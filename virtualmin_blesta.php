@@ -417,7 +417,18 @@ class VirtualminBlesta extends module
      * @return string HTML content containing information to display when viewing the manager module page
      */
     public function manageModule($module, array &$vars) {
-        return "";
+        // Load the view into this object, so helpers can be automatically added to the view
+
+        $this->view = new View("manage", "default");
+        $this->view->base_uri = $this->base_uri;
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+
+        $this->view->set("module", $module);
+
+        return $this->view->fetch();
     }
 
     /**
