@@ -748,7 +748,30 @@ class VirtualminBlesta extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getClientAddFields($package, $vars=null) {
-        return new ModuleFields();
+
+        //render client buying options view
+        Loader::loadHelpers($this, array("Html"));
+
+        $fields = new ModuleFields();
+
+        // Create domain label
+        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
+
+        // Create domain field and attach to domain label
+        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id'=>"virtualmin_domain")));
+
+
+        $fields->setField($domain);
+
+        // Create password label
+        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
+
+        // Create password field and attach to password label
+        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id'=>"virtualmin_password")));
+
+        $fields->setField($password);
+
+        return $fields;
     }
 
     /**
@@ -938,6 +961,7 @@ class VirtualminBlesta extends module
      * @return array An array of packages in key/value pairs
      */
     //@todo cleanup packahge plans
+    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
     private function getVirtualMinPackages($module_row) {
 
         try {

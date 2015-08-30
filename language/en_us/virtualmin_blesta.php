@@ -80,4 +80,11 @@ $lang['virtualmin.!error.virtualmin_password.length'] = "The password must be at
 $lang['virtualmin.!error.virtualmin_email.format'] = "Please enter a valid email address.";
 $lang['virtualmin.!error.virtualmin_password.matches'] = "Password and Confirm Password do not match.";
 
+// Service fields
+$lang['virtualmin.service_field.domain'] = "Domain";
+//$lang['virtualmin.service_field.username'] = "Username";
+//$lang['virtualmin.service_field.email'] = "Email";
+$lang['virtualmin.service_field.password'] = "Password";
+
+
 ?>
