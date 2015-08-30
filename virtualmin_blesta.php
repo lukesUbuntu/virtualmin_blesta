@@ -305,8 +305,7 @@ class VirtualminBlesta extends module
 
                 //lets add the domain
                 $result = $api->add_domain($account);
-                $this->checkResponse($result);
-
+                $this->parseResponse($result);
 
                 $this->log(
                     $row->meta->host_name . "|" . 'addService', serialize($result), "output", true
@@ -1204,6 +1203,54 @@ class VirtualminBlesta extends module
         $domain = preg_replace("/[^A-Za-z0-9 ]/", '', $domain);
 
         return trim($domain);
+    }
+
+    /**
+     * Parses the response from the API into a stdClass object
+     *
+     * @param array $response The response from the API
+     * @param boolean $return_response Whether to return the response, regardless of error
+     * @return stdClass A stdClass object representing the response, void if the response was an error
+     */
+    private function parseResponse($response, $module_row = null, $ignore_error = false) {
+
+        if (!$module_row)
+            $module_row = $this->getModuleRow();
+
+        $success = true;
+
+
+        // Set an internal error on no response or invalid response
+        if (empty($response)) {
+            $this->Input->setErrors(
+                array('errors' => Language::_("virtualmin.!error.api.internal", true))
+            );
+            $success = false;
+        }
+
+        // Set an error if given
+        if (isset($response->error) || $response->status != "success" )
+        {
+
+            $error = (isset($response->error) ? $response->error : Language::_("virtualmin.!error.api.internal", true));
+            $this->Input->setErrors(
+                array('errors' => $error)
+            );
+            $success = false;
+        }
+
+        //remove the full long error before logging
+        if (isset($response->full_error))
+            unset($response->full_error);
+
+        // Log the response
+        $this->log($module_row->meta->host_name, serialize($response), "output", $success);
+
+        // Return if any errors encountered
+        if (!$success && !$ignore_error)
+            return;
+
+        return $response;
     }
 
 }
