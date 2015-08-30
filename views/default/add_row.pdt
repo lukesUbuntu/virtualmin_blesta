@@ -1,0 +1,151 @@
+		<?php
+		$this->Widget->clear();
+		$this->Widget->setLinkButtons(array());
+		$this->Widget->create($this->_("virtualmin.add_row.box_title", true));
+		?>
+		<div class="inner">
+			<?php
+			$this->Form->create();
+			$this->Form->fieldHidden("account_count", $this->Html->ifSet($vars->account_count, 0));
+			?>
+			<div class="title_row first">
+				<h3><?php $this->_("virtualmin.add_row.basic_title");?></h3>
+			</div>
+			<div class="pad">
+				<ul>
+					<li>
+						<?php
+						$this->Form->label($this->_("virtualmin.row_meta.server_name", true), "server_name");
+						$this->Form->fieldText("server_name", $this->Html->ifSet($vars->server_name),array('id'=>"server_name"));?>
+
+					</li>
+					<li>
+						<?php
+						$this->Form->label($this->_("virtualmin.row_meta.host_name", true), "host_name");
+						$this->Form->fieldText("host_name", $this->Html->ifSet($vars->host_name),array('id'=>"host_name"));
+						//@todo fix this up so port is properly inline with hostname
+						echo $this->_("virtualmin.row_meta.port_number", true);
+						$this->Form->fieldText("port_number", $this->Html->ifSet($vars->port_number),array('id'=>"port_number"));
+
+						?>
+					</li>
+					<li>
+						<?php
+						$this->Form->label($this->_("virtualmin.row_meta.user_name", true), "user_name");
+						$this->Form->fieldText("user_name", $this->Html->ifSet($vars->user_name),array('id'=>"user_name"));
+						?>
+					</li>
+					<li>
+						<?php
+						$this->Form->label($this->_("virtualmin.row_meta.password", true), "password");
+						$this->Form->fieldText("password", $this->Html->ifSet($vars->password),array('id'=>"password"));
+						?>
+					</li>
+					<li>
+						<?php
+						$this->Form->fieldCheckbox("use_ssl", "true", $this->Html->ifSet($vars->use_ssl, "true") == "true", array('id'=>"use_ssl"));
+						$this->Form->label($this->_("virtualmin.row_meta.use_ssl", true), "use_ssl", array('class'=>"inline"));
+						?>
+					</li>
+					<li>
+						<button id="testConnection" class="btn btn-warning"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+					</li>
+					<li>
+						<?php
+						$this->Form->label($this->_("virtualmin.row_meta.account_limit", true), "account_limit");
+						$this->Form->fieldText("account_limit", $this->Html->ifSet($vars->account_limit));
+						?>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="title_row">
+				<h3><?php $this->_("virtualmin.add_row.name_servers_title");?></h3>
+			</div>
+			<div class="pad">
+				<div class="links_row">
+					<a class="btn_right ns_row_add" href="#"><span><?php $this->_("virtualmin.add_row.name_server_btn");?></span></a>
+				</div>
+				<table class="table">
+					<thead>
+						<tr class="heading_row">
+							<td><?php $this->Form->label($this->_("virtualmin.add_row.name_server_col", true));?></td>
+							<td><?php $this->Form->label($this->_("virtualmin.add_row.name_server_host_col", true));?></td>
+							<td class="last"></td>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$num_servers = count($this->Html->ifSet($vars->name_servers));
+						for ($i=0; $i<max(2,$num_servers); $i++) {
+						?>
+						<tr class="ns_row<?php echo ($i%2 == 1) ? " odd_row" : "";?>">
+							<td><?php $this->_("virtualmin.row_meta.name_server", false, "<span>" . ($i+1) . "</span>");?></td>
+							<td><?php $this->Form->fieldText("name_servers[]", $this->Html->ifSet($vars->name_servers[$i]));?></td>
+							<td><a href="#" class="manage ns_row_remove"><?php $this->_("virtualmin.add_row.remove_name_server");?></a></td>
+						</tr>
+						<?php
+						}
+						?>
+					</tbody>
+				</table>
+			</div>
+			<div class="title_row">
+				<h3><?php $this->_("virtualmin.add_row.additional_settings");?></h3>
+			</div>
+			<div class="pad">
+
+			</div>
+			<div class="button_row"><a class="btn_right submit" href="#"><?php $this->_("virtualmin.add_row.add_btn");?></a></div>
+			<?php
+			$this->Form->end();
+			?>
+		</div>
+		<?php
+		$this->Widget->end();
+		?>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#testConnection").click(function(e){
+		e.preventDefault();
+		alert("currently not implmented")
+	});
+
+	// Add a row
+	$('.ns_row_add').click(function() {
+		var fields = $('tr.ns_row:first').clone(true);
+		$(fields).find('input').val('');
+		$('td:first span', fields).text($('tr.ns_row').length+1);
+		$('tr.ns_row:last').after(fields);
+		updateNsRows();
+		return false;
+	});
+	// Remove a row
+	$('.ns_row_remove').click(function() {
+		if ($('tr.ns_row').length > 1) {
+			$(this).closest('tr').remove();
+			// Reorder the counts for these rows
+			$i=1;
+			$('tr.ns_row').each(function() {
+				$('td:first span', this).text($i++);
+			});
+		}
+		updateNsRows();
+		return false;
+	});
+
+});
+
+// Zebra-stripe pricing rows
+function updateNsRows() {
+	var i = 0;
+	$('tr.ns_row').each(function() {
+		if (i++%2 == 1)
+			$(this).addClass('odd_row');
+		else
+			$(this).removeClass('odd_row');
+	});
+}
+</script>
