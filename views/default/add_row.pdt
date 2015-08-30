@@ -45,11 +45,17 @@
 						<?php
 						$this->Form->fieldCheckbox("use_ssl", "true", $this->Html->ifSet($vars->use_ssl, "true") == "true", array('id'=>"use_ssl"));
 						$this->Form->label($this->_("virtualmin.row_meta.use_ssl", true), "use_ssl", array('class'=>"inline"));
+						$this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
+						//@todo add virtualmin connection test
 						?>
 					</li>
+
 					<li>
-						<button id="testConnection" class="btn btn-warning"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+
+						<button id="testConnection" class="btn btn-warning btn-xs disabled"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+						Connection testing not finished
 					</li>
+
 					<li>
 						<?php
 						$this->Form->label($this->_("virtualmin.row_meta.account_limit", true), "account_limit");
@@ -76,6 +82,7 @@
 					</thead>
 					<tbody>
 						<?php
+						//@todo make namservers optional
 						$num_servers = count($this->Html->ifSet($vars->name_servers));
 						for ($i=0; $i<max(2,$num_servers); $i++) {
 						?>

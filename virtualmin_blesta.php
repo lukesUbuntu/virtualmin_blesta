@@ -783,7 +783,7 @@ class VirtualminBlesta extends module
      * @param string $host_name The host name to validate
      * @return boolean True if the hostname is valid, false otherwise
      */
-    private function validateHostName($host_name) {
+    public function validateHostName($host_name) {
         if (strlen($host_name) > 255)
             return false;
 
@@ -795,8 +795,35 @@ class VirtualminBlesta extends module
      * @param $port_number
      * @return bool
      */
-    private function validatePortNumber($port_number) {
+    public function validatePortNumber($port_number) {
         return is_numeric($port_number);
+    }
+    /**
+     * Validates that at least 2 name servers are set in the given array of name servers
+     *
+     * @param array $name_servers An array of name servers
+     * @return boolean True if the array count is >=2, false otherwise
+     */
+    public function validateNameServerCount($name_servers) {
+        if (is_array($name_servers) && count($name_servers) >= 2)
+            return true;
+        return false;
+    }
+
+    /**
+     * Validates that the nameservers given are formatted correctly
+     *
+     * @param array $name_servers An array of name servers
+     * @return boolean True if every name server is formatted correctly, false otherwise
+     */
+    public function validateNameServers($name_servers) {
+        if (is_array($name_servers)) {
+            foreach ($name_servers as $name_server) {
+                if (!$this->validateHostName($name_server))
+                    return false;
+            }
+        }
+        return true;
     }
 
 
