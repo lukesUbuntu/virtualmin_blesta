@@ -190,8 +190,54 @@ class VirtualminBlesta extends module
      * @param array $vars An array of user supplied info to satisfy the request
      * @return boolean True if the service validates, false otherwise. Sets Input errors when false.
      */
-    public function validateService($package, array $vars=null) {
-        return true;
+    public function validateService($package, array $vars=null, $editService = false) {
+        // Validate the service fields
+        $rules = array(
+
+            'virtualmin_domain' => array(
+                'format' => array(
+                    'rule' => array(array($this, "validateHostName")),
+                    'message' => Language::_("virtualmin.!error.virtualmin_domain.format", true)
+                )
+            ),
+            'virtualmin_password' => array(
+                'format' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127
+                    'message' => Language::_("virtualmin.!error.virtualmin_password.format", true)
+                ),
+                'length' => array(
+                    'rule' => array("minLength", 5),
+                    'message' => Language::_("virtualmin.!error.virtualmin_password.length", true)
+                )
+            )/*,
+            'virtualmin_edit_action' => array(
+                'format' => array(
+                    'rule' => array(array($this, "validatePostActions")),
+                    'message' => "Something is wrong with virtualmin_edit_action ;("
+                )
+            )*/
+            //if we are editing on form action make sure we are set
+        );
+
+        //edit_action
+        //if we are editing a service we do not need to verify all rules so we will unset ones we need
+        if ($editService) {
+            //add our rule for editing
+
+            //loop all arrays
+            foreach($rules as $rule => $value){
+                // || $vars[$rule] == ""
+                if (!array_key_exists($rule, $vars))
+                    unset($rules[$rule]);
+            }
+
+        }else{
+            //we are adding a service remove the edit_action
+            //unset($rules["virtualmin_edit_action"]);
+        }
+
+        $this->Input->setRules($rules);
+        return $this->Input->validates($vars);
     }
 
     /**
@@ -215,7 +261,79 @@ class VirtualminBlesta extends module
      * @see Module::getModuleRow()
      */
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
-        return array();
+
+
+
+        //going to get the fields we need but passing some pacakage fields
+        $params = $this->getFieldsFromInput((array)$vars, $package);
+
+        //validate
+        $this->validateService($package, $vars);
+
+        if ($this->Input->errors())
+            return;
+
+        // Only provision the service if module is enabled
+        //if $vars['virtualmin_domain_already']
+        if (isset($vars['use_module']) && $vars['use_module'] == "true" && !isset($vars['virtualmin_domain_already'])) {
+                //get row
+                $row = $this->getModuleRow();
+
+                //hide passwords from log
+                $masked_params = $params;
+                $masked_params['password'] = "****";
+                $this->log($row->meta->host_name . "|" . 'addService', serialize($masked_params), "input", true);
+                unset($masked_params);
+
+                //get current clients details we want username
+                Loader::loadModels($this,array("Clients"));
+                $client = $this->Clients->get($vars['client_id'],false);
+
+
+                //we are going to process the account under the blesta email as username
+                $api = $this->api($row);
+
+                //$result = $api->create($params['domain'],$params['passwd']);
+                $account = array(
+                    'domain'				=> $params['domain'],
+                    'email'					=> $client->email,
+                    'user'					=> $params['domain'],
+                    'pass'					=> $params['passwd'],
+                    'plan'					=> $params['package'],
+                    'features-from-plan' 	=> ''
+                );
+
+                //lets add the domain
+                $result = $api->add_domain($account);
+                $this->checkResponse($result);
+
+
+                $this->log(
+                    $row->meta->host_name . "|" . 'addService', serialize($result), "output", true
+                );
+
+
+        }
+
+        // Return service fields
+        return array(
+            array(
+                'key' => "virtualmin_domain",
+                'value' => $params['domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "virtualmin_username",
+                'value' => $params['domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "virtualmin_password",
+                'value' => $params['passwd'],
+                'encrypted' => 1
+            )
+        );
+
     }
 
     /**
@@ -750,7 +868,7 @@ class VirtualminBlesta extends module
     public function getClientAddFields($package, $vars=null) {
 
         //render client buying options view
-        Loader::loadHelpers($this, array("Html"));
+        Loader::loadHelpers($this, array("Form","Html"));
 
         $fields = new ModuleFields();
 
@@ -770,7 +888,8 @@ class VirtualminBlesta extends module
         $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id'=>"virtualmin_password")));
 
         $fields->setField($password);
-
+        unset($domain);
+        unset($password);
         return $fields;
     }
 
@@ -1053,6 +1172,38 @@ class VirtualminBlesta extends module
         }
 
         return $module_row;
+    }
+
+    /**
+     * Returns an array of service field to set for the service using the given input
+     *
+     * @param array $vars An array of key/value input pairs
+     * @param stdClass $package A stdClass object representing the package for the service
+     * @return array An array of key/value pairs representing service fields
+     */
+    private function getFieldsFromInput(array $vars, $package) {
+        $fields = array(
+            'domain' => isset($vars['virtualmin_domain']) ? $vars['virtualmin_domain'] : null,
+            //'username' => isset($vars['virtualmin_domain']) ? $this->usernameFromDomain($vars['virtualmin_domain']): null,
+            'passwd' => isset($vars['virtualmin_password']) ? $vars['virtualmin_password'] : null,
+            'package' => isset($package->meta->package) ? $package->meta->package : null
+        );
+
+        return $fields;
+    }
+
+    /**
+     * Returns a safe username from a domain name (not using for now)
+     *
+     * @param $domain domain name or possible url
+     * @return string safe string as keycdn name as refrence
+     */
+    private function usernameFromDomain($domain){
+        //generate name
+        $domain = preg_replace('#^https?://#', '', $domain);
+        $domain = preg_replace("/[^A-Za-z0-9 ]/", '', $domain);
+
+        return trim($domain);
     }
 
 }
