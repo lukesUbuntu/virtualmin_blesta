@@ -464,7 +464,23 @@ class VirtualminBlesta extends module
      * @return string HTML content containing information to display when viewing the edit module row page
      */
     public function manageEditRow($module_row, array &$vars) {
-        return "";
+        $this->view = new View("edit_row", "default");
+        $this->view->base_uri = $this->base_uri;
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+
+        if (empty($vars))
+            $vars = $module_row->meta;
+        else {
+            // Set unspecified checkboxes
+            if (empty($vars['use_ssl']))
+                $vars['use_ssl'] = "false";
+        }
+
+        $this->view->set("vars", (object)$vars);
+        return $this->view->fetch();
     }
 
     /**
@@ -531,15 +547,45 @@ class VirtualminBlesta extends module
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function editModuleRow($module_row, array &$vars) {
-        $meta = array();
-        foreach ($vars as $key => $value) {
-            $meta[] = array(
-                'key'=>$key,
-                'value'=>$value,
-                'encrypted'=>0
-            );
+        //define our meta fields
+        $meta_fields = array(
+            "server_name",
+            "host_name",
+            "port_number",
+            "user_name",
+            "password",
+            "use_ssl",
+            "account_limit",
+            "account_count",
+            "name_servers"
+        );
+        //set encrypted fields
+        $encrypted_fields = array("user_name", "password");
+
+        // Set unspecified checkboxes
+        if (empty($vars['use_ssl']))
+            $vars['use_ssl'] = "false";
+
+        $this->Input->setRules($this->getRowRules($vars));
+
+        // Validate module row
+        if ($this->Input->validates($vars)) {
+
+            // Build the meta data for this row
+            $meta = array();
+            foreach ($vars as $key => $value) {
+
+                if (in_array($key, $meta_fields)) {
+                    $meta[] = array(
+                        'key'=>$key,
+                        'value'=>$value,
+                        'encrypted'=>in_array($key, $encrypted_fields) ? 1 : 0
+                    );
+                }
+            }
+
+            return $meta;
         }
-        return $meta;
     }
 
     /**

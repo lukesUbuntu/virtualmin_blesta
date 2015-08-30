@@ -8,7 +8,6 @@ $lang['virtualmin.name'] = "Virtualmin ";
 //module management
 $lang['virtualmin.module_row'] = "Virtualmin Server";
 $lang['virtualmin.module_row_plural'] = "Server";
-
 $lang['virtualmin.add_module_row'] = "Add Server";
 $lang['virtualmin.add_module_group'] = "Add Server Group";
 $lang['virtualmin.manage.module_rows_title'] = "Servers";
@@ -22,10 +21,14 @@ $lang['virtualmin.manage.module_groups_heading.servers'] = "Server Count";
 $lang['virtualmin.manage.module_groups_heading.options'] = "Options";
 $lang['virtualmin.manage.servers.no_results'] = "There are no servers.";
 $lang['virtualmin.manage.servers.groups.no_results'] = "There are no server groups.";
+$lang['virtualmin.manage.module_rows.edit'] = "Edit";
+$lang['virtualmin.manage.module_groups.edit'] = "Edit";
+$lang['virtualmin.manage.module_rows.delete'] = "Delete";
+$lang['virtualmin.manage.module_groups.delete'] = "Delete";
+$lang['virtualmin.manage.module_rows.confirm_delete'] = "Are you sure you want to delete this server?";
+$lang['virtualmin.manage.module_groups.confirm_delete'] = "Are you sure you want to delete this server group?";
 
 //module management add row
-$lang['virtualmin.add_row.box_title'] = "Add Virtualmin Server";
-$lang['virtualmin.add_row.basic_title'] = "Virtualmin Settings";
 $lang['virtualmin.row_meta.server_name'] = "Server Name";
 $lang['virtualmin.row_meta.host_name'] = "Host Name";
 $lang['virtualmin.row_meta.port_number'] = "Port : ";
@@ -38,6 +41,8 @@ $lang['virtualmin.row_meta.name_server'] = "Name server %1\$s"; // %1$s is the n
 
 
 // Add row
+$lang['virtualmin.add_row.box_title'] = "Add Virtualmin Server";
+$lang['virtualmin.add_row.basic_title'] = "Virtualmin Settings";
 $lang['virtualmin.add_row.add_btn'] = "Add Server";
 $lang['virtualmin.add_row.remove_name_server'] = "Remove";
 $lang['virtualmin.add_row.name_server_btn'] = "Add Name Server";
@@ -45,7 +50,15 @@ $lang['virtualmin.add_row.test_connection_btn'] = "Test Connection";
 $lang['virtualmin.add_row.name_servers_title'] = "Name Servers";
 $lang['virtualmin.add_row.additional_settings'] = "Additional Settings";
 
-
+// Edit row
+$lang['virtualmin.edit_row.box_title'] = "Edit VirtualMin Server";
+$lang['virtualmin.edit_row.basic_title'] = "Virtualmin Settings";
+$lang['virtualmin.edit_row.name_servers_title'] = "Name Servers";
+$lang['virtualmin.edit_row.name_server_btn'] = "Add Additional Name Server";
+$lang['virtualmin.edit_row.name_server_col'] = "Name Server";
+$lang['virtualmin.edit_row.name_server_host_col'] = "Hostname";
+$lang['virtualmin.edit_row.remove_name_server'] = "Remove";
+$lang['virtualmin.edit_row.save_btn'] = "Save Server";
 
 //errors
 $lang['virtualmin.!error.server_name.empty'] = "You must enter a Server Name.";
