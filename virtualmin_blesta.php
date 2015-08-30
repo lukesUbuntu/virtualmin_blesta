@@ -651,31 +651,59 @@ class VirtualminBlesta extends module
         Loader::loadHelpers($this, array("Html"));
 
         $fields = new ModuleFields();
-
         $module_row = $this->getOurModuleRows($vars);
+        //if virtualmin_package on change display the options for this
 
-
-
-        //lets get the backages
+        //lets get the packages
         $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
 
-        $packages = array();
+        $packagesOptions = array();
         if ($module_row) {
-            //echo "here";
             $packages = $this->getVirtualMinPackages($module_row);
-        }else{
-            echo "failed packages";
+            $packagesOptions = $packages['packages'];
+            $packagesValues = $packages['values'];
         }
 
+        //print_r($packages);
+        //@todo if we don't have any packages then we need to display error
         $package->attach(
             $fields->fieldSelect(
                 "meta[package]",
-                $packages,
+                $packagesOptions,
                 $this->Html->ifSet($vars->meta['package']),
-                array('id'=>"virtualmin_package"),
-                array('mail'=>"1")
+                array('id'=>"virtualmin_package",'data' => json_encode($packagesValues))
             )
         );
+        $fields->setField($package);
+        //@todo clean up package display of settings
+        $fields->setHtml("
+			<script type=\"text/javascript\">
+			    try{
+			        //pass our package data
+                    var packages = JSON.parse($('#virtualmin_package').attr('data'));
+                    console.log('packages data',packages);
+                 }catch(e){}
+
+                $(document).ready(function() {
+                    $('#virtualmin_package').change(function() {
+                        $('#virtualminPackageSettings').empty();
+                        //render package settings on page
+                         if (typeof packages[$(this).val()] == 'object'){
+                             var package_settings = packages[$(this).val()];
+                             console.log('value',package_settings);
+                             var setting = $.map(package_settings, function(value,name) {
+                                return('<div><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</div>');
+                            });
+                            $('#virtualminPackageSettings').html(setting.join(''));
+                         }
+
+
+					});
+                });
+			</script>
+			<div id='virtualminPackageSettings'></div>
+		");
+
 
         return $fields;
 
@@ -909,19 +937,11 @@ class VirtualminBlesta extends module
      * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
      * @return array An array of packages in key/value pairs
      */
+    //@todo cleanup packahge plans
     private function getVirtualMinPackages($module_row) {
 
-
-        //$api = $this->api($module_row);
-
-
-        $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', null, "input", true);
-
         try {
-
-            //get the packages
-            //@todo add templates option
-
+            //get the packages from virtualmin
             $response = $this->api($module_row)->list_plans();
 
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($response), "output", !empty($response));
@@ -931,17 +951,14 @@ class VirtualminBlesta extends module
 
             //preset packages array
             $packages = array();
-
+            $packages['packages']['-0'] = "--- SELECT PLAN ----";
             // Assign the key/value for each package
             foreach ($plans as $package => $values){
-                //print_r($package);
-                //print_r($packageArray->values);
-                $packages[$package] = $package;
+                $packages['packages'][$package] = $package;
+                $packages['values'][$package] = $values;
             }
 
 
-
-            //print_r($packages);exit;
             return $packages;
         }
         catch (Exception $e) {
