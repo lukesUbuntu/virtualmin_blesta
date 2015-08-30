@@ -38,7 +38,7 @@ $lang['virtualmin.row_meta.use_ssl'] = "Use SSL when connecting to Virtualmin AP
 $lang['virtualmin.row_meta.use_ssl_warning'] = "Note: Module will fail if invalid SSL or any SSL cert issues.";
 $lang['virtualmin.row_meta.account_limit'] = "Virtualmin Account Limit";
 $lang['virtualmin.row_meta.name_server'] = "Name server %1\$s"; // %1$s is the name server number (e.g. 2)
-
+$lang['virtualmin.manage.module_rows.count'] = "%1\$s / %2\$s"; // %1$s is the current number of accounts, %2$s is the total
 
 // Add row
 $lang['virtualmin.add_row.box_title'] = "Add Virtualmin Server";
