@@ -44,4 +44,26 @@ $lang['virtualmin.add_row.test_connection_btn'] = "Test Connection";
 $lang['virtualmin.add_row.name_servers_title'] = "Name Servers";
 $lang['virtualmin.add_row.additional_settings'] = "Additional Settings";
 
+
+
+//errors
+$lang['virtualmin.!error.server_name.empty'] = "You must enter a Server Name.";
+$lang['virtualmin.!error.host_name.format'] = "The Host Name appears to be invalid.";
+$lang['virtualmin.!error.user_name.empty'] = "You must enter a User Name.";
+$lang['virtualmin.!error.password.format'] = "You must enter a Password.";
+$lang['virtualmin.!error.use_ssl.format'] = "Use SSL must be either true or false.";
+$lang['virtualmin.!error.account_limit.valid'] = "Account Limit must be left blank (for unlimited accounts) or set to some integer value.";
+$lang['virtualmin.!error.name_servers.valid'] = "One or more of the name servers entered are invalid.";
+$lang['virtualmin.!error.name_servers.count'] = "You must define at least 2 name servers.";
+$lang['virtualmin.!error.api.internal'] = "An internal error occurred, or the server did not respond to the request.";
+$lang['virtualmin.!error.meta[package].empty'] = "A VirtualMin package is required.";
+//$lang['VirtualMin.!error.meta[ip].empty'] = "An IP address is required.";
+$lang['virtualmin.!error.virtualmin_domain.format'] = "Please enter a valid domain name of the form: domain.com";
+$lang['virtualmin.!error.virtualmin_username.format'] = "The username may only contain alphanumeric characters.";
+$lang['virtualmin.!error.virtualmin_username.length'] = "The username must be between 4 and 8 characters in length.";
+$lang['virtualmin.!error.virtualmin_password.format'] = "The password may only contain ASCII characters.";
+$lang['virtualmin.!error.virtualmin_password.length'] = "The password must be at least 5 characters in length.";
+$lang['virtualmin.!error.virtualmin_email.format'] = "Please enter a valid email address.";
+$lang['virtualmin.!error.virtualmin_password.matches'] = "Password and Confirm Password do not match.";
+
 ?>
