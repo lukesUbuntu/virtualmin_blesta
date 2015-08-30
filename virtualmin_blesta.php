@@ -478,15 +478,45 @@ class VirtualminBlesta extends module
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function addModuleRow(array &$vars) {
-        $meta = array();
-        foreach ($vars as $key => $value) {
-            $meta[] = array(
-                'key'=>$key,
-                'value'=>$value,
-                'encrypted'=>0
-            );
+        //our meta fields
+        $meta_fields = array(
+            "server_name",
+            "host_name",
+            "port_number",
+            "user_name",
+            "password",
+            "use_ssl",
+            "account_limit",
+            "account_count",
+            "name_servers"
+        );
+        //encrypted fields
+        $encrypted_fields = array("user_name", "password");
+
+        // Set use_ssl as false if not checked
+        if (empty($vars['use_ssl']))
+            $vars['use_ssl'] = "false";
+
+        // Set rules to validate against
+        $this->Input->setRules($this->getRowRules($vars));
+
+        // Validate module row
+        if ($this->Input->validates($vars)) {
+            // Build the meta data for this row
+            $meta = array();
+            foreach ($vars as $key => $value) {
+
+                if (in_array($key, $meta_fields)) {
+                    $meta[] = array(
+                        'key'=>$key,
+                        'value'=>$value,
+                        'encrypted'=>in_array($key, $encrypted_fields) ? 1 : 0
+                    );
+                }
+            }
+
+            return $meta;
         }
-        return $meta;
     }
 
     /**
@@ -543,7 +573,25 @@ class VirtualminBlesta extends module
      * @see Module::getGroupOrderOptions()
      */
     public function selectModuleRow($module_group_id) {
+        if (!isset($this->ModuleManager))
+            Loader::loadModels($this, array("ModuleManager"));
 
+        $group = $this->ModuleManager->getGroup($module_group_id);
+
+        if ($group) {
+            switch ($group->add_order) {
+                default:
+                case "first":
+
+                    foreach ($group->rows as $row) {
+                        if ($row->meta->account_limit > (isset($row->meta->account_count) ? $row->meta->account_count : 0))
+                            return $row->id;
+                    }
+
+                    break;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -659,6 +707,96 @@ class VirtualminBlesta extends module
      */
     public function getClientTabs($package) {
         return array();
+    }
+
+    /**
+     * Retrieves a list of rules for validating adding/editing a module row
+     *
+     * @param array $vars A list of input vars
+     * @return array A list of rules
+     */
+    private function getRowRules(array &$vars)
+    {
+       return array(
+            'server_name' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("virtualmin.!error.server_name.empty", true)
+                )
+            ),
+            'host_name' => array(
+                'format' => array(
+                    'rule' => array(array($this, "validateHostName")),
+                    'message' => Language::_("virtualmin.!error.host_name.format", true)
+                )
+            ),
+            'port_number' => array(
+                'format' => array(
+                    'rule' => array(array($this, "validatePortNumber")),    //is_numeric
+                    'message' => Language::_("virtualmin.!error.port_number.format", true)
+                )
+            ),
+            'user_name' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("virtualmin.!error.user_name.empty", true)
+                )
+            ),
+            'password' => array(
+                'format' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("virtualmin.!error.password.format", true)
+                )
+            ),
+            'use_ssl' => array(
+                'format' => array(
+                    'if_set' => true,
+                    'rule' => array("in_array", array("true", "false")),
+                    'message' => Language::_("virtualmin.!error.use_ssl.format", true)
+                )
+            ),
+            'account_limit' => array(
+                'valid' => array(
+                    'rule' => array("matches", "/^([0-9]+)?$/"),
+                    'message' => Language::_("virtualmin.!error.account_limit.valid", true)
+                )
+            ),
+            'name_servers'=>array(
+                'count'=>array(
+                    'rule'=>array(array($this, "validateNameServerCount")),
+                    'message'=>Language::_("virtualmin.!error.name_servers.count", true)
+                ),
+                'valid'=>array(
+                    'rule'=>array(array($this, "validateNameServers")),
+                    'message'=>Language::_("virtualmin.!error.name_servers.valid", true)
+                )
+            )
+        );
+
+    }
+    /**
+     * Validates that the given hostname is valid
+     *
+     * @param string $host_name The host name to validate
+     * @return boolean True if the hostname is valid, false otherwise
+     */
+    private function validateHostName($host_name) {
+        if (strlen($host_name) > 255)
+            return false;
+
+        return $this->Input->matches($host_name, "/^([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9])(\.([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]))*$/");
+    }
+
+    /**
+     * Validates port number is numeric
+     * @param $port_number
+     * @return bool
+     */
+    private function validatePortNumber($port_number) {
+        return is_numeric($port_number);
     }
 
 
