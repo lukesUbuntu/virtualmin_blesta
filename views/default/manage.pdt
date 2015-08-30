@@ -32,13 +32,13 @@
 				<td><?php $this->Html->_($module->rows[$i]->meta->host_name);?></td>
 				<td><?php $this->_("virtualmin.manage.module_rows.count", false, $this->Html->ifSet($module->rows[$i]->meta->account_count, 0), ($this->Html->ifSet($module->rows[$i]->meta->account_limit) == "" ? "∞" : $module->rows[$i]->meta->account_limit));?></td>
 				<td>
-					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/editrow/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->rows[$i]->id) . "/");?>"><?php $this->_("VirtualMin.manage.module_rows.edit");?></a>
+					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/editrow/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->rows[$i]->id) . "/");?>"><?php $this->_("virtualmin.manage.module_rows.edit");?></a>
 					<?php
 					$this->Form->create($this->base_uri . "settings/company/modules/deleterow/");
 					$this->Form->fieldHidden("id", $this->Html->ifSet($module->id));
 					$this->Form->fieldHidden("row_id", $this->Html->ifSet($module->rows[$i]->id));
 					?>
-					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/deleterow/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->rows[$i]->id) . "/");?>" class="manage" rel="<?php echo $this->Html->safe($this->_("VirtualMin.manage.module_rows.confirm_delete", true));?>"><?php $this->_("VirtualMin.manage.module_rows.delete");?></a>
+					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/deleterow/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->rows[$i]->id) . "/");?>" class="manage" rel="<?php echo $this->Html->safe($this->_("virtualmin.manage.module_rows.confirm_delete", true));?>"><?php $this->_("virtualmin.manage.module_rows.delete");?></a>
 					<?php
 					$this->Form->end();
 					?>
