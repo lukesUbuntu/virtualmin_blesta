@@ -648,7 +648,37 @@ class VirtualminBlesta extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getPackageFields($vars=null) {
-        return new ModuleFields();
+        Loader::loadHelpers($this, array("Html"));
+
+        $fields = new ModuleFields();
+
+        $module_row = $this->getOurModuleRows($vars);
+
+
+
+        //lets get the backages
+        $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
+
+        $packages = array();
+        if ($module_row) {
+            //echo "here";
+            $packages = $this->getVirtualMinPackages($module_row);
+        }else{
+            echo "failed packages";
+        }
+
+        $package->attach(
+            $fields->fieldSelect(
+                "meta[package]",
+                $packages,
+                $this->Html->ifSet($vars->meta['package']),
+                array('id'=>"virtualmin_package"),
+                array('mail'=>"1")
+            )
+        );
+
+        return $fields;
+
     }
 
     /**
@@ -872,6 +902,116 @@ class VirtualminBlesta extends module
         return true;
     }
 
+    /**
+     * Fetches a listing of all packages configured in VirtualMin for the given server
+     *
+     * @param stdClass $module_row A stdClass object representing a single server
+     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
+     * @return array An array of packages in key/value pairs
+     */
+    private function getVirtualMinPackages($module_row) {
 
+
+        //$api = $this->api($module_row);
+
+
+        $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', null, "input", true);
+
+        try {
+
+            //get the packages
+            //@todo add templates option
+
+            $response = $this->api($module_row)->list_plans();
+
+            $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($response), "output", !empty($response));
+
+            // Packages are set in 'list'
+            $plans = (isset($response->data) ? $response->data : array());
+
+            //preset packages array
+            $packages = array();
+
+            // Assign the key/value for each package
+            foreach ($plans as $package => $values){
+                //print_r($package);
+                //print_r($packageArray->values);
+                $packages[$package] = $package;
+            }
+
+
+
+            //print_r($packages);exit;
+            return $packages;
+        }
+        catch (Exception $e) {
+            // API request failed
+            $message = $e->getMessage();
+            $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($message), "output", false);
+        }
+    }
+
+    /**
+     * Returns a singleton of Virtualmin API
+     *
+     * @param bool|false $module_row
+     * @return bool|VirtualMinApi
+     */
+    private function api($module_row = false){
+        //load our api
+        if ($this->_api == false){
+
+            if ($module_row == false)
+                $module_row = $this->getModuleRow();
+
+            if (!isset($module_row)){
+                die("failed to get module row");
+            }
+
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
+
+            //$host, $username, $password, $port = "10000", $use_ssl = true
+            $this->_api = new VirtualMinApi(
+                $module_row->meta->host_name,			//hostname
+                $module_row->meta->user_name,			//username
+                $module_row->meta->password,			//password
+                $module_row->meta->port_number,			//port number
+                ($module_row->meta->use_ssl == "true")	//use secure
+            );
+        }
+
+        return $this->_api;
+    }
+
+    /**
+     * @param null $vars
+     * @return null|stdClass module row of current group
+     */
+    private function getOurModuleRows($vars=null){
+        // Fetch all packages available for the given server or server group
+        $module_row = null;
+
+        if (isset($vars->module_group) && $vars->module_group == "") {
+            if (isset($vars->module_row) && $vars->module_row > 0) {
+                $module_row = $this->getModuleRow($vars->module_row);
+            }
+            else {
+                $rows = $this->getModuleRows();
+                if (isset($rows[0]))
+                    $module_row = $rows[0];
+                unset($rows);
+            }
+        }
+        else {
+            // Fetch the 1st server from the list of servers in the selected group
+            $rows = $this->getModuleRows($vars->module_group);
+
+            if (isset($rows[0]))
+                $module_row = $rows[0];
+            unset($rows);
+        }
+
+        return $module_row;
+    }
 
 }
