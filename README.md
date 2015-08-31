@@ -1,7 +1,3 @@
-
-## Sorry Module not installable yet come back soon  :) 
-Will remove message once module is installable.
-
 **Virtualmin Blesta Module version 0.1.3**
 
 [**Blesta**](http://www.blesta.com) is a professional web based billing and support application focusing on productivity and usability.
@@ -12,6 +8,7 @@ Virtualmin Blesta module uses [**Virtualmin's Api**](https://www.virtualmin.com/
 
 
 ## Module Screen shots
+please note not all tabs are active in this repo module version 
 
 ### Client Panel - Overview
 

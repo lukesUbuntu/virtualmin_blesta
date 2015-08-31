@@ -91,11 +91,18 @@ $lang['virtualmin.service_field.not_active'] = "Sorry your service is either not
 $lang['virtualmin.client.tabs.menu.server_status'] = "Server Status";
 
 //client tabs - Client Tab Status (client_tab_status.pdt)
-$lang['virtualmin.client.tabs.status.heading'] = "Server Overview";
+$lang['virtualmin.client.tabs.status.heading'] = "Hosting Overview";
 $lang['virtualmin.client.tabs.status.disk_title'] = "Disk Usage";
 $lang['virtualmin.client.tabs.status.disk_usage_unlimited'] = "(%1\$s MB/?)"; // %1$s is the amount of resource usage
 $lang['virtualmin.client.tabs.status.disk_usage'] = "(%1\$s MB/%2\$s MB)"; // %1$s is the amount of resource usage, %2$s is the resource usage limit
 $lang['virtualmin.client.tabs.status.bandwidth_title'] = "Bandwidth Usage";
 $lang['virtualmin.client.tabs.status.server_details'] = "Server Details";
+$lang['virtualmin.client.tabs.status.name_servers'] = "Name Server";
+$lang['virtualmin.client.tabs.status.login_webmin'] = "Login to Control Panel";
+$lang['virtualmin.client.tabs.status.web_folder'] = "Website Path";
+$lang['virtualmin.client.tabs.status.web_address'] = "Website Address";
+
+
+
 
 ?>
