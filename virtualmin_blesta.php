@@ -5,6 +5,7 @@
  * User: Luke Hardiman
  * Date: 30/08/2015
  * Time: 12:51 PM
+ * copyright Luke Hardiman 2015
  */
 
 class VirtualminBlesta extends module
@@ -29,11 +30,16 @@ class VirtualminBlesta extends module
 
     /**
      * Initializes the API and returns a Singleton instance of that object for api calls
-     *
-     * @param stdClass $module_row A stdClass object representing a single reseller (optional, required when Module::getModuleRow() is unavailable)
+     * see ::Api()
      * @return VirtualMIN API The
      */
     private $_api = false;
+    /**
+     * Initializes the Virtualmin helper class and returns a Singleton instance of our helper
+     * see ::getVirtualMinHelper()
+     * @return VirtualMIN Helper Class
+     */
+    private $_virtualmin_lib_helper = false;
 
     /**
      * Initializes the module
@@ -980,7 +986,93 @@ class VirtualminBlesta extends module
      * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
      */
     public function getClientTabs($package) {
-        return array();
+        return array(
+            'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.menu.server_status", true), 'icon' => "fa fa-columns")
+        );
+    }
+    /**
+     * Checks service status and returns true else returns service error message
+     *
+     * @param $service
+     * @return bool true or system generated messaging
+     */
+    private function serviceCheck($service){
+        //if service is not active lets show a error|status message
+        if ($service->status != "active"){
+            Loader::loadHelpers($this, array("Html"));
+            return $this->Html->safe("<h3>".Language::_("virtualmin.service_field.not_active" ,true)."</h3>",true);
+        }
+
+        return true;
+    }
+    /**
+     * client Tab Status provides details based on the virtual server
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabStatus($package, $service, array $getRequest=null, array $post=null, array $files=null) {
+
+        //check if the service is currently active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //set out view
+        $current_view = 'client_tab_status';
+
+
+        $api = $this->api();
+        //clear current session while testing
+        $api->clearSession();
+
+        //parse service fields
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //retrieve domain info
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $stats = $api->get_domain_info($account);
+
+        //build vars to parse to view
+        $module_row = $this->getModuleRow($package->module_row);
+
+        $buildVars = array(
+            "stats" 		 =>	$stats->data[0]->values,
+            "action_url"	 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
+            "service_fields" =>	$service_fields,
+            "service_id"	 => $service->id,
+            "name_servers"	 => $module_row->meta->name_servers,
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+
+        // Perform any post request based on get request
+        if (!empty($post)) {
+            //virtualmin_confirm_password
+            $data = array(
+                'virtualmin_password' => $post['virtualmin_password'],
+                'virtualmin_confirm_password' => $post['virtualmin_confirm_password']
+            );
+            print_r($data);
+            print_r($post);
+
+            Loader::loadModels($this, array("Services"));
+            $this->Services->edit($service->id, $data);
+
+            if ($this->Services->errors())
+                $this->Input->setErrors($this->Services->errors());
+
+            $vars = (object)$post;
+            $buildVars["vars"] = $vars;
+        }
+
+
+        //render template
+        return  $this->renderTemplate($current_view,$buildVars);
     }
 
     /**
@@ -1140,7 +1232,10 @@ class VirtualminBlesta extends module
     }
 
     /**
+     *
      * Returns a singleton of Virtualmin API
+     *
+     * see lib/virtualmin_api.php
      *
      * @param bool|false $module_row
      * @return bool|VirtualMinApi
@@ -1170,8 +1265,23 @@ class VirtualminBlesta extends module
 
         return $this->_api;
     }
+    /**
+     * Initializes the virtualMinLib and returns an instance of that object
+     * see lib/virtualmin_lib_helper.php
+     * @return The virtualMinLib instance
+     */
+    private function getVirtualMinHelper() {
+        if (!$this->_virtualmin_lib_helper){
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_lib_helper.php");
+            $this->_virtualmin_lib_helper = new virtualmin_lib_helper();
+        }
+
+        return new $this->_virtualmin_lib_helper;
+    }
 
     /**
+     *
+     * Get the current module row for the selected module group
      * @param null $vars
      * @return null|stdClass module row of current group
      */
@@ -1280,6 +1390,36 @@ class VirtualminBlesta extends module
             return;
 
         return $response;
+    }
+
+    /**
+     *
+     * Helps renders a template view from an action in our controller
+     *
+     * @param $templateName     template we want to render to view
+     * @param $vars             $vars we want to pass to view
+     * @param array $helpers    optional array of helpers , form & html are default
+     * @return string           returns template view
+     */
+    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html") )
+    {
+        //create view
+        $this->view = new View($templateName, "default");
+        //load helpers
+        Loader::loadHelpers($this, $helpers);
+        //set base
+        $this->view->base_uri = $this->base_uri;
+        //set location
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+
+        //pass on our vars to template
+        foreach ($vars as $key => $value)
+        {
+            $this->view->set($key, $value);
+        }
+
+        //return rendered template
+        return $this->view->fetch();
     }
 
 }

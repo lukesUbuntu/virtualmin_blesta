@@ -85,6 +85,17 @@ $lang['virtualmin.service_field.domain'] = "Domain";
 //$lang['virtualmin.service_field.username'] = "Username";
 //$lang['virtualmin.service_field.email'] = "Email";
 $lang['virtualmin.service_field.password'] = "Password";
+$lang['virtualmin.service_field.not_active'] = "Sorry your service is either not provisioned yet or is disabled";
 
+//client tabs general
+$lang['virtualmin.client.tabs.menu.server_status'] = "Server Status";
+
+//client tabs - Client Tab Status (client_tab_status.pdt)
+$lang['virtualmin.client.tabs.status.heading'] = "Server Overview";
+$lang['virtualmin.client.tabs.status.disk_title'] = "Disk Usage";
+$lang['virtualmin.client.tabs.status.disk_usage_unlimited'] = "(%1\$s MB/?)"; // %1$s is the amount of resource usage
+$lang['virtualmin.client.tabs.status.disk_usage'] = "(%1\$s MB/%2\$s MB)"; // %1$s is the amount of resource usage, %2$s is the resource usage limit
+$lang['virtualmin.client.tabs.status.bandwidth_title'] = "Bandwidth Usage";
+$lang['virtualmin.client.tabs.status.server_details'] = "Server Details";
 
 ?>
