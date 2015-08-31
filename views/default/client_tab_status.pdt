@@ -1,0 +1,85 @@
+<h4><?php $this->_("virtualmin.client.tabs.status.heading");?></h4>
+
+
+
+
+<h3><?php $this->_("virtualmin.client.tabs.status.disk_title");?></h3>
+<?php
+$disk = array(
+	'used' => round($this->Html->ifSet($stats->server_quota_used[0], 0), 2),
+	'limit' => round($this->Html->ifSet($stats->server_quota[0], 0), 2)
+);
+$unlimited = empty($stats->server_quota[0]);
+$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0)/$this->Html->ifSet($disk['limit']))*100, 0));
+?>
+<small>
+	<?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit'])));?>
+</small>
+<div class="progress">
+	<div class="progress-bar progress-bar-success progress-bar-striped"  role="progressbar" aria-valuenow="<?php $this->Html->_($percent_used);?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php $this->Html->_($percent_used);?>%">
+		<span class="sr-only"><?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit'])));?></span>
+	</div>
+</div>
+
+<h3><?php $this->_("virtualmin.client.tabs.status.bandwidth_title");?></h3>
+<?php
+
+$bandwidth = array(
+	'used' => round($this->Html->ifSet($stats->bandwidth_usage[0], 0), 2),
+	'limit' => round($this->Html->ifSet($stats->bandwidth_limit[0], 0), 2)
+);
+$unlimited = empty($stats->bandwidth_limit[0]);
+$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 0)/$this->Html->ifSet($bandwidth['limit']))*100, 0));
+?>
+<small>
+	<?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit'])));?>
+</small>
+<div class="progress">
+	<div class="progress-bar progress-bar-info progress-bar-striped"  role="progressbar" aria-valuenow="<?php $this->Html->_($percent_used);?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php $this->Html->_($percent_used);?>%">
+		<span class="sr-only"><?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit'])));?></span>
+	</div>
+</div>
+
+
+<h3><?php $this->_("virtualmin.client.tabs.status.server_details");?></h3>
+
+<div class="table-responsive">
+	<table class="table table-curved table-striped">
+		<tr>
+
+			<td>IP Address</td>
+
+			<td><?php $this->Html->_($stats->ip_address[0]);?></td>
+
+		</tr>
+
+		<!-- name servers !-->
+		<?php
+		foreach($name_servers as $server)
+		{
+			?>
+			<tr>
+
+				<td>Name Server</td>
+				<td><?php $this->Html->_($server);?></td>
+			</tr>
+		<?php
+		}
+		?>
+
+		</tbody>
+	</table>
+</div>
+<?php
+/*
+ * auto login to virtualmin server may check out another way not secure
+echo sprintf( '<form action="http://server:10000/session_login.cgi" method="post" target="_blank">' .
+	'<input type="hidden" name="user" value="%s" />' .
+	'<input type="hidden" name="pass" value="%s" />' .
+	'<input type="hidden" name="notestingcookie" value="1" />' .
+	'<input type="submit" value="%s" class="button" />' . '</form>',
+	"username",
+	"password" ,
+	'Login to Control Panel' );
+*/
+?>
