@@ -1034,17 +1034,20 @@ class VirtualminBlesta extends module
 
         //retrieve domain info
         $account = array('domain' => $service_fields->virtualmin_domain);
-        $stats = $api->get_domain_info($account);
+
+        $serverDetails = $this->getVirtualMinHelper()->cleanArray($api->get_domain_info($account));
+
 
         //build vars to parse to view
         $module_row = $this->getModuleRow($package->module_row);
 
         $buildVars = array(
-            "stats" 		 =>	$stats->data[0]->values,
+            "serverDetails"  =>	$serverDetails,
             "action_url"	 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
             "service_fields" =>	$service_fields,
             "service_id"	 => $service->id,
             "name_servers"	 => $module_row->meta->name_servers,
+            "webmin_url"	 => ((($module_row->meta->use_ssl == "true") ? "https://" : "http://").$module_row->meta->host_name.":".$module_row->meta->port_number ),
             //"action_buttons" => $this->clientActionButtons(),
             "vars", (isset($vars) ? $vars : new stdClass())
         );
@@ -1421,5 +1424,7 @@ class VirtualminBlesta extends module
         //return rendered template
         return $this->view->fetch();
     }
+
+
 
 }

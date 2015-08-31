@@ -12,6 +12,7 @@ class virtualmin_lib_helper {
 
     /**
      * Sends back a JSON response with|without callback and exits execution
+     *
      * @param $data
      * @param bool $success'
      */
@@ -65,6 +66,7 @@ class virtualmin_lib_helper {
 
     /**
      * Process ajax's call's only if the request is allowed calls method on main virtualmin by ref
+     *
      * @param $caller
      * @param $getRequest
      * @param $postRequest
@@ -83,5 +85,30 @@ class virtualmin_lib_helper {
             $this->sendAjax("Invalid call to $request",false);
 
         }
+    }
+
+    /**
+     * Cleans up the data back from virutlamin server more readable array like maparray
+     *
+     * @param $arrayData    mixed array|multi array
+     * @return object| bool   Returns a virtualmin clean object with values
+     */
+    public function cleanArray($arrayData){
+        $cleanArray = array();
+        if (isset($arrayData->data) && isset($arrayData->data[0]->values)){
+            $data = $arrayData->data[0]->values;
+            unset($arrayData); // or $mainArr = $resultArr;
+            foreach ($data as $key => $value) {
+
+                if (count($value) > 1)      //if there is possible multiple values we will then store them as
+                    foreach($value as $values)
+                    $cleanArray[$key][] = $values;
+                else
+                $cleanArray[$key] = $value[0];
+            }
+        }
+
+        unset($data); // or $mainArr = $resultArr;
+        return count($cleanArray) > 0 ? (object)$cleanArray : false;
     }
 }

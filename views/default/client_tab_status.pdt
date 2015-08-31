@@ -6,10 +6,10 @@
 <h3><?php $this->_("virtualmin.client.tabs.status.disk_title");?></h3>
 <?php
 $disk = array(
-	'used' => round($this->Html->ifSet($stats->server_quota_used[0], 0), 2),
-	'limit' => round($this->Html->ifSet($stats->server_quota[0], 0), 2)
+	'used' => round($this->Html->ifSet($serverDetails->server_quota_used, 0), 2),
+	'limit' => round($this->Html->ifSet($serverDetails->server_quota, 0), 2)
 );
-$unlimited = empty($stats->server_quota[0]);
+$unlimited = empty($serverDetails->server_quota);
 $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0)/$this->Html->ifSet($disk['limit']))*100, 0));
 ?>
 <small>
@@ -25,10 +25,10 @@ $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0)/$t
 <?php
 
 $bandwidth = array(
-	'used' => round($this->Html->ifSet($stats->bandwidth_usage[0], 0), 2),
-	'limit' => round($this->Html->ifSet($stats->bandwidth_limit[0], 0), 2)
+	'used' => round($this->Html->ifSet($serverDetails->bandwidth_usage, 0), 2),
+	'limit' => round($this->Html->ifSet($serverDetails->bandwidth_limit, 0), 2)
 );
-$unlimited = empty($stats->bandwidth_limit[0]);
+$unlimited = empty($serverDetails->bandwidth_limit);
 $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 0)/$this->Html->ifSet($bandwidth['limit']))*100, 0));
 ?>
 <small>
@@ -45,12 +45,30 @@ $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 
 
 <div class="table-responsive">
 	<table class="table table-curved table-striped">
+		<?php
+		if (isset($serverDetails->url)){
+			?>
+			<tr>
+				<td>Website</td>
+				<td><?php $this->Html->_($serverDetails->url);?></td>
+			</tr>
+			<?
+		}
+		?>
+		<?php
+		if (isset($serverDetails->html_directory)){
+			?>
+				<tr>
+				<td>Website Folder/Path</td>
+				<td><?php $this->Html->_($serverDetails->html_directory);?></td>
+			</tr>
+			<?
+		}
+		?>
+
 		<tr>
-
 			<td>IP Address</td>
-
-			<td><?php $this->Html->_($stats->ip_address[0]);?></td>
-
+			<td><?php $this->Html->_($serverDetails->ip_address);?></td>
 		</tr>
 
 		<!-- name servers !-->
@@ -71,15 +89,18 @@ $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 
 	</table>
 </div>
 <?php
-/*
- * auto login to virtualmin server may check out another way not secure
-echo sprintf( '<form action="http://server:10000/session_login.cgi" method="post" target="_blank">' .
+// auto login to webmin server may remove as not secure
+if ($serverDetails->password_storage == "Plain text" && strpos($serverDetails->allowed_features,'webmin') !== false ){
+echo sprintf( '<form action="%s/session_login.cgi" method="post" target="_blank">' .
 	'<input type="hidden" name="user" value="%s" />' .
 	'<input type="hidden" name="pass" value="%s" />' .
 	'<input type="hidden" name="notestingcookie" value="1" />' .
-	'<input type="submit" value="%s" class="button" />' . '</form>',
-	"username",
-	"password" ,
+	'<input type="submit" value="%s" class="btn btn-success" />' . '</form>',
+	$webmin_url,
+	$serverDetails->username,
+	$serverDetails->password,
 	'Login to Control Panel' );
-*/
+}
+
+
 ?>
