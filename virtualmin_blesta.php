@@ -853,8 +853,37 @@ class VirtualminBlesta extends module
      * @param $vars stdClass A stdClass object representing a set of post fields
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
+    //@todo add generate password option
+    //@todo add option if server already exists on system
     public function getAdminAddFields($package, $vars=null) {
-        return new ModuleFields();
+        //generate admin view to add service
+        Loader::loadHelpers($this, array("Html"));
+
+
+        $fields = new ModuleFields();
+
+        // Create domain label
+        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
+
+        // Create domain field and attach to domain label
+        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id'=>"virtualmin_domain")));
+
+
+        $fields->setField($domain);
+
+        // Create password label
+        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
+
+        // Create password field and attach to password label
+        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id'=>"virtualmin_password")));
+
+
+        $fields->setField($password);
+        unset($domain);
+        unset($password);
+
+
+        return $fields;
     }
 
     /**
