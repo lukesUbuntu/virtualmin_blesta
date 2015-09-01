@@ -96,19 +96,20 @@ class virtualmin_lib_helper {
     public function cleanArray($arrayData){
         $cleanArray = array();
         if (isset($arrayData->data) && isset($arrayData->data[0]->values)){
-            $data = $arrayData->data[0]->values;
-            unset($arrayData); // or $mainArr = $resultArr;
-            foreach ($data as $key => $value) {
+                foreach ($arrayData->data as $index => $results) {
+                    foreach($results->values as $result => $values )
 
-                if (count($value) > 1)      //if there is possible multiple values we will then store them as
-                    foreach($value as $values)
-                    $cleanArray[$key][] = $values;
-                else
-                $cleanArray[$key] = $value[0];
-            }
+                    if (count($values) > 1)      //if there is possible multiple values we will then store them as
+                        foreach($values as $value)
+                            $cleanArray[$index][$values][] = $value;
+                    else
+                        $cleanArray[$index][$result] = $values[0];
+
+                }
+
         }
 
         unset($data); // or $mainArr = $resultArr;
-        return count($cleanArray) > 0 ? (object)$cleanArray : false;
+        return count($cleanArray) > 0 ? (array)$cleanArray : false;
     }
 }

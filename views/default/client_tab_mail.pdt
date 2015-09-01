@@ -1,0 +1,476 @@
+<h4><?php $this->_("virtualmin.client.tabs.mail.menu");?></h4>
+
+	<div id="add_account_button" >
+		<button class="btn btn-default pull-right add_mail btn-success" style="width:150px;">
+			<i class="fa fa-edit"></i><span>Add Mail Account</span>
+		</button>
+	</div>
+
+	<div id="createEmailAccount" class="hide"  >
+		<h4>Create Email</h4>
+		<div class="row panel-fix">
+			<div class="col-md-12">
+				<?php
+				$this->Form->fieldHidden(
+					"edit_action",
+						array('id' => "add_mail_account")
+				);
+				?>
+				<div class="form-group">
+					<?php
+					$this->Form->label("Account Username", "login_username");
+					?>
+					<div style="">
+					<?php
+
+					$this->Form->fieldText(
+						"add_mail_username",
+						$this->Html->ifSet($vars->username),
+						array(
+							'id' => "add_mail_username",
+							'style' => "display: inline;width:40%",
+							'class' => "form-control",
+							'placeholder' => "Email Username", true)
+					);
+					?>
+						<span class="at_domain">@<?php $this->Html->_($service_fields->virtualmin_domain);?></span>
+
+						</div>
+				</div>
+				<div class="form-group">
+					<?php
+					$this->Form->label("Password", "");
+					$this->Form->fieldText(
+						"add_mail_password",
+						$this->Html->ifSet($vars->username),
+						array('id' => "add_mail_password",
+							'class' => "form-control",
+							'placeholder' => "password",
+							true)
+					);
+					?>
+				</div>
+				<div class="form-group">
+					<?php
+					$this->Form->label("Quota", "login_password");
+					$this->Form->fieldText(
+						"add_mail_quota",
+						$this->Html->ifSet($vars->username),
+						array('id' => "add_mail_quota",
+							'class' => "form-control",
+							'placeholder' => "Quota in MB eg : 10mb",
+							true)
+					);
+					?>
+				</div>
+				<div class="form-group">
+					<?php
+
+					$this->Form->fieldCheckbox(
+						"enable_mail_forward",
+						"disabled",
+						false,
+						array('id' => "enable_mail_forward",
+						'class' => "")
+						);
+					$this->Form->label("Forward Email");
+
+
+					$this->Form->fieldText(
+						"email_forward_to",
+						$this->Html->ifSet($vars->username),
+						array('id' => "email_forward_to",
+							'class' => "form-control hide",
+							'placeholder' => "myEmail@example.com",
+							true)
+					);
+					?>
+				</div>
+				<div id="ajax_loader" class="form-group"></div>
+				<button id="create_account" type="submit" class="btn btn-success pull-right">
+					<i class="fa fa-sign-in"></i> Create Account
+				</button>
+				<?php
+				//$this->Form->end();
+				?>
+			</div>
+		</div>
+	</div>
+	<?php
+	//$this->Form->end();
+	if (($account_index = count($mail_accounts)) > 1) {
+		?>
+
+		<div id="mail_accounts" class="table-responsive" style="margin-top: 60px;">
+			<table class="table table-curved table-striped">
+
+				<tr>
+
+					<td>Email Account</td>
+
+					<td>Quota</td>
+					<td></td>
+				</tr>
+
+				<?php
+				foreach ($mail_accounts as $email_id => $email_data) {
+
+					$unlimited = empty($email_data['home_quota']);
+					//print_r($email_data->forward_mail_to);
+					$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($email_data['home_byte_quota_used'], 0) / $this->Html->ifSet($email_data['home_byte_quota'])) * 100, 0));
+					?>
+					<tr id="email_<?php echo $email_id; ?>">
+
+
+						<td class="email_address"><?php $this->Html->_($email_data['email_address']); ?></td>
+						<td>
+						 <span>
+								<?php $this->Html->_($email_data['home_quota_used']); ?>
+							 / <?php $this->Html->_($email_data['home_quota']); ?>
+							</span>
+
+							<div class="progress">
+								<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+									 aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0"
+									 aria-valuemax="100" style="width: <?php $this->Html->_($percent_used); ?>%">
+
+								</div>
+							</div>
+
+						</td>
+
+
+						<?php
+						if ($this->Html->ifSet($email_data['forward_mail_to']) != "")
+							echo "<td>Mail Forwarding on</td>";
+						else
+							echo "<td></td>";; ?>
+
+
+						<!--actions !-->
+						<td class="">
+							<div class="dropdown pull-right">
+								<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+										data-toggle="dropdown" aria-expanded="true">
+									Actions
+									<span class="caret"></span>
+								</button>
+								<ul data-email_id="<?php echo $email_id; ?>" class="dropdown-menu" role="menu"
+									aria-labelledby="dropdownMenu1">
+									<li class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
+											Account</a></li>
+									<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Change
+											Password</a></li>
+									<?php
+									if ($this->Html->ifSet($email_data['forward_mail_to']) != "") {
+										?>
+										<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
+												Forwarding</a></li>
+										<?php
+									} else {
+
+										?>
+										<li class="disabled" role="presentation"><a role="menuitem" tabindex="-1"
+																					href="#">Enable Forwarding</a>
+										</li<?php
+									}
+									?>
+
+
+									<li role="presentation" class="divider"></li>
+									<!--<a data-href="delete.php?id=54" data-toggle="modal" data-target="#confirm-delete" href="#">Delete record #54</a> !-->
+									<li data-toggle="modal" data-target="#confirm-delete" role="presentation"><a
+											role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
+
+				</tbody>
+			</table>
+		</div>
+		<?php
+	}
+	?>
+	<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+				</div>
+
+				<div class="modal-body">
+					<p>You are about to delete <strong><span id="confirm_email"></span></strong></p>
+					<p>All mailbox data will be deleted, Do you want to proceed?</p>
+					<p class="debug-url"></p>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					<a href="#" class="btn btn-danger danger">Delete</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+	/*
+		var defaults = {
+			title: "Test",
+
+			onHide: function(event) {
+				alert("on hide");
+			},
+			onRender: function(event) {
+				alert("Clicked onRender");
+			},
+			url: null,
+			text: '',
+			backdrop: true
+		}
+		$("#client_services_manage").fn.blestaModal(defaults);
+		*/
+
+
+
+
+	 $action_url = '<?php echo $action_url; ?>';
+	 $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+
+		$(document).ready(function() {
+
+
+
+
+
+			$('#confirm-delete').on('show.bs.modal', function(e) {
+				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'));
+				console.log("e", $(e.relatedTarget).parent().data("email_id"));
+
+				var email_id = $(e.relatedTarget).parent().data("email_id");
+				var url = actionUrl("delete_user")
+				var email_address = $(".email_address","#email_"+email_id).text();
+
+				console.log("email_address",email_address)
+				$("#confirm_email", this).text(email_address);
+
+				$(this).find('.danger').click(function(e){
+
+					var $postVars = {
+						'_csrf_token' 	: 	$CsrfToken,
+						'email_id'		: 	email_id,
+						'email_address'	:	email_address,
+						'url'			:	url,
+						'edit_action'   :	"delete_user"
+					}
+					console.log("$postVars",$postVars);
+
+					sendRequest($postVars,function(){
+						//console.log("success")
+						$('#confirm-delete').modal('hide')
+					});
+					//$('#confirm-delete').hide.bs.modal
+
+					return e.preventDefault();
+				})
+			});
+
+			function removeEmail(id){
+
+			}
+			$("#create_account").click(function(){
+				$postVars = returnInputs("#createEmailAccount");
+				$postVars['_csrf_token'] = $CsrfToken;
+
+				sendRequest($postVars);
+			})
+
+			//toggle add mail div
+			$(".add_mail").click(
+				function () {
+
+					//toggle our buttons to show addmail account and cancel
+					$("#createEmailAccount").toggleClass("hide");
+					$("#mail_accounts").toggleClass("hide");
+
+					//modify form
+					if ($(this).hasClass("btn-warning")){
+						$(this).toggleClass("btn-warning","btn-success")
+						$("span",this).text("Add Mail Account");
+
+					}
+					else{
+						$(this).toggleClass("btn-warning")
+						$("span",this).text("Cancel");
+					}
+
+
+				}
+			);
+
+			//enable_mail_forward display textbox
+			$('#enable_mail_forward').change(function() {
+				if($(this).is(":checked")){
+					$(this).val("enabled");
+					$("#email_forward_to").removeClass("hide")
+				}
+				else{
+					$(this).val("");
+					$("#email_forward_to").addClass("hide");
+				}
+
+
+			});
+			/*********************************************************************************************************/
+
+			/**
+			 * Send ajax request
+			 */
+			function sendRequest($postVars,successCallback,errorCallback){
+				//remove any errors
+				$(".error_section").remove();
+				$.ajax({
+					method: 'POST',
+					url: $postVars.url,
+					data : $postVars,
+					success: function(response) {
+							//console.log(response);
+
+						if (response && response.success == false)
+							processErrors(response);
+						else
+							$(".content_section").parent().prepend(attachSuccess(response.data));
+
+						//$("#package-config").html(data);
+						if (typeof successCallback == "function")
+							successCallback(response);
+					},
+					error : function(httpObj, textStatus) {
+						//401 (Unauthorized) need to refresh page session died
+						if (httpObj.status == 401){
+							$(".content_section").parent().prepend(attachError("Session timed out refreshing..."));
+							setTimeout(function(){
+								location.reload();
+							},5000);
+							return;
+						}
+						//if not dump the works
+						console.log("ajaxError httpObj->",httpObj);
+						console.log("ajaxError textStatus->",textStatus);
+						console.log("ajaxError $postVars ->",$postVars);
+
+						if (typeof errorCallback == "function")
+							errorCallback(response);
+					},
+					beforeSend: function() {
+						$("#ajax_loader").append($(this).blestaLoadingDialog());
+					},
+					complete: function() {
+						$(".loading_container", $("#ajax_loader")).remove();
+					},
+					dataType: 'json'
+				})
+			}
+			/**
+			 * Returns inputs from form
+			 */
+			function returnInputs(element){
+				//@todo fix edit_action checking
+				var $inputs = $(":input",element);
+
+				// get an associative array of just the values.
+				var values = {};
+				$inputs.each(function() {
+					if (this.name.length > 1)
+					values[this.name] = $(this).val();
+				});
+
+				//set the url
+				values['url'] = actionUrl(values['edit_action']);
+
+
+				return values;
+			}
+
+			/**
+			 * process errors received from ajax
+			 * @param errors
+			 */
+			function processErrors(response){
+
+				//check what type of error
+				if (typeof response.data == "undefined"){
+					console.log("Error checking response",response);
+					console.log("Error checking typeof",typeof response)
+					return;
+				}
+
+				//3 types of errors that could be returned
+				//****Single errors***/
+				if (typeof response.data.errors == "string"){
+					$(".content_section").parent().prepend(attachError(response.data.errors));
+					return;
+				}
+				if (typeof response.data == "string"){
+					console.log("typeof response.data ",typeof response.data )
+					console.log("response.data ",response.data )
+					$(".content_section").parent().prepend(attachError( response.data));
+					return;
+				}
+				//****Multiple errors***/
+				var our_errors = response.data.errors;
+
+				if (typeof our_errors == "object"){
+					$.each(our_errors,function(key,value){
+						var error_message = false;
+						if (typeof value.format == "string")
+							error_message = value.format
+
+						if (typeof value.empty == "string")
+							error_message = value.empty
+
+
+						$(".content_section").parent().prepend(attachError(error_message));
+
+					})
+				}
+
+			}
+
+			/*
+			 * Create URL & Get Request
+			 */
+			function actionUrl(action){
+				var url = ($action_url.length < 1) ? "/" : $action_url;
+				return ((url.substr(-1) != '/') ? url + "/" +  action : url + action);
+			}
+			//$message = attachError("shit")
+			function attachError($message){
+			return '<section class=\"error_section\">'+
+						'<article class=\"error_box error alert alert-danger alert-dismissable\">'+
+							'<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+						//	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
+						'<p>'+$message+'</p>'+
+					'</article>'+
+				'</section>';
+
+			}
+			//attach success
+			function attachSuccess($message){
+				return '<section class=\"success_section\">'+
+					'<article class=\"alert alert-success alert-dismissable\">'+
+					'<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+						//	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
+					'<p>'+$message+'</p>'+
+					'</article>'+
+					'</section>';
+
+			}
+		});
+	</script>

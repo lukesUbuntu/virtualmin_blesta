@@ -988,8 +988,8 @@ class VirtualminBlesta extends module
     //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
     public function getClientTabs($package) {
         return array(
-            'clientTabStatus'   => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns")
-
+            'clientTabStatus'   => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
+            'clientTabMail'     => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
         );
     }
     /**
@@ -1006,6 +1006,83 @@ class VirtualminBlesta extends module
         }
 
         return true;
+    }
+    /**
+     * client Tab Mail handles all the mail from listing to adding and deleting mailboxs
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabMail($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
+    {
+
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //allowed request to clientTabMail
+        $allowedRequests = array("add_mail_account","delete_user","confirm");
+        $dataRequest = array(
+            'package'	=> $package,
+            'service'	=> $service,
+        );
+
+        //process any ajax request first
+        $this->getVirtualMinHelper()->processAjax($this,$getRequest,$postRequest,$allowedRequests,$dataRequest);
+
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //pass this account to api
+        $account = array('domain' => $service_fields->virtualmin_domain);
+
+        //grab the mailAccounts for domain
+        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
+
+        //lets build vars before render
+        $buildVars = array(
+            "mail_accounts" 		 =>	$mail_accounts,
+            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/mailAccounts/",
+            "service_fields" 		 =>	$service_fields,
+            "service_id"			 => $service->id,
+            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        if (!empty($postRequest)) {
+
+
+
+            //lets checks some posts out
+            //virtualmin_confirm_password
+            $data = array(
+                "virtualmin_edit_action" 		=> $postRequest["edit_action"] ,
+                "virtualmin_add_mail_username" 	=> $postRequest["add_mail_username"],
+                "virtualmin_add_mail_password"	=> $postRequest["add_mail_password"],
+                "virtualmin_add_mail_quota"		=> $postRequest["add_mail_quota"]
+            );
+
+
+
+            $this->Input->setRules($this->addMailAccountRules($data));
+            $this->Input->validates($data);
+
+
+
+            $vars = (object)$data;
+            //update page $vars
+            $buildVars["vars"] = $vars;
+        }
+
+        return  $this->renderTemplate("client_tab_mail",$buildVars);
+
+
     }
     /**
      * client Tab Status provides details based on the virtual server
@@ -1026,10 +1103,8 @@ class VirtualminBlesta extends module
         //set out view
         $current_view = 'client_tab_status';
 
-
-        $api = $this->api();
         //clear current session while testing
-        $api->clearSession();
+        $this->api()->clearSession();
 
         //parse service fields
         $service_fields = $this->serviceFieldsToObject($service->fields);
@@ -1037,14 +1112,14 @@ class VirtualminBlesta extends module
         //retrieve domain info
         $account = array('domain' => $service_fields->virtualmin_domain);
 
-        $serverDetails = $this->getVirtualMinHelper()->cleanArray($api->get_domain_info($account));
+        $serverDetails = $this->getVirtualMinHelper()->cleanArray($this->api()->get_domain_info($account));
 
 
         //build vars to parse to view
         $module_row = $this->getModuleRow($package->module_row);
 
         $buildVars = array(
-            "serverDetails"  =>	$serverDetails,
+            "serverDetails"  =>	(object)$serverDetails[0],
             "action_url"	 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
             "service_fields" =>	$service_fields,
             "service_id"	 => $service->id,
