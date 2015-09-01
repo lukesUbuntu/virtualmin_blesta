@@ -975,7 +975,7 @@ class VirtualminBlesta extends module
 
     /**
      * Returns all tabs to display to a client when managing a service whose
-     * package uses this module
+     * package uses this module client tabs
      *
      * @param stdClass $package A stdClass object representing the selected package
      * @return array An array of tabs in the format of method => title, or method => array where array contains:
@@ -985,9 +985,11 @@ class VirtualminBlesta extends module
      * 		Example: array('methodName' => "Title", 'methodName2' => "Title2")
      * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
      */
+    //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
     public function getClientTabs($package) {
         return array(
-            'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.menu.server_status", true), 'icon' => "fa fa-columns")
+            'clientTabStatus'   => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns")
+
         );
     }
     /**
@@ -1055,22 +1057,7 @@ class VirtualminBlesta extends module
 
         // Perform any post request based on get request
         if (!empty($post)) {
-            //virtualmin_confirm_password
-            $data = array(
-                'virtualmin_password' => $post['virtualmin_password'],
-                'virtualmin_confirm_password' => $post['virtualmin_confirm_password']
-            );
-            print_r($data);
-            print_r($post);
 
-            Loader::loadModels($this, array("Services"));
-            $this->Services->edit($service->id, $data);
-
-            if ($this->Services->errors())
-                $this->Input->setErrors($this->Services->errors());
-
-            $vars = (object)$post;
-            $buildVars["vars"] = $vars;
         }
 
 
