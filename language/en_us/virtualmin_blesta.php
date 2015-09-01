@@ -90,8 +90,6 @@ $lang['virtualmin.service_field.not_active'] = "Sorry your service is either not
 
 //client tabs general
 
-
-
 //client tabs - Client Tab Status (client_tab_status.pdt)
 $lang['virtualmin.client.tabs.status.menu'] = "Server Status";
 $lang['virtualmin.client.tabs.status.heading'] = "Hosting Overview";
