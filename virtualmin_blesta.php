@@ -1487,6 +1487,76 @@ class VirtualminBlesta extends module
         return $this->view->fetch();
     }
 
+    /**
+     * Manages adding a new mail account via Ajax for our Client Mail Tab
+     *
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     * @throws Exception
+     */
+    public function add_mail_account($postRequest, $dataRequest = array()){
+
+        //set our data & required post
+        $vars = array(
+            "virtualmin_edit_action" 			=> $postRequest["edit_action"] ,
+            "virtualmin_add_mail_username" 		=> $postRequest["add_mail_username"],
+            "virtualmin_add_mail_password"		=> $postRequest["add_mail_password"],
+            "virtualmin_add_mail_quota"			=> $postRequest["add_mail_quota"],
+            "virtualmin_enable_mail_forward"	=> $postRequest["enable_mail_forward"],
+            "virtualmin_email_forward_to"		=> $postRequest["email_forward_to"]
+        );
+
+        //lets validate our rules
+        $this->Input->setRules($this->addMailAccountRules($vars));
+        $this->Input->validates($vars);
+
+
+        //validate rules before heading to editService
+        if ($errors = $this->Input->errors()){
+            $response["errors"] = $errors;
+            $response["message"] = "failed on validation";
+            $this->getVirtualMinHelper()->sendAjax($response,false);
+        }
+
+        //lets grab the service
+        $service = $dataRequest['service'];
+
+        Loader::loadModels($this, array("Services"));
+        $this->Services->edit($service->id, $vars);
+        //lets make sure there is no issues between query and service
+        if ($errors = $this->Services->errors()){
+            //$this->Input->setErrors($this->Services->errors());
+            echo "errors ->";
+            print_r($errors);
+            exit;
+        }
+
+        //lets create the mail account on server
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        $account = array(
+            'domain'	=> $service_fields->virtualmin_domain,
+            'user'		=> $vars["virtualmin_add_mail_username"],
+            'pass'		=> $vars["virtualmin_add_mail_password"]
+        );
+        /*
+         * [status] => success
+            [output] => User test.testing1.com created successfully
+            [command] => create-user
+         */
+        $response = $this->checkResponse($this->api()->create_user($account));
+        
+        if ($errors = $this->Input->errors()){
+            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        }
+        //clear the list-users
+        //$api->clearSession("list-users");
+        $this->getVirtualMinHelper()->sendAjax($response->output);
+
+        exit(0);
+    }
+
 
 
 }
