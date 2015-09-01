@@ -79,6 +79,7 @@ $lang['virtualmin.!error.virtualmin_password.format'] = "The password may only c
 $lang['virtualmin.!error.virtualmin_password.length'] = "The password must be at least 5 characters in length.";
 $lang['virtualmin.!error.virtualmin_email.format'] = "Please enter a valid email address.";
 $lang['virtualmin.!error.virtualmin_password.matches'] = "Password and Confirm Password do not match.";
+$lang['virtualmin.!error.mail_account.quota'] = "Quota must be number values only";
 
 // Service fields
 $lang['virtualmin.service_field.domain'] = "Domain";
@@ -104,7 +105,7 @@ $lang['virtualmin.client.tabs.status.login_webmin'] = "Login to Control Panel";
 $lang['virtualmin.client.tabs.status.web_folder'] = "Website Path";
 $lang['virtualmin.client.tabs.status.web_address'] = "Website Address";
 
-//client tabs - Client Tab Status (client_tab_mail.pdt)
+//client tabs - Client Tab Mail (client_tab_mail.pdt)
 $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";
 
 

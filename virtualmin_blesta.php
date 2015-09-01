@@ -1555,6 +1555,7 @@ class VirtualminBlesta extends module
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
     }
+
     /**
      * Builds and returns the rules for add_mail_account
      *
@@ -1567,29 +1568,29 @@ class VirtualminBlesta extends module
                 'empty' => array(
                     'rule' => "isEmpty",
                     'negate' => true,
-                    'message' => "virtualmin_add_mail_password failed"
+                    'message' => Language::_('virtualmin.!error.password.format', true)
                 ),
                 'valid' => array(
                     'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
-                    'message' => "virtualmin_add_mail_password valid error"
+                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
                 )
             ),
             'virtualmin_add_mail_username' => array(
                 'empty' => array(
                     'rule' => "isEmpty",
                     'negate' => true,
-                    'message' => "virtualmin_add_mail_username error"
+                    'message' => Language::_('virtualmin.!error.user_name.empty', true)
                 ),
                 'valid' => array(
                     'rule' => array("matches", "/^[a-z0-9]*$/i"),
-                    'message' => "virtualmin_add_mail_username valid error"
+                    'message' =>  Language::_('virtualmin.!error.virtualmin_username.format', true)
                 )
             ),
             'virtualmin_add_mail_quota' => array(
                 'format' => array(
                     'if_set' => true,
                     'rule' => array("matches", "/^[0-9]*$/i"),
-                    'message' => "virtualmin_add_mail_quota valid error 1"
+                    'message' => Language::_("virtualmin.!error.mail_account.quota", true)
                 )
             )
         );
