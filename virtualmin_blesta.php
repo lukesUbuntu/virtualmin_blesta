@@ -1047,7 +1047,7 @@ class VirtualminBlesta extends module
         //lets build vars before render
         $buildVars = array(
             "mail_accounts" 		 =>	$mail_accounts,
-            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/mailAccounts/",
+            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabMail/",
             "service_fields" 		 =>	$service_fields,
             "service_id"			 => $service->id,
             //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
@@ -1546,7 +1546,7 @@ class VirtualminBlesta extends module
             [command] => create-user
          */
         $response = $this->checkResponse($this->api()->create_user($account));
-        
+
         if ($errors = $this->Input->errors()){
             $this->getVirtualMinHelper()->sendAjax($errors,false);
         }
@@ -1554,7 +1554,45 @@ class VirtualminBlesta extends module
         //$api->clearSession("list-users");
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
-        exit(0);
+    }
+    /**
+     * Builds and returns the rules for add_mail_account
+     *
+     * @param array $vars An array of key/value data pairs
+     * @return array An array of Input rules suitable for Input::setRules()
+     */
+    public function addMailAccountRules(&$vars) {
+        return array(
+            'virtualmin_add_mail_password' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => "virtualmin_add_mail_password failed"
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
+                    'message' => "virtualmin_add_mail_password valid error"
+                )
+            ),
+            'virtualmin_add_mail_username' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => "virtualmin_add_mail_username error"
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[a-z0-9]*$/i"),
+                    'message' => "virtualmin_add_mail_username valid error"
+                )
+            ),
+            'virtualmin_add_mail_quota' => array(
+                'format' => array(
+                    'if_set' => true,
+                    'rule' => array("matches", "/^[0-9]*$/i"),
+                    'message' => "virtualmin_add_mail_quota valid error 1"
+                )
+            )
+        );
     }
 
 
