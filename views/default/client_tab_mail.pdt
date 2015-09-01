@@ -219,6 +219,7 @@
 	</div>
 
 <script type="text/javascript">
+		//rushed job the javascript code needs to be cleaned up
 	 $action_url = '<?php echo $action_url; ?>';
 	 $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 
@@ -263,31 +264,22 @@
 				$postVars = returnInputs("#createEmailAccount");
 				$postVars['_csrf_token'] = $CsrfToken;
 
-				sendRequest($postVars);
+				sendRequest($postVars,function(response){
+
+					if (response && response.success == false){
+						processErrors(response)
+					}
+					else{
+						toggleAddMail();
+						$(".content_section").parent().prepend(attachSuccess(response.data));
+					}
+
+
+				});
 			})
 
 			//toggle add mail div
-			$(".add_mail").click(
-				function () {
-
-					//toggle our buttons to show addmail account and cancel
-					$("#createEmailAccount").toggleClass("hide");
-					$("#mail_accounts").toggleClass("hide");
-
-					//modify form
-					if ($(this).hasClass("btn-warning")){
-						$(this).toggleClass("btn-warning","btn-success")
-						$("span",this).text("Add Mail Account");
-
-					}
-					else{
-						$(this).toggleClass("btn-warning")
-						$("span",this).text("Cancel");
-					}
-
-
-				}
-			);
+			$(".add_mail").click(toggleAddMail);
 
 			//enable_mail_forward display textbox
 			$('#enable_mail_forward').change(function() {
@@ -302,6 +294,22 @@
 
 
 			});
+
+			function toggleAddMail(){
+				$("#createEmailAccount").toggleClass("hide");
+				$("#mail_accounts").toggleClass("hide");
+
+				//modify form
+				if ($(".add_mail").hasClass("btn-warning")){
+					$(".add_mail").toggleClass("btn-warning","btn-success")
+					$("span",".add_mail").text("Add Mail Account");
+
+				}
+				else{
+					$(".add_mail").toggleClass("btn-warning")
+					$("span",".add_mail").text("Cancel");
+				}
+			}
 			/*********************************************************************************************************/
 
 			/**
@@ -314,18 +322,8 @@
 					method: 'POST',
 					url: $postVars.url,
 					data : $postVars,
-					success: function(response) {
+					success: successCallback,
 							//console.log(response);
-
-						if (response && response.success == false)
-							processErrors(response);
-						else
-							$(".content_section").parent().prepend(attachSuccess(response.data));
-
-						//$("#package-config").html(data);
-						if (typeof successCallback == "function")
-							successCallback(response);
-					},
 					error : function(httpObj, textStatus) {
 						//401 (Unauthorized) need to refresh page session died
 						if (httpObj.status == 401){
@@ -373,79 +371,84 @@
 				return values;
 			}
 
-			/**
-			 * process errors received from ajax
-			 * @param errors
-			 */
-			function processErrors(response){
-
-				//check what type of error
-				if (typeof response.data == "undefined"){
-					console.log("Error checking response",response);
-					console.log("Error checking typeof",typeof response)
-					return;
-				}
-
-				//3 types of errors that could be returned
-				//****Single errors***/
-				if (typeof response.data.errors == "string"){
-					$(".content_section").parent().prepend(attachError(response.data.errors));
-					return;
-				}
-				if (typeof response.data == "string"){
-					console.log("typeof response.data ",typeof response.data )
-					console.log("response.data ",response.data )
-					$(".content_section").parent().prepend(attachError( response.data));
-					return;
-				}
-				//****Multiple errors***/
-				var our_errors = response.data.errors;
-
-				if (typeof our_errors == "object"){
-					$.each(our_errors,function(key,value){
-						var error_message = false;
-						if (typeof value.format == "string")
-							error_message = value.format
-
-						if (typeof value.empty == "string")
-							error_message = value.empty
 
 
-						$(".content_section").parent().prepend(attachError(error_message));
-
-					})
-				}
-
-			}
-
-			/*
-			 * Create URL & Get Request
-			 */
-			function actionUrl(action){
-				var url = ($action_url.length < 1) ? "/" : $action_url;
-				return ((url.substr(-1) != '/') ? url + "/" +  action : url + action);
-			}
-			//$message = attachError("shit")
-			function attachError($message){
-			return '<section class=\"error_section\">'+
-						'<article class=\"error_box error alert alert-danger alert-dismissable\">'+
-							'<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
-						//	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
-						'<p>'+$message+'</p>'+
-					'</article>'+
-				'</section>';
-
-			}
-			//attach success
-			function attachSuccess($message){
-				return '<section class=\"success_section\">'+
-					'<article class=\"alert alert-success alert-dismissable\">'+
-					'<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
-						//	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
-					'<p>'+$message+'</p>'+
-					'</article>'+
-					'</section>';
-
-			}
 		});
+
+
+	 /*
+	  * Create URL & Get Request
+	  */
+	 function actionUrl(action){
+		 var url = ($action_url.length < 1) ? "/" : $action_url;
+		 return ((url.substr(-1) != '/') ? url + "/" +  action : url + action);
+	 }
+	 //$message = attachError("shit")
+	 function attachError($message){
+		 $(".content_section").parent().prepend(
+			 '<section class=\"error_section\">'+
+			 '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
+			 '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+				 //	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
+			 '<p>'+$message+'</p>'+
+			 '</article>'+
+			 '</section>'
+		 );
+	 }
+	 //attach success
+	 function attachSuccess($message){
+		 $(".content_section").parent().prepend(
+			 '<section class=\"success_section\">'+
+			 '<article class=\"alert alert-success alert-dismissable\">'+
+			 '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+				 //	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
+			 '<p>'+$message+'</p>'+
+			 '</article>'+
+			 '</section>'
+		 );
+	 }
+
+	 /**
+	  * process errors received from ajax
+	  * @param errors
+	  */
+	 function processErrors(response){
+
+		 //check what type of error
+		 if (typeof response.data == "undefined"){
+			 console.log("Error checking response",response);
+			 return;
+		 }
+
+		 //3 types of errors that could be returned
+		 //****Single errors***/
+		 if (typeof response.data.errors == "string"){
+			 $(".content_section").parent().prepend(attachError(response.data.errors));
+			 return;
+		 }
+		 if (typeof response.data == "string"){
+			 console.log("typeof response.data ",typeof response.data )
+			 console.log("response.data ",response.data )
+			 $(".content_section").parent().prepend(attachError( response.data));
+			 return;
+		 }
+		 //****Multiple errors***/
+		 var our_errors = response.data.errors;
+
+		 if (typeof our_errors == "object"){
+			 $.each(our_errors,function(key,value){
+				 var error_message = false;
+				 if (typeof value.format == "string")
+					 error_message = value.format
+
+				 if (typeof value.empty == "string")
+					 error_message = value.empty
+
+
+				 $(".content_section").parent().prepend(attachError(error_message));
+
+			 })
+		 }
+
+	 }
 	</script>

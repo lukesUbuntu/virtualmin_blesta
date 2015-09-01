@@ -1557,6 +1557,69 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Deletes a mail account via Ajax for our Client Mail Tab
+     *
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     * @throws Exception
+     */
+    public function delete_user($postRequest,$dataRequest = array()){
+
+    //get the email user account for the id
+    $email_id 		= $postRequest['email_id'];
+    $email_address 	= $postRequest["email_address"];
+    //parse service & package
+    $service = $dataRequest['service'];
+    $package = $dataRequest['package'];
+
+    //grab service details
+    $service_fields = $this->serviceFieldsToObject($service->fields);
+
+    //get the mail accounts for domain
+    $account = array('domain' => $service_fields->virtualmin_domain);
+    $mail_accounts = $this->api()->list_users($account);
+
+    //grab the users account we are referencing
+    //check that the index passed is not more than our array
+    if ($email_id > count($mail_accounts)){
+        $this->log(
+            $service_fields->virtualmin_domain . "| delete_user account failed mailAccount[$email_id] is out of bounds" .
+            serialize(array($service_fields->virtualmin_username, $package->meta->package)
+            ), "output", true
+        );
+        //send error
+        $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
+    }
+    //grab the user account
+    $user_account = $mail_accounts->data[$email_id]->values;
+
+    //make sure that the email matches the users_accounts email that we are wanting to delete
+    if ($user_account->email_address[0] != $email_address){
+        $this->log(
+            $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
+            serialize(array($service_fields->virtualmin_username, $package->meta->package)
+            ), "output", true
+        );
+        $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
+    }
+
+    //	->unix_username[0];
+    //prepare to delete the user from account
+    $account['user']	= 	$user_account->unix_username[0];
+
+    //call api
+    $response = $this->checkResponse($this->api()->delete_user($account));
+    if ($errors = $this->Input->errors()){
+        $this->getVirtualMinHelper()->sendAjax($errors,false);
+    }
+    //clear the list-users
+    //$api->clearSession("list-users");
+    $this->getVirtualMinHelper()->sendAjax($response->output);
+
+
+}
+
+    /**
      * Builds and returns the rules for add_mail_account
      *
      * @param array $vars An array of key/value data pairs
