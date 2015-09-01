@@ -1545,7 +1545,7 @@ class VirtualminBlesta extends module
             [output] => User test.testing1.com created successfully
             [command] => create-user
          */
-        $response = $this->checkResponse($this->api()->create_user($account));
+        $response = $this->parseResponse($this->api()->create_user($account));
 
         if ($errors = $this->Input->errors()){
             $this->getVirtualMinHelper()->sendAjax($errors,false);
