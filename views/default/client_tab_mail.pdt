@@ -218,36 +218,11 @@
 		</div>
 	</div>
 
-	<script>
-
-	/*
-		var defaults = {
-			title: "Test",
-
-			onHide: function(event) {
-				alert("on hide");
-			},
-			onRender: function(event) {
-				alert("Clicked onRender");
-			},
-			url: null,
-			text: '',
-			backdrop: true
-		}
-		$("#client_services_manage").fn.blestaModal(defaults);
-		*/
-
-
-
-
+<script type="text/javascript">
 	 $action_url = '<?php echo $action_url; ?>';
 	 $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 
 		$(document).ready(function() {
-
-
-
-
 
 			$('#confirm-delete').on('show.bs.modal', function(e) {
 				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'));
@@ -281,9 +256,9 @@
 				})
 			});
 
-			function removeEmail(id){
-
-			}
+			/*
+			 * Create Email Account
+			 */
 			$("#create_account").click(function(){
 				$postVars = returnInputs("#createEmailAccount");
 				$postVars['_csrf_token'] = $CsrfToken;
@@ -377,6 +352,7 @@
 					dataType: 'json'
 				})
 			}
+
 			/**
 			 * Returns inputs from form
 			 */
@@ -393,7 +369,6 @@
 
 				//set the url
 				values['url'] = actionUrl(values['edit_action']);
-
 
 				return values;
 			}
