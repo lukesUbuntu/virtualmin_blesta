@@ -1,8 +1,12 @@
-	<h3>Account Details</h3>
+<div id="DatabasePage" class="inner">
+
+
+<h3>Account Details</h3>
 	<div>
 		<div class="btn-group pull-right">
 			<button class="sorry btn btn-info">Change Password</button>
-			<button class="sorry btn btn-success">Add Database</button>
+
+			<button id="add_database" class="btn btn-success" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
 		</div>
 			<div>Username : <span id="user_name"><?php echo $this->Html->ifSet($service_fields->virtualmin_username)?></span></div>
 			<?php
@@ -37,28 +41,14 @@
 						array('id' => "add_database")
 				);
 				?>
-				<div class="form-group">
-					<?php
-					$this->Form->label("Database Name", "add_database_name");
-					?>
-					<div style="">
-						<?php
 
-						$this->Form->fieldText(
-							"add_database_name",
-							$this->Html->ifSet($vars->database_name),
-							array(
-								'id' => "database_name",
-								'style' => "display: inline;width:40%",
-								'class' => "form-control",
-								'placeholder' => "Database Name", true)
-						);
-						?>
-					</div>
-				</div>
 
 				<div id="ajax_loader" class="form-group"></div>
-				<button id="create_account" type="submit" class="btn btn-success pull-right sorry">
+
+				<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
+
+
+				<button role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation" id="create_account" type="submit" class="btn btn-success pull-right sorry">
 					<i class="fa fa-sign-in"></i> Create Database
 				</button>
 				<?php
@@ -71,9 +61,9 @@
 	<!--Display Database !-->
 	<?php if (count($databases) > 0) {
 	?>
-		<div id = "databases" class="table-responsive" style="margin-top: 30px;">
+		<div  class="table-responsive" style="margin-top: 30px;">
 			<h3>Database's</h3>
-			<table class="table table-curved table-striped">
+			<table id= "databases" class="table table-curved table-striped">
 				<tr>
 					<td>Database Name</td>
 					<td>Tables</td>
@@ -139,16 +129,91 @@
 			</div>
 		</div>
 	</div>
+	<!-- database create new form !-->
+	<div class="modal fade" id="createDatabaseForm" tabindex="-1" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
 
-	<script>
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Create New Database</h4>
+				</div>
+
+				<div class="modal-body">
+					<div class="form-group">
+						<?php
+						$this->Form->label("Database Name", "add_database_name");
+						?>
+
+							<?php
+
+							$this->Form->fieldText(
+								"add_database_name",
+								$this->Html->ifSet($vars->database_name),
+								array(
+									'id' => "database_name",
+									'style' => "display: inline;width:40%",
+									'class' => "form-control",
+									'placeholder' => "Database Name", true)
+							);
+							?>
+
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					<a id="createDatabaseBtn" href="#" class="btn btn-success succss">Create</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div><!-- database create new form end !-->
+<script>
+	//globals
+	var DatabasePage = $("#DatabasePage");
+	var DatabaseList = $("#DatabasePage #databases");
+
 	$(document).ready(function(){
-		$("#show_password").click(function(){
+		/**
+		 * Show the main database bassword
+		 */
+		$("#show_password",DatabasePage).click(function(){
 			$(this).hide();
-			$("#password").removeClass('hide');
-		})
+			$("#password",DatabasePage).removeClass('hide');
+		});
+		/*
+		$('#createDatabaseForm',DatabasePage).on('show.bs.modal', function(md) {
+			var createBox = this;
+		});*/
+		$('#createDatabaseBtn',DatabasePage).click(function(e){
 
+			var databaseName = $('#createDatabaseForm #database_name',DatabasePage).val()
+
+			var $postVars = {
+				'database_name'	: databaseName,
+				'action'   		:	"add_database"
+			};
+
+			console.log("$postVars",$postVars)
+			return e.preventDefault();
+			//console.log("$postVars",$postVars);
+
+			sendRequest($postVars,function(response){
+				console.log("delete email response",response)
+				$('#confirm-delete',CurrentPage).modal('hide');
+				$('#email_' + email_id,MailAccountsDiv).remove();
+
+			});
+
+			//$('#confirm-delete').hide.bs.modal
+
+
+		})
 		$(".sorry").click(function(){
 			alert("sorry have not finished this action yet.. :(")
 		})
 	})
+
+
 	</script>

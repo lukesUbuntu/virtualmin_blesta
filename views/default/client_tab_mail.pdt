@@ -182,8 +182,7 @@
 
 
 									<li role="presentation" class="divider"></li>
-									<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a
-											role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
+									<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
 								</ul>
 							</div>
 						</td>
@@ -253,7 +252,7 @@
 						'action'   :	"delete_user"
 					};
 
-					//console.log("$postVars",$postVars);
+					console.log("$postVars",$postVars);
 
 					sendRequest($postVars,function(response){
 						console.log("delete email response",response)
