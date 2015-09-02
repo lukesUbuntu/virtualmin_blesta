@@ -106,5 +106,7 @@ $lang['virtualmin.client.tabs.status.web_address'] = "Website Address";
 //client tabs - Client Tab Mail (client_tab_mail.pdt)
 $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";
 
+//client tabs - Client Tab Database (client_tab_database.pdt)
+$lang['virtualmin.client.tabs.database.menu'] = "Databases";
 
 ?>
