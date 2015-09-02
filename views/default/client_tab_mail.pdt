@@ -104,8 +104,8 @@
 	if (($account_index = count($mail_accounts)) > 1) {
 		?>
 
-		<div id="mail_accounts" class="table-responsive" style="margin-top: 60px;">
-			<table class="table table-curved table-striped">
+		<div class="table-responsive" style="margin-top: 60px;">
+			<table id="mail_accounts" class="table table-curved table-striped">
 
 				<tr>
 
@@ -224,6 +224,7 @@
 		//rushed job the javascript code needs to be cleaned up
 	    $action_url = '<?php echo $action_url; ?>';
 	    $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+        $Domain     = '<?php echo $service_fields->virtualmin_domain;?>';
 
         //reference the main elements
         var MailAccountsDiv = $("#mail_accounts");
@@ -234,13 +235,11 @@
 
 			$('#ConfirmEmailDelete',CurrentPage).on('show.bs.modal', function(e) {
 
-				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'));
-				console.log("e", $(e.relatedTarget).parent().data("email_id"));
-
+				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
 				var email_id = $(e.relatedTarget).parent().data("email_id");
 
                 //not correct way should be binding data to the element but its just for basic display for now
-				var email_address = $("#email_"+email_id, MailAccountsDiv).text();
+				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
 
 				console.log("email_address",email_address);
 				$("#email_address", this).text(email_address);
@@ -257,8 +256,8 @@
 
 					sendRequest($postVars,function(response){
 						console.log("delete email response",response)
-						$('#confirm-delete').modal('hide');
-                        $('#email_' + email_id).remove();
+						$('#confirm-delete',CurrentPage).modal('hide');
+                        $('#email_' + email_id,MailAccountsDiv).remove();
 
 					});
 
@@ -278,17 +277,16 @@
                 //get our filled out form data
                 var formData = $("#createEmailAccount",CurrentPage).serializeFormToObject();
 
-
+                
 				sendRequest(formData,function(response){
 
 					if (response && response.success == false){
 						processErrors(response)
 					}
 					else{
+                        addEmailToList(formData);
+                        attachSuccess(response.data);
 						toggleAddMail();
-                        attachSuccess(response.data);//$(".content_section").parent().prepend();
-                        //lets add the email account dynamicly
-
 					}
 
 
@@ -313,6 +311,14 @@
 
  });
 
+        /**
+         * Adds an email to our email list table
+         */
+        function addEmailToList(emailForm){
+            //@todo add full row options
+            $('tr:last',MailAccountsDiv).after('<tr><td>'  +   emailForm.add_mail_username +   '@' +   $Domain +   ' has been added the edit options have not loaded</td></tr>')
+
+        }
         /*
          * Toggles between adding a mail address form
          */
