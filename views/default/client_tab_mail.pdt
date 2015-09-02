@@ -1,5 +1,6 @@
 <!--
 @todo add html5 validation, currently testing validating fields via backend for safety.
+@todo move static text to language file
 !-->
 <h4><?php $this->_("virtualmin.client.tabs.mail.menu");?></h4>
 
@@ -277,7 +278,7 @@
                 //get our filled out form data
                 var formData = $("#createEmailAccount",CurrentPage).serializeFormToObject();
 
-                
+
 				sendRequest(formData,function(response){
 
 					if (response && response.success == false){
@@ -316,7 +317,7 @@
          */
         function addEmailToList(emailForm){
             //@todo add full row options
-            $('tr:last',MailAccountsDiv).after('<tr><td>'  +   emailForm.add_mail_username +   '@' +   $Domain +   ' has been added the edit options have not loaded</td></tr>')
+            $('tr:last',MailAccountsDiv).after('<tr><td>'  +   emailForm.add_mail_username +   '@' +   $Domain + '</td> edit options have not been loaded<td></td><td></td></tr>')
 
         }
         /*

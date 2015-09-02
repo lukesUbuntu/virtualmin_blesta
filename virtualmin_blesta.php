@@ -990,6 +990,7 @@ class VirtualminBlesta extends module
         return array(
             'clientTabStatus'   => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
             'clientTabMail'     => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
+            'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
         );
     }
     /**
@@ -1006,6 +1007,49 @@ class VirtualminBlesta extends module
         }
 
         return true;
+    }
+
+
+    /**
+     *  client Tab Database handles all the database listings and manages databases for client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabDatabase($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+       //get the databases for this account
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $databases = $this->api()->list_databases($account);
+
+
+        //lets build vars before render
+        $buildVars = array(
+            "databases" 		 	=>	$databases->data,
+            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/databaseAccounts/",
+            "service_fields" 		 =>	$service_fields,
+            "service_id"			 => $service->id,
+            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        //build page
+
+        return  $this->renderTemplate("client_tab_database",$buildVars);
     }
     /**
      * client Tab Mail handles all the mail from listing to adding and deleting mailboxs
