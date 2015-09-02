@@ -1062,7 +1062,7 @@ class VirtualminBlesta extends module
             //lets checks some posts out
             //virtualmin_confirm_password
             $data = array(
-                "virtualmin_edit_action" 		=> $postRequest["edit_action"] ,
+                "virtualmin_action" 		=> $postRequest["action"] ,
                 "virtualmin_add_mail_username" 	=> $postRequest["add_mail_username"],
                 "virtualmin_add_mail_password"	=> $postRequest["add_mail_password"],
                 "virtualmin_add_mail_quota"		=> $postRequest["add_mail_quota"]
@@ -1498,7 +1498,7 @@ class VirtualminBlesta extends module
 
         //set our data & required post
         $vars = array(
-            "virtualmin_edit_action" 			=> $postRequest["edit_action"] ,
+            "virtualmin_action"      			=> $postRequest["action"] ,
             "virtualmin_add_mail_username" 		=> $postRequest["add_mail_username"],
             "virtualmin_add_mail_password"		=> $postRequest["add_mail_password"],
             "virtualmin_add_mail_quota"			=> $postRequest["add_mail_quota"],
@@ -1565,9 +1565,10 @@ class VirtualminBlesta extends module
      */
     public function delete_user($postRequest,$dataRequest = array()){
 
-    //get the email user account for the id
+    //get the email user account from the id
     $email_id 		= $postRequest['email_id'];
     $email_address 	= $postRequest["email_address"];
+
     //parse service & package
     $service = $dataRequest['service'];
     $package = $dataRequest['package'];
@@ -1587,9 +1588,10 @@ class VirtualminBlesta extends module
             serialize(array($service_fields->virtualmin_username, $package->meta->package)
             ), "output", true
         );
-        //send error
+        //send error as email_id doesn't match account for that domain
         $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
     }
+
     //grab the user account
     $user_account = $mail_accounts->data[$email_id]->values;
 
@@ -1608,7 +1610,7 @@ class VirtualminBlesta extends module
     $account['user']	= 	$user_account->unix_username[0];
 
     //call api
-    $response = $this->checkResponse($this->api()->delete_user($account));
+    $response = $this->parseResponse($this->api()->delete_user($account));
     if ($errors = $this->Input->errors()){
         $this->getVirtualMinHelper()->sendAjax($errors,false);
     }
@@ -1617,7 +1619,7 @@ class VirtualminBlesta extends module
     $this->getVirtualMinHelper()->sendAjax($response->output);
 
 
-}
+    }
 
     /**
      * Builds and returns the rules for add_mail_account

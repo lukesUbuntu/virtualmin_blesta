@@ -1,3 +1,6 @@
+<!--
+@todo add html5 validation, currently testing validating fields via backend for safety.
+!-->
 <h4><?php $this->_("virtualmin.client.tabs.mail.menu");?></h4>
 
 	<div id="add_account_button" >
@@ -6,13 +9,13 @@
 		</button>
 	</div>
 
-	<div id="createEmailAccount" class="hide"  >
+	<form id="createEmailAccount" class="hide"  >
 		<h4>Create Email</h4>
 		<div class="row panel-fix">
 			<div class="col-md-12">
 				<?php
 				$this->Form->fieldHidden(
-					"edit_action",
+					"action",
 						array('id' => "add_mail_account")
 				);
 				?>
@@ -20,22 +23,22 @@
 					<?php
 					$this->Form->label("Account Username", "login_username");
 					?>
-					<div style="">
-					<?php
+                        <div style="">
+                        <?php
 
-					$this->Form->fieldText(
-						"add_mail_username",
-						$this->Html->ifSet($vars->username),
-						array(
-							'id' => "add_mail_username",
-							'style' => "display: inline;width:40%",
-							'class' => "form-control",
-							'placeholder' => "Email Username", true)
-					);
-					?>
-						<span class="at_domain">@<?php $this->Html->_($service_fields->virtualmin_domain);?></span>
+                        $this->Form->fieldText(
+                            "add_mail_username",
+                            $this->Html->ifSet($vars->username),
+                            array(
+                                'id' => "add_mail_username",
+                                'style' => "display: inline;width:40%",
+                                'class' => "form-control",
+                                'placeholder' => "Email Username", true)
+                        );
+                        ?>
+                            <span class="at_domain">@<?php $this->Html->_($service_fields->virtualmin_domain);?></span>
 
-						</div>
+                        </div>
 				</div>
 				<div class="form-group">
 					<?php
@@ -52,13 +55,13 @@
 				</div>
 				<div class="form-group">
 					<?php
-					$this->Form->label("Quota", "login_password");
+					$this->Form->label("Quota", "add_mail_quota");
 					$this->Form->fieldText(
 						"add_mail_quota",
 						$this->Html->ifSet($vars->username),
 						array('id' => "add_mail_quota",
 							'class' => "form-control",
-							'placeholder' => "Quota in MB eg : 10mb",
+							'placeholder' => "Quota in MB eg : 10 = 10 MB",
 							true)
 					);
 					?>
@@ -95,7 +98,7 @@
 				?>
 			</div>
 		</div>
-	</div>
+	</form>
 	<?php
 	//$this->Form->end();
 	if (($account_index = count($mail_accounts)) > 1) {
@@ -144,7 +147,7 @@
 						if ($this->Html->ifSet($email_data['forward_mail_to']) != "")
 							echo "<td>Mail Forwarding on</td>";
 						else
-							echo "<td></td>";; ?>
+							echo "<td></td>"; ?>
 
 
 						<!--actions !-->
@@ -178,8 +181,7 @@
 
 
 									<li role="presentation" class="divider"></li>
-									<!--<a data-href="delete.php?id=54" data-toggle="modal" data-target="#confirm-delete" href="#">Delete record #54</a> !-->
-									<li data-toggle="modal" data-target="#confirm-delete" role="presentation"><a
+									<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a
 											role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
 								</ul>
 							</div>
@@ -195,24 +197,24 @@
 		<?php
 	}
 	?>
-	<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+					<h4 class="modal-title" id="confirmation">Confirm Delete</h4>
 				</div>
 
 				<div class="modal-body">
-					<p>You are about to delete <strong><span id="confirm_email"></span></strong></p>
+					<p>You are about to delete <strong><span id="email_address"></span></strong></p>
 					<p>All mailbox data will be deleted, Do you want to proceed?</p>
 					<p class="debug-url"></p>
 				</div>
 
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<a href="#" class="btn btn-danger danger">Delete</a>
+					<a id="confirmed" href="#" class="btn btn-danger danger">Delete</a>
 				</div>
 			</div>
 		</div>
@@ -220,69 +222,84 @@
 
 <script type="text/javascript">
 		//rushed job the javascript code needs to be cleaned up
-	 $action_url = '<?php echo $action_url; ?>';
-	 $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+	    $action_url = '<?php echo $action_url; ?>';
+	    $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+
+        //reference the main elements
+        var MailAccountsDiv = $("#mail_accounts");
+        var CurrentPage     = $("#client_services_manage");
+        var ErrorHolder     = $(".container #client_services_manage").parent();
 
 		$(document).ready(function() {
 
-			$('#confirm-delete').on('show.bs.modal', function(e) {
+			$('#ConfirmEmailDelete',CurrentPage).on('show.bs.modal', function(e) {
+
 				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'));
 				console.log("e", $(e.relatedTarget).parent().data("email_id"));
 
 				var email_id = $(e.relatedTarget).parent().data("email_id");
-				var url = actionUrl("delete_user")
-				var email_address = $(".email_address","#email_"+email_id).text();
 
-				console.log("email_address",email_address)
-				$("#confirm_email", this).text(email_address);
+                //not correct way should be binding data to the element but its just for basic display for now
+				var email_address = $("#email_"+email_id, MailAccountsDiv).text();
+
+				console.log("email_address",email_address);
+				$("#email_address", this).text(email_address);
 
 				$(this).find('.danger').click(function(e){
 
 					var $postVars = {
-						'_csrf_token' 	: 	$CsrfToken,
 						'email_id'		: 	email_id,
 						'email_address'	:	email_address,
-						'url'			:	url,
-						'edit_action'   :	"delete_user"
-					}
-					console.log("$postVars",$postVars);
+						'action'   :	"delete_user"
+					};
 
-					sendRequest($postVars,function(){
-						//console.log("success")
-						$('#confirm-delete').modal('hide')
+					//console.log("$postVars",$postVars);
+
+					sendRequest($postVars,function(response){
+						console.log("delete email response",response)
+						$('#confirm-delete').modal('hide');
+                        $('#email_' + email_id).remove();
+
 					});
+
 					//$('#confirm-delete').hide.bs.modal
 
 					return e.preventDefault();
 				})
 			});
 
+
 			/*
 			 * Create Email Account
 			 */
-			$("#create_account").click(function(){
-				$postVars = returnInputs("#createEmailAccount");
-				$postVars['_csrf_token'] = $CsrfToken;
+			$("#create_account",CurrentPage).click(function(e){
 
-				sendRequest($postVars,function(response){
+                e.preventDefault();
+                //get our filled out form data
+                var formData = $("#createEmailAccount",CurrentPage).serializeFormToObject();
+
+
+				sendRequest(formData,function(response){
 
 					if (response && response.success == false){
 						processErrors(response)
 					}
 					else{
 						toggleAddMail();
-						$(".content_section").parent().prepend(attachSuccess(response.data));
+                        attachSuccess(response.data);//$(".content_section").parent().prepend();
+                        //lets add the email account dynamicly
+
 					}
 
 
 				});
-			})
+			});
 
-			//toggle add mail div
-			$(".add_mail").click(toggleAddMail);
+			//toggle add mail div to show form
+			$(".add_mail",CurrentPage).click(toggleAddMail);
 
 			//enable_mail_forward display textbox
-			$('#enable_mail_forward').change(function() {
+			$('#enable_mail_forward',CurrentPage).change(function() {
 				if($(this).is(":checked")){
 					$(this).val("enabled");
 					$("#email_forward_to").removeClass("hide")
@@ -291,101 +308,86 @@
 					$(this).val("");
 					$("#email_forward_to").addClass("hide");
 				}
-
-
 			});
 
-			function toggleAddMail(){
-				$("#createEmailAccount").toggleClass("hide");
-				$("#mail_accounts").toggleClass("hide");
 
-				//modify form
-				if ($(".add_mail").hasClass("btn-warning")){
-					$(".add_mail").toggleClass("btn-warning","btn-success")
-					$("span",".add_mail").text("Add Mail Account");
+ });
 
-				}
-				else{
-					$(".add_mail").toggleClass("btn-warning")
-					$("span",".add_mail").text("Cancel");
-				}
-			}
-			/*********************************************************************************************************/
+        /*
+         * Toggles between adding a mail address form
+         */
+        function toggleAddMail(){
+            $("#createEmailAccount",CurrentPage).toggleClass("hide");
+            $("#mail_accounts",CurrentPage).toggleClass("hide");
 
-			/**
-			 * Send ajax request
-			 */
-			function sendRequest($postVars,successCallback,errorCallback){
-				//remove any errors
-				$(".error_section").remove();
-				$.ajax({
-					method: 'POST',
-					url: $postVars.url,
-					data : $postVars,
-					success: successCallback,
-							//console.log(response);
-					error : function(httpObj, textStatus) {
-						//401 (Unauthorized) need to refresh page session died
-						if (httpObj.status == 401){
-							$(".content_section").parent().prepend(attachError("Session timed out refreshing..."));
-							setTimeout(function(){
-								location.reload();
-							},5000);
-							return;
-						}
-						//if not dump the works
-						console.log("ajaxError httpObj->",httpObj);
-						console.log("ajaxError textStatus->",textStatus);
-						console.log("ajaxError $postVars ->",$postVars);
+            //modify form
+            if ($(".add_mail",CurrentPage).hasClass("btn-warning")){
+                $(".add_mail",CurrentPage).toggleClass("btn-warning","btn-success");
+                $("span",".add_mail",CurrentPage).text("Add Mail Account");
 
-						if (typeof errorCallback == "function")
-							errorCallback(response);
-					},
-					beforeSend: function() {
-						$("#ajax_loader").append($(this).blestaLoadingDialog());
-					},
-					complete: function() {
-						$(".loading_container", $("#ajax_loader")).remove();
-					},
-					dataType: 'json'
-				})
-			}
+            }
+            else{
+                $(".add_mail",CurrentPage).toggleClass("btn-warning");
+                $("span",".add_mail",CurrentPage).text("Cancel");
+            }
+        }
 
-			/**
-			 * Returns inputs from form
-			 */
-			function returnInputs(element){
-				//@todo fix edit_action checking
-				var $inputs = $(":input",element);
+        /*********************************************************************************************************/
 
-				// get an associative array of just the values.
-				var values = {};
-				$inputs.each(function() {
-					if (this.name.length > 1)
-					values[this.name] = $(this).val();
-				});
+        /**
+         * Send ajax request
+         */
+        function sendRequest($postVars,successCallback,errorCallback){
+            //pass the token
+            $postVars['_csrf_token'] = $CsrfToken;  //add token
 
-				//set the url
-				values['url'] = actionUrl(values['edit_action']);
+            //remove any errors
+            $(".error_section").remove();
+            $.ajax({
+                method: 'POST',
+                url: actionUrl($postVars.action),   //render url
+                data : $postVars,
+                success: successCallback,
+                //console.log(response);
+                error : function(httpObj, textStatus) {
+                    //401 (Unauthorized) need to refresh page session died
+                    if (httpObj.status == 401){
+                        attachError("Session timed out refreshing possibley logged out reloading page...");
+                        setTimeout(function(){
+                            location.reload();
+                        },4000);
+                        return;
+                    }
+                    //if not dump the works
+                    console.log("ajaxError httpObj->",httpObj);
+                    console.log("ajaxError textStatus->",textStatus);
+                    console.log("ajaxError $postVars ->",$postVars);
 
-				return values;
-			}
-
-
-
-		});
-
+                    if (typeof errorCallback == "function")
+                        errorCallback(response);
+                },
+                beforeSend: function() {
+                    $("#ajax_loader",CurrentPage).append($(this).blestaLoadingDialog());
+                },
+                complete: function() {
+                    $(".loading_container",CurrentPage, $("#ajax_loader",CurrentPage)).remove();
+                },
+                dataType: 'json'
+            })
+        }
 
 	 /*
-	  * Create URL & Get Request
+	  * Create URL & Get Request based on action url
 	  */
 	 function actionUrl(action){
 		 var url = ($action_url.length < 1) ? "/" : $action_url;
 		 return ((url.substr(-1) != '/') ? url + "/" +  action : url + action);
 	 }
-	 //$message = attachError("shit")
+     /**
+      * Attaches error message to the
+      */
 	 function attachError($message){
-		 $(".content_section").parent().prepend(
+         ErrorHolder.prepend(
 			 '<section class=\"error_section\">'+
 			 '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
 			 '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
@@ -397,7 +399,7 @@
 	 }
 	 //attach success
 	 function attachSuccess($message){
-		 $(".content_section").parent().prepend(
+         ErrorHolder.prepend(
 			 '<section class=\"success_section\">'+
 			 '<article class=\"alert alert-success alert-dismissable\">'+
 			 '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
@@ -413,7 +415,7 @@
 	  * @param errors
 	  */
 	 function processErrors(response){
-
+         console.log("response.data ",response.data );
 		 //check what type of error
 		 if (typeof response.data == "undefined"){
 			 console.log("Error checking response",response);
@@ -423,13 +425,11 @@
 		 //3 types of errors that could be returned
 		 //****Single errors***/
 		 if (typeof response.data.errors == "string"){
-			 $(".content_section").parent().prepend(attachError(response.data.errors));
+             attachError(response.data.errors);
 			 return;
 		 }
 		 if (typeof response.data == "string"){
-			 console.log("typeof response.data ",typeof response.data )
-			 console.log("response.data ",response.data )
-			 $(".content_section").parent().prepend(attachError( response.data));
+             attachError( response.data);
 			 return;
 		 }
 		 //****Multiple errors***/
@@ -439,16 +439,34 @@
 			 $.each(our_errors,function(key,value){
 				 var error_message = false;
 				 if (typeof value.format == "string")
-					 error_message = value.format
+					 error_message = value.format;
 
 				 if (typeof value.empty == "string")
-					 error_message = value.empty
+					 error_message = value.empty;
 
-
-				 $(".content_section").parent().prepend(attachError(error_message));
+                attachError(error_message);
 
 			 })
 		 }
 
 	 }
+        /**
+         * Takes all inputs from element and renders to object
+         *
+         * @returns {{}} Object of form
+         */
+        $.fn.serializeFormToObject = function()
+        {
+            //get inputs from element
+            var $inputs = $(":input",this);
+
+            // get an associative array of just the values.
+            var values = {};
+            $inputs.each(function() {
+                if (this.name.length > 1)
+                    values[this.name] = $(this).val();
+            });
+
+            return values;
+        };
 	</script>
