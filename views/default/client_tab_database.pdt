@@ -6,7 +6,7 @@
 		<div class="btn-group pull-right">
 			<button class="sorry btn btn-info">Change Password</button>
 
-			<button id="add_database" class="btn btn-success sorry" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
+			<button id="add_database" class="btn btn-success" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
 		</div>
 			<div>Username : <span id="user_name"><?php echo $this->Html->ifSet($service_fields->virtualmin_username)?></span></div>
 			<?php
@@ -197,7 +197,7 @@
 			var createBox = this;
 		});*/
 		$('#createDatabaseBtn',DatabasePage).click(function(e){
-			return;
+
 			var databaseName = $('#createDatabaseForm #database_name',DatabasePage).val()
 
 			var $postVars = {

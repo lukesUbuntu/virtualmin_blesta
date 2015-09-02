@@ -1026,7 +1026,14 @@ class VirtualminBlesta extends module
         if (($service_active = $this->serviceCheck($service)) !== true)
             return $service_active;
 
-
+        //allowed request to clientTabMail
+        $allowedRequests = array("add_database","delete_database");
+        $dataRequest = array(
+            'package'	=> $package,
+            'service'	=> $service,
+        );
+        //process any ajax request first
+        $this->getVirtualMinHelper()->processAjax($this,$getRequest,$postRequest,$allowedRequests,$dataRequest);
 
         //get the service
         $service_fields = $this->serviceFieldsToObject($service->fields);
@@ -1069,7 +1076,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account","delete_user","confirm");
+        $allowedRequests = array("add_mail_account","delete_user");
         $dataRequest = array(
             'package'	=> $package,
             'service'	=> $service,
@@ -1105,6 +1112,7 @@ class VirtualminBlesta extends module
 
             //lets checks some posts out
             //virtualmin_confirm_password
+            /*
             $data = array(
                 "virtualmin_action" 		=> $postRequest["action"] ,
                 "virtualmin_add_mail_username" 	=> $postRequest["add_mail_username"],
@@ -1121,7 +1129,7 @@ class VirtualminBlesta extends module
 
             $vars = (object)$data;
             //update page $vars
-            $buildVars["vars"] = $vars;
+            $buildVars["vars"] = $vars;*/
         }
 
         return  $this->renderTemplate("client_tab_mail",$buildVars);
@@ -1663,6 +1671,76 @@ class VirtualminBlesta extends module
     $this->getVirtualMinHelper()->sendAjax($response->output);
 
 
+    }
+
+    /**
+     * Adds a database to virtualmin
+     *
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     * @throws Exception
+     */
+    public function add_database($postRequest,$dataRequest = array()){
+
+        //get the email user account from the id
+        $database_name 		= $postRequest['database_name'];
+        $database_type      = 'mysql';  //@todo possible support other
+
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //lets validate our rules
+        $this->Input->setRules($this->addDatabaseRules($postRequest));
+        $this->Input->validates($postRequest);
+
+
+        //validate rules before heading to editService
+        if ($errors = $this->Input->errors()){
+            $response["errors"] = $errors;
+            $response["message"] = "failed on validation";
+            $this->getVirtualMinHelper()->sendAjax($response,false);
+        }
+
+        //get the mail accounts for domain
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $mail_accounts = $this->api()->list_users($account);
+
+        //clear the list-users
+        //$api->clearSession("list-users");
+        $this->getVirtualMinHelper()->sendAjax($response->output);
+
+
+    }
+    /**
+     * Builds and returns the rules for add_mail_account
+     *
+     * @param array $vars An array of key/value data pairs
+     * @return array An array of Input rules suitable for Input::setRules()
+     */
+    public function addDatabaseRules(&$vars) {
+        return array(
+            'database_name' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_('virtualmin.!error.password.format', true)
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
+                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
+                ),
+                'action' => array(
+                    'empty' => array(
+                        'rule' => "isEmpty",
+                        'negate' => true,
+                        'message' => Language::_('virtualmin.!error.password.format', true)
+                    )
+                )
+            ));
     }
 
     /**
