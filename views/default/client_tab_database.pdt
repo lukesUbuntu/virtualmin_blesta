@@ -6,7 +6,7 @@
 		<div class="btn-group pull-right">
 			<button class="sorry btn btn-info">Change Password</button>
 
-			<button id="add_database" class="btn btn-success" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
+			<button id="add_database" class="btn btn-success sorry" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
 		</div>
 			<div>Username : <span id="user_name"><?php echo $this->Html->ifSet($service_fields->virtualmin_username)?></span></div>
 			<?php
@@ -169,12 +169,22 @@
 		</div>
 	</div>
 </div><!-- database create new form end !-->
-<script>
+
+
+
+<script type="text/javascript">
+	//rushed job the javascript code needs to be cleaned up
+	$action_url = '<?php echo $action_url; ?>';
+	$CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 	//globals
 	var DatabasePage = $("#DatabasePage");
 	var DatabaseList = $("#DatabasePage #databases");
 
+
 	$(document).ready(function(){
+
+		if (typeof sendRequest != "function") throw new Error("pagehelper.js has not loaded");
+
 		/**
 		 * Show the main database bassword
 		 */
@@ -187,7 +197,7 @@
 			var createBox = this;
 		});*/
 		$('#createDatabaseBtn',DatabasePage).click(function(e){
-
+			return;
 			var databaseName = $('#createDatabaseForm #database_name',DatabasePage).val()
 
 			var $postVars = {
@@ -195,14 +205,10 @@
 				'action'   		:	"add_database"
 			};
 
-			console.log("$postVars",$postVars)
-			return e.preventDefault();
 			//console.log("$postVars",$postVars);
-
 			sendRequest($postVars,function(response){
-				console.log("delete email response",response)
-				$('#confirm-delete',CurrentPage).modal('hide');
-				$('#email_' + email_id,MailAccountsDiv).remove();
+				console.log("database create response",response)
+
 
 			});
 
@@ -210,10 +216,16 @@
 
 
 		})
+
 		$(".sorry").click(function(){
 			alert("sorry have not finished this action yet.. :(")
 		})
 	})
 
+	//below will be referenced from a seperate script
+	/*********************************************************************************************************/
+
 
 	</script>
+<!--Include our javascript file !-->
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>
