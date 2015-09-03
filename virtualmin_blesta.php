@@ -1707,12 +1707,16 @@ class VirtualminBlesta extends module
         }
 
         //get the mail accounts for domain
-        $account = array('domain' => $service_fields->virtualmin_domain);
-        $mail_accounts = $this->api()->list_users($account);
+        $prams = array(
+            'domain' => $service_fields->virtualmin_domain,
+            'name'  =>  $database_name,
+            'type'  =>  $database_type
+        );
 
-        //clear the list-users
-        //$api->clearSession("list-users");
-        $this->getVirtualMinHelper()->sendAjax($response->output);
+        $database_response = $this->api()->create_database($prams);
+        $this->api()->clearSession();
+
+        $this->getVirtualMinHelper()->sendAjax($database_response->output);
 
 
     }
@@ -1728,17 +1732,13 @@ class VirtualminBlesta extends module
                 'empty' => array(
                     'rule' => "isEmpty",
                     'negate' => true,
-                    'message' => Language::_('virtualmin.!error.password.format', true)
-                ),
-                'valid' => array(
-                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
-                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
+                    'message' => Language::_('virtualmin.client.tabs.database.database_name.empty', true)
                 )),
                 'action' => array(
                     'empty' => array(
                         'rule' => "isEmpty",
                         'negate' => true,
-                        'message' => Language::_("virtualmin.!error.user_name.empty", true)
+                        'message' => Language::_("virtualmin.!error.action.empty", true)
                     )
                 )
             );

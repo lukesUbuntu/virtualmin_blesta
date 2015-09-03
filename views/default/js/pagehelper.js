@@ -67,8 +67,9 @@ function actionUrl(action){
 /**
  * Attaches error message to the
  */
-function attachError($message){
-    $ErrorHolder.prepend(
+function attachError($message,toElement){
+    error_holder =  (typeof toElement != "undefined") ? toElement : $ErrorHolder
+    error_holder.prepend(
         '<section class=\"error_section\">'+
         '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
         '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
@@ -79,8 +80,9 @@ function attachError($message){
     );
 }
 //attach success
-function attachSuccess($message){
-    $ErrorHolder.prepend(
+function attachSuccess($message,toElement){
+    error_holder =  (typeof toElement != "undefined") ? toElement : $ErrorHolder
+    error_holder.prepend(
         '<section class=\"success_section\">'+
         '<article class=\"alert alert-success alert-dismissable\">'+
         '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
@@ -93,9 +95,10 @@ function attachSuccess($message){
 
 /**
  * process errors received from ajax
+ * Will render to toElement if set otherwise $ErrorHolder will be used
  * @param errors
  */
-function processErrors(response){
+function processErrors(response,toElement){
     console.log("response.data ",response.data );
     //check what type of error
     if (typeof response.data == "undefined"){
@@ -106,11 +109,11 @@ function processErrors(response){
     //3 types of errors that could be returned
     //****Single errors***/
     if (typeof response.data.errors == "string"){
-        attachError(response.data.errors);
+        attachError(response.data.errors,toElement);
         return;
     }
     if (typeof response.data == "string"){
-        attachError( response.data);
+        attachError( response.data,toElement);
         return;
     }
     //****Multiple errors***/
@@ -125,7 +128,7 @@ function processErrors(response){
             if (typeof value.empty == "string")
                 error_message = value.empty;
 
-            attachError(error_message);
+            attachError(error_message,toElement);
 
         })
     }

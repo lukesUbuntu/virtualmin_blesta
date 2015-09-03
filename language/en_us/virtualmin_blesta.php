@@ -80,6 +80,7 @@ $lang['virtualmin.!error.virtualmin_password.length'] = "The password must be at
 $lang['virtualmin.!error.virtualmin_email.format'] = "Please enter a valid email address.";
 $lang['virtualmin.!error.virtualmin_password.matches'] = "Password and Confirm Password do not match.";
 $lang['virtualmin.!error.mail_account.quota'] = "Quota must be number values only";
+$lang['virtualmin.!error.action.empty'] = "Can not process this request, incorrect data sent";
 
 // Service fields
 $lang['virtualmin.service_field.domain'] = "Domain";
@@ -108,5 +109,7 @@ $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";
 
 //client tabs - Client Tab Database (client_tab_database.pdt)
 $lang['virtualmin.client.tabs.database.menu'] = "Databases";
+$lang['virtualmin.client.tabs.database.database_name.empty'] = "Database name can not be empty";
+
 
 ?>
