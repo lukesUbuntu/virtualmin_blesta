@@ -68,7 +68,7 @@ function actionUrl(action){
  * Attaches error message to the
  */
 function attachError($message,toElement){
-    error_holder =  (typeof toElement != "undefined") ? toElement : $ErrorHolder
+    error_holder =  (typeof toElement != "undefined") ? toElement :  $(".container #client_services_manage").parent();
     error_holder.prepend(
         '<section class=\"error_section\">'+
         '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
@@ -81,7 +81,7 @@ function attachError($message,toElement){
 }
 //attach success
 function attachSuccess($message,toElement){
-    error_holder =  (typeof toElement != "undefined") ? toElement : $ErrorHolder
+    error_holder =  (typeof toElement != "undefined") ? toElement :  $(".container #client_services_manage").parent();
     error_holder.prepend(
         '<section class=\"success_section\">'+
         '<article class=\"alert alert-success alert-dismissable\">'+
