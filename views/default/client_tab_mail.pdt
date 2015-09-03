@@ -226,7 +226,7 @@
 	var $action_url = '<?php echo $action_url; ?>';
 	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 	var $CurrentPage = $("#client_services_manage");
-	var $ErrorHolder     = $(".container #client_services_manage").parent();
+
 
 	//main elements on current page
 	var MailAccountsDiv = $("#mail_accounts");

@@ -1674,7 +1674,7 @@ class VirtualminBlesta extends module
     }
 
     /**
-     * Adds a database to virtualmin
+     * Adds a database from VirtualMin server
      *
      * @param $postRequest is the post passed by client
      * @param array $dataRequest is an array of the service & package
@@ -1706,7 +1706,7 @@ class VirtualminBlesta extends module
             $this->getVirtualMinHelper()->sendAjax($response,false);
         }
 
-        //get the mail accounts for domain
+        //lets create the database
         $prams = array(
             'domain' => $service_fields->virtualmin_domain,
             'name'  =>  $database_name,
@@ -1717,6 +1717,16 @@ class VirtualminBlesta extends module
         $this->api()->clearSession();
 
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
+
+    }
+    /**
+     * Deletes a database from VirtualMin server
+     *
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     * @throws Exception
+     */
+    public function delete_database($postRequest,$dataRequest = array()){
 
 
     }

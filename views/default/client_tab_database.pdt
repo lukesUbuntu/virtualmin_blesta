@@ -91,8 +91,7 @@
 						<!--actions start !-->
 						<td class="" >
 							<div class="dropdown pull-right">
-								<button class="btn btn-warning" type="button"  aria-expanded="true">Delete</button>
-
+								<button data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation" class="btn btn-warning" type="button" href="confirm-delete" aria-expanded="true">Delete</button>
 							</div>
 						</td>
 						<!--actions end !-->
@@ -107,7 +106,7 @@
 	<?php
 	}
 	?>
-	<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
+	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
@@ -177,7 +176,7 @@
 	var $action_url = '<?php echo $action_url; ?>';
 	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 	var $CurrentPage = $("#DatabasePage");
-	var $ErrorHolder     = $(".container #client_services_manage").parent();
+
 
 	//globals required
 	var DatabasePage = $("#DatabasePage");
@@ -200,8 +199,6 @@
 			var createBox = this;
 		});*/
 		$('#createDatabaseBtn',DatabasePage).click(function(e){
-
-
 
 			var databaseName = $('#createDatabaseForm #database_name',DatabasePage).val()
 
@@ -235,9 +232,7 @@
 
 		})
 
-		$(".sorry").click(function(){
-			alert("sorry have not finished this action yet.. :(")
-		})
+
 	})
 
 	//below will be referenced from a seperate script
