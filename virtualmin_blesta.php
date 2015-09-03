@@ -1046,7 +1046,7 @@ class VirtualminBlesta extends module
         //lets build vars before render
         $buildVars = array(
             "databases" 		 	=>	$databases->data,
-            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/databaseAccounts/",
+            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabDatabase/",
             "service_fields" 		 =>	$service_fields,
             "service_id"			 => $service->id,
             //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
@@ -1693,7 +1693,8 @@ class VirtualminBlesta extends module
         //grab service details
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
-        //lets validate our rules
+
+        //lets validate our rules against posts
         $this->Input->setRules($this->addDatabaseRules($postRequest));
         $this->Input->validates($postRequest);
 
@@ -1732,15 +1733,15 @@ class VirtualminBlesta extends module
                 'valid' => array(
                     'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
                     'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
-                ),
+                )),
                 'action' => array(
                     'empty' => array(
                         'rule' => "isEmpty",
                         'negate' => true,
-                        'message' => Language::_('virtualmin.!error.password.format', true)
+                        'message' => Language::_("virtualmin.!error.user_name.empty", true)
                     )
                 )
-            ));
+            );
     }
 
     /**

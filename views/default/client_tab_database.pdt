@@ -177,6 +177,7 @@
 	var $action_url = '<?php echo $action_url; ?>';
 	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 	var $CurrentPage = $("#DatabasePage");
+	var $ErrorHolder     = $(".container #client_services_manage").parent();
 
 	//globals required
 	var DatabasePage = $("#DatabasePage");
@@ -209,8 +210,17 @@
 
 			//console.log("$postVars",$postVars);
 			sendRequest($postVars,function(response){
-				console.log("database create response",response)
 
+
+				if (response.success == false)
+					$ErrorHolder     = $("#createDatabaseForm .modal-body");
+					processErrors(response);
+				else{
+					console.log("database create response",response)
+					$('#createDatabaseForm #database_name',DatabasePage).val('')
+				}
+
+				$ErrorHolder     =  $(".container #client_services_manage").parent();
 
 			});
 

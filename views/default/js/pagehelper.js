@@ -17,7 +17,6 @@ if (typeof $CsrfToken !== "string" || typeof $action_url !== "string")
 
 console.log("pagehelper.js loaded okay")
 
-var ErrorHolder     = $(".container #client_services_manage").parent();
 
 function sendRequest($postVars,successCallback,errorCallback){
     //pass the token
@@ -69,7 +68,7 @@ function actionUrl(action){
  * Attaches error message to the
  */
 function attachError($message){
-    ErrorHolder.prepend(
+    $ErrorHolder.prepend(
         '<section class=\"error_section\">'+
         '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
         '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
@@ -81,7 +80,7 @@ function attachError($message){
 }
 //attach success
 function attachSuccess($message){
-    ErrorHolder.prepend(
+    $ErrorHolder.prepend(
         '<section class=\"success_section\">'+
         '<article class=\"alert alert-success alert-dismissable\">'+
         '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
