@@ -221,21 +221,25 @@
 	</div>
 
 <script type="text/javascript">
-		//rushed job the javascript code needs to be cleaned up
-	    $action_url = '<?php echo $action_url; ?>';
-	    $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
-        $Domain     = '<?php echo $service_fields->virtualmin_domain;?>';
 
-        //reference the main elements
-        var MailAccountsDiv = $("#mail_accounts");
-        var CurrentPage     = $("#client_services_manage"); var ErrorHolder     = $(".container #client_services_manage").parent();
+	//declared for our external js pagehelper.js
+	var $action_url = '<?php echo $action_url; ?>';
+	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+	var $CurrentPage = $("#client_services_manage");
+
+
+	//main elements on current page
+	var MailAccountsDiv = $("#mail_accounts");
+
+
+
 
 
 		$(document).ready(function() {
 
             if (typeof sendRequest != "function") throw new Error("pagehelper.js has not loaded");
 
-			$('#ConfirmEmailDelete',CurrentPage).on('show.bs.modal', function(e) {
+			$('#ConfirmEmailDelete',$CurrentPage).on('show.bs.modal', function(e) {
 
 				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
 				var email_id = $(e.relatedTarget).parent().data("email_id");
@@ -258,7 +262,7 @@
 
 					sendRequest($postVars,function(response){
 						console.log("delete email response",response)
-						$('#confirm-delete',CurrentPage).modal('hide');
+						$('#confirm-delete',$CurrentPage).modal('hide');
                         $('#email_' + email_id,MailAccountsDiv).remove();
 
 					});
@@ -273,11 +277,11 @@
 			/*
 			 * Create Email Account
 			 */
-			$("#create_account",CurrentPage).click(function(e){
+			$("#create_account",$CurrentPage).click(function(e){
 
                 e.preventDefault();
                 //get our filled out form data
-                var formData = $("#createEmailAccount",CurrentPage).serializeFormToObject();
+                var formData = $("#createEmailAccount",$CurrentPage).serializeFormToObject();
 
 
 				sendRequest(formData,function(response){
@@ -296,10 +300,10 @@
 			});
 
 			//toggle add mail div to show form
-			$(".add_mail",CurrentPage).click(toggleAddMail);
+			$(".add_mail",$CurrentPage).click(toggleAddMail);
 
 			//enable_mail_forward display textbox
-			$('#enable_mail_forward',CurrentPage).change(function() {
+			$('#enable_mail_forward',$CurrentPage).change(function() {
 				if($(this).is(":checked")){
 					$(this).val("enabled");
 					$("#email_forward_to").removeClass("hide")
@@ -325,18 +329,18 @@
          * Toggles between adding a mail address form
          */
         function toggleAddMail(){
-            $("#createEmailAccount",CurrentPage).toggleClass("hide");
-            $("#mail_accounts",CurrentPage).toggleClass("hide");
+            $("#createEmailAccount",$CurrentPage).toggleClass("hide");
+            $("#mail_accounts",$CurrentPage).toggleClass("hide");
 
             //modify form
-            if ($(".add_mail",CurrentPage).hasClass("btn-warning")){
-                $(".add_mail",CurrentPage).toggleClass("btn-warning","btn-success");
-                $("span",".add_mail",CurrentPage).text("Add Mail Account");
+            if ($(".add_mail",$CurrentPage).hasClass("btn-warning")){
+                $(".add_mail",$CurrentPage).toggleClass("btn-warning","btn-success");
+                $("span",".add_mail",$CurrentPage).text("Add Mail Account");
 
             }
             else{
-                $(".add_mail",CurrentPage).toggleClass("btn-warning");
-                $("span",".add_mail",CurrentPage).text("Cancel");
+                $(".add_mail",$CurrentPage).toggleClass("btn-warning");
+                $("span",".add_mail",$CurrentPage).text("Cancel");
             }
         }
 

@@ -173,10 +173,12 @@
 
 
 <script type="text/javascript">
-	//rushed job the javascript code needs to be cleaned up
-	$action_url = '<?php echo $action_url; ?>';
-	$CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
-	//globals
+	//declared for our external js pagehelper.js
+	var $action_url = '<?php echo $action_url; ?>';
+	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+	var $CurrentPage = $("#DatabasePage");
+
+	//globals required
 	var DatabasePage = $("#DatabasePage");
 	var DatabaseList = $("#DatabasePage #databases");
 
