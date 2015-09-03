@@ -49,10 +49,10 @@ function sendRequest($postVars,successCallback,errorCallback){
                 errorCallback(response);
         },
         beforeSend: function() {
-            $("#ajax_loader",CurrentPage).append($(this).blestaLoadingDialog());
+            $("#ajax_loader",$CurrentPage).append($(this).blestaLoadingDialog());
         },
         complete: function() {
-            $(".loading_container",CurrentPage, $("#ajax_loader",CurrentPage)).remove();
+            $(".loading_container",$CurrentPage, $("#ajax_loader",$CurrentPage)).remove();
         },
         dataType: 'json'
     })
