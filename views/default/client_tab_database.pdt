@@ -201,6 +201,8 @@
 		});*/
 		$('#createDatabaseBtn',DatabasePage).click(function(e){
 
+
+
 			var databaseName = $('#createDatabaseForm #database_name',DatabasePage).val()
 
 			var $postVars = {
@@ -212,20 +214,24 @@
 			sendRequest($postVars,function(response){
 
 
-				if (response.success == false)
-					$ErrorHolder     = $("#createDatabaseForm .modal-body");
-					processErrors(response);
-				else{
-					console.log("database create response",response)
-					$('#createDatabaseForm #database_name',DatabasePage).val('')
+				if (response.success == false){
+					processErrors(response,$("#createDatabaseForm .modal-body"));
+					return false;
 				}
 
-				$ErrorHolder     =  $(".container #client_services_manage").parent();
+				else{
+					console.log("database create response",response)
+					$('#createDatabaseForm #database_name',DatabasePage).val('');
+					attachSuccess(response.data);
+					$('#createDatabaseForm').modal('toggle');
+				}
+
+
 
 			});
 
 			//$('#confirm-delete').hide.bs.modal
-
+			//return e.preventDefault();
 
 		})
 
