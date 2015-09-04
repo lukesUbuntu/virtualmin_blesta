@@ -14,7 +14,7 @@ class VirtualminBlesta extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.0";
+    private static $version = "0.1.1";
     /**
      * @var string The authors of this module
      */
@@ -988,9 +988,11 @@ class VirtualminBlesta extends module
     //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
     public function getClientTabs($package) {
         return array(
-            'clientTabStatus'   => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
-            'clientTabMail'     => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
-            'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
+            'clientTabStatus'          => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
+            'clientTabMail'            => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
+            'clientTabDatabase'        => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
+            'clientTabScripts'         => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
+            'clientTabBackups'         => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
         );
     }
     /**
@@ -1009,7 +1011,43 @@ class VirtualminBlesta extends module
         return true;
     }
 
+    /**
+     *  client Tab Scripts handles all available scripts that can be installed on client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabScripts($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
 
+        return "Not available in this release";
+    }
+
+    /**
+     *  client Tab Backups handles all available backups on virtual server for client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabBackups($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        return "Not available in this release";
+    }
     /**
      *  client Tab Database handles all the database listings and manages databases for client
      *

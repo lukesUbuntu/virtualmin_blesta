@@ -111,5 +111,10 @@ $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";
 $lang['virtualmin.client.tabs.database.menu'] = "Databases";
 $lang['virtualmin.client.tabs.database.database_name.empty'] = "Database name can not be empty";
 
+//client tabs - Client Tab Backup (client_tab_backup.pdt)
+$lang['virtualmin.client.tabs.backup.menu'] = "Backups";
+
+//client tabs - Client Tab Scripts (client_tab_scripts.pdt)
+$lang['virtualmin.client.tabs.scripts.menu'] = "Install Scripts";
 
 ?>

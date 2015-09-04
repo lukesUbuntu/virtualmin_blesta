@@ -232,7 +232,7 @@
 
 	//main elements on current page
 	var MailAccountsDiv = $("#mail_accounts");
-
+	var $Domain = '<?php $this->Html->_($service_fields->virtualmin_domain);?>';
 
 
 
@@ -260,17 +260,13 @@
 						'action'   :	"delete_user"
 					};
 
-					console.log("$postVars",$postVars);
-
-					sendRequest($postVars,function(response.data){
+					sendRequest($postVars,function(response){
 						console.log("delete email response",response)
 						$('#confirm-delete',$CurrentPage).modal('hide');
                         $('#email_' + email_id,MailAccountsDiv).remove();
 
 					});
-
 					//$('#confirm-delete').hide.bs.modal
-
 					return e.preventDefault();
 				})
 			});

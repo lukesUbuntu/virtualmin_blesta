@@ -24,16 +24,8 @@ function sendRequest($postVars,successCallback,loadingElement){
     //pass the token
     $postVars['_csrf_token'] = $CsrfToken;  //add token
 
-    //allow a loading div to place blesta ajaxwaiting.....
-    var loadingDiv = (loadingElement instanceof jQuery)?    loadingElement  : $CurrentPage;
-
-
-        //$("#createDatabaseForm .modal-content");
-
-        //(typeof loadingElement != "undefined" && $(loadingElement).length > 1)? $(loadingElement) : $CurrentPage;
-
-    console.log("loadingElement",loadingElement);
-    console.log("loadingDiv",loadingDiv);
+    //allow a loading div to be defined and append blesta ajax waiting.....
+    loadingDiv = (loadingElement instanceof jQuery)?    loadingElement  : $CurrentPage;
 
     //remove any errors
     $(".error_section").remove();
