@@ -1713,9 +1713,17 @@ class VirtualminBlesta extends module
             'type'  =>  $database_type
         );
 
+        //check for issues
         $database_response = $this->api()->create_database($prams);
-        $this->api()->clearSession();
+        $response = $this->parseResponse($database_response);
+        
+        //pass issues back to client
+        if ($errors = $this->Input->errors()){
+            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        }
 
+        //database added send back
+        $this->api()->clearSession();
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
 
     }
