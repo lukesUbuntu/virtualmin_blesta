@@ -241,7 +241,12 @@
 				console.log("$postVars",$postVars);
 
 				sendRequest($postVars,function(response){
-					console.log("delete email response",response)
+
+					if (response.success = false)
+						return processErrors(response);
+
+					attachSuccess(response);
+					$('#createDatabaseForm').modal('hide');
 					//$('#confirm-delete',$CurrentPage).modal('hide');
 					//$('#email_' + email_id,MailAccountsDiv).remove();
 

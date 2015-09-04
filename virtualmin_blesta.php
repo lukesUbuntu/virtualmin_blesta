@@ -1706,6 +1706,9 @@ class VirtualminBlesta extends module
             $this->getVirtualMinHelper()->sendAjax($response,false);
         }
 
+        //clear database session
+        $this->api()->clearSession();
+
         //lets create the database
         $prams = array(
             'domain' => $service_fields->virtualmin_domain,
@@ -1714,16 +1717,15 @@ class VirtualminBlesta extends module
         );
 
         //check for issues
-        $database_response = $this->api()->create_database($prams);
-        $response = $this->parseResponse($database_response);
-        
+        $database_response = $this->parseResponse($this->api()->create_database($prams));
+
         //pass issues back to client
         if ($errors = $this->Input->errors()){
             $this->getVirtualMinHelper()->sendAjax($errors,false);
         }
 
         //database added send back
-        $this->api()->clearSession();
+
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
 
     }
