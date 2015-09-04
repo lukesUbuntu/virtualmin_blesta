@@ -30,34 +30,6 @@
 
 	</div>
 
-	<form id="createDatabase" class="hide"  >
-		<h4>Create Database</h4>
-		<div class="row panel-fix">
-			<div class="col-md-12">
-				<?php
-				//$this->Form->create($action_url);
-				//$this->Form->fieldHidden("_csrf_token", $this->Form->getCsrfToken());
-				$this->Form->fieldHidden(
-					"action",
-						array('id' => "add_database")
-				);
-				?>
-
-				<div id="ajax_loader" class="form-group"></div>
-
-				<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
-
-
-				<button role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation" id="create_account" type="submit" class="btn btn-success pull-right sorry">
-					<i class="fa fa-sign-in"></i> Create Database
-				</button>
-				<?php
-				//$this->Form->end();
-				?>
-			</div>
-		</div>
-	</form>
-
 	<!--Display Database !-->
 	<?php if (count($databases) > 0) {
 	?>
@@ -74,7 +46,7 @@
 				{
 
 					?>
-					<tr id="database_<?php echo $database_id;?>" >
+					<tr id="database_<?php $this->Html->_($database->name);?>" >
 
 
 						<td ><?php $this->Html->_($database->name);?></td>
@@ -91,7 +63,7 @@
 						<!--actions start !-->
 						<td class="" >
 							<div class="dropdown pull-right">
-								<button data-databasename="<?php $this->Html->_($database->name);?>" class="btn btn-warning" data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation">Delete Account</button>
+								<button data-databasename="<?php $this->Html->_($database->name);?>" class="btn btn-warning" data-toggle="modal" data-target="#ConfirmDatabaseDelete" role="presentation">Delete</button>
 							</div>
 						</td>
 						<!--actions end !-->
@@ -106,7 +78,7 @@
 	<?php
 	}
 	?>
-	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="delete_confirm" aria-hidden="true">
+	<div class="modal fade" id="ConfirmDatabaseDelete" tabindex="-1" role="dialog" aria-labelledby="delete_confirm" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
@@ -218,12 +190,13 @@
 					attachSuccess(response.data);
 					return $('#createDatabaseForm').modal('toggle');
 
-			});
+				//place ajaxloading holder
+			},$("#createDatabaseForm .modal-content"));
 
 		});
 
 
-		$('#ConfirmEmailDelete',$CurrentPage).on('show.bs.modal', function(e) {
+		$('#ConfirmDatabaseDelete',$CurrentPage).on('show.bs.modal', function(e) {
 
 			//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
 			var databaseName = $(e.relatedTarget).data('databasename');
@@ -235,19 +208,18 @@
 					'database_name'		: 	databaseName,
 					'action'	:	'delete_database'
 				};
-
-
-				console.log("$postVars",$postVars);
-
+				//send request to server
 				sendRequest($postVars,function(response){
-
 					if (response.success = false)
-						return processErrors(response,$("#ConfirmEmailDelete .modal-body"));
+						return processErrors(response,$("#ConfirmDatabaseDelete .modal-body"));
+
+					//success remove from table
+					$("#database_"+databaseName,DatabaseList).remove();
 
 					attachSuccess(response.data);
-					return $('#ConfirmEmailDelete').modal('hide');
+					return $('#ConfirmDatabaseDelete').modal('hide');
 
-				});
+				},$('#ConfirmDatabaseDelete .modal-content'));
 
 				//$('#confirm-delete').hide.bs.modal
 
