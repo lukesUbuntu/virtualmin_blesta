@@ -4,8 +4,9 @@
 <h3>Account Details</h3>
 	<div>
 		<div class="btn-group pull-right">
+			<!-- @todo add change password
 			<button class="sorry btn btn-info">Change Password</button>
-
+			!-->
 			<button id="add_database" class="btn btn-success" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">Add Database</button>
 		</div>
 			<div>Username : <span id="user_name"><?php echo $this->Html->ifSet($service_fields->virtualmin_username)?></span></div>
@@ -41,7 +42,6 @@
 						array('id' => "add_database")
 				);
 				?>
-
 
 				<div id="ajax_loader" class="form-group"></div>
 
@@ -255,10 +255,7 @@
 
 	});
 
-	//below will be referenced from a seperate script
-	/*********************************************************************************************************/
 
-
-	</script>
+</script>
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>
