@@ -260,7 +260,7 @@
 
 					console.log("$postVars",$postVars);
 
-					sendRequest($postVars,function(response){
+					sendRequest($postVars,function(response.data){
 						console.log("delete email response",response)
 						$('#confirm-delete',$CurrentPage).modal('hide');
                         $('#email_' + email_id,MailAccountsDiv).remove();

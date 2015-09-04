@@ -1706,7 +1706,7 @@ class VirtualminBlesta extends module
             $this->getVirtualMinHelper()->sendAjax($response,false);
         }
 
-        //clear database session
+        //clear database session as we are now processing a request
         $this->api()->clearSession();
 
         //lets create the database
@@ -1725,7 +1725,6 @@ class VirtualminBlesta extends module
         }
 
         //database added send back
-
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
 
     }
@@ -1769,9 +1768,17 @@ class VirtualminBlesta extends module
             'type'  =>  $database_type
         );
 
-        $database_response = $this->api()->delete_database($prams);
+        //clear database session as we have modified session data
         $this->api()->clearSession();
 
+        $database_response = $this->parseResponse($this->api()->delete_database($prams));
+
+        //pass issues back to client
+        if ($errors = $this->Input->errors()){
+            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        }
+
+        //database added send back
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
     }
 
