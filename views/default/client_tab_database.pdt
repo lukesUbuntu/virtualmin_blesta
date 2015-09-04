@@ -209,16 +209,15 @@
 			//console.log("$postVars",$postVars);
 			sendRequest($postVars,function(response){
 
-				if (response.success == false){
-					processErrors(response,$("#createDatabaseForm .modal-body"));
-					return false;
-				}
-				else{
+				if (response.success == false)
+					return processErrors(response,$("#createDatabaseForm .modal-body"));
+
 					console.log("database create response",response)
 					$('#createDatabaseForm #database_name',DatabasePage).val('');
+
 					attachSuccess(response.data);
-					$('#createDatabaseForm').modal('toggle');
-				}
+					return $('#createDatabaseForm').modal('toggle');
+
 			});
 
 		});
@@ -243,12 +242,10 @@
 				sendRequest($postVars,function(response){
 
 					if (response.success = false)
-						return processErrors(response);
+						return processErrors(response,$("#ConfirmEmailDelete .modal-body"));
 
-					attachSuccess(response);
-					$('#createDatabaseForm').modal('hide');
-					//$('#confirm-delete',$CurrentPage).modal('hide');
-					//$('#email_' + email_id,MailAccountsDiv).remove();
+					attachSuccess(response.data);
+					return $('#ConfirmEmailDelete').modal('hide');
 
 				});
 
