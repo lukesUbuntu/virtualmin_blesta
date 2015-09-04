@@ -74,7 +74,7 @@
 				{
 
 					?>
-					<tr id="database_<?php echo $database_id;?>">
+					<tr id="database_<?php echo $database_id;?>" >
 
 
 						<td ><?php $this->Html->_($database->name);?></td>
@@ -91,7 +91,7 @@
 						<!--actions start !-->
 						<td class="" >
 							<div class="dropdown pull-right">
-								<button data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation" class="btn btn-warning" type="button" href="confirm-delete" aria-expanded="true">Delete</button>
+								<button data-databasename="<?php $this->Html->_($database->name);?>" class="btn btn-warning" data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation">Delete Account</button>
 							</div>
 						</td>
 						<!--actions end !-->
@@ -106,13 +106,13 @@
 	<?php
 	}
 	?>
-	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
+	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="delete_confirm" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="database_confirm">Confirm Delete</h4>
+					<h4 class="modal-title" id="delete_confirm">Confirm Delete</h4>
 				</div>
 
 				<div class="modal-body">
@@ -129,7 +129,7 @@
 		</div>
 	</div>
 	<!-- database create new form !-->
-	<div class="modal fade" id="createDatabaseForm" tabindex="-1" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
+	<div class="modal fade" id="createDatabaseForm" tabindex="2" role="dialog" aria-labelledby="database_confirm" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
@@ -143,7 +143,6 @@
 						<?php
 						$this->Form->label("Database Name", "add_database_name");
 						?>
-
 							<?php
 
 							$this->Form->fieldText(
@@ -156,7 +155,6 @@
 									'placeholder' => "Database Name", true)
 							);
 							?>
-
 					</div>
 				</div>
 
@@ -207,33 +205,55 @@
 				'action'   		:	"add_database"
 			};
 
+
 			//console.log("$postVars",$postVars);
 			sendRequest($postVars,function(response){
-
 
 				if (response.success == false){
 					processErrors(response,$("#createDatabaseForm .modal-body"));
 					return false;
 				}
-
 				else{
 					console.log("database create response",response)
 					$('#createDatabaseForm #database_name',DatabasePage).val('');
 					attachSuccess(response.data);
 					$('#createDatabaseForm').modal('toggle');
 				}
-
-
-
 			});
 
-			//$('#confirm-delete').hide.bs.modal
-			//return e.preventDefault();
-
-		})
+		});
 
 
-	})
+		$('#ConfirmEmailDelete',$CurrentPage).on('show.bs.modal', function(e) {
+
+			//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
+			var databaseName = $(e.relatedTarget).data('databasename');
+
+			$("#confirm_database",DatabasePage).text(databaseName);
+			$(this).find('.danger').click(function(e){
+
+				var $postVars = {
+					'database_name'		: 	databaseName,
+					'action'	:	'delete_database'
+				};
+
+
+				console.log("$postVars",$postVars);
+
+				sendRequest($postVars,function(response){
+					console.log("delete email response",response)
+					//$('#confirm-delete',$CurrentPage).modal('hide');
+					//$('#email_' + email_id,MailAccountsDiv).remove();
+
+				});
+
+				//$('#confirm-delete').hide.bs.modal
+
+				return e.preventDefault();
+			})
+		});
+
+	});
 
 	//below will be referenced from a seperate script
 	/*********************************************************************************************************/
