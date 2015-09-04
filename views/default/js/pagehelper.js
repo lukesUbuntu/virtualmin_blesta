@@ -3,6 +3,8 @@
  *
  * Moved general functions that are been used by most views to this file will tidy up and create proper helper js file
  *
+ * this javascript file has been thrown together as im concentrating on smashing out the php code then will define javascript structure better
+ *
  */
 
 /**
@@ -18,9 +20,20 @@ if (typeof $CsrfToken !== "string" || typeof $action_url !== "string")
 console.log("pagehelper.js loaded okay")
 
 
-function sendRequest($postVars,successCallback,errorCallback){
+function sendRequest($postVars,successCallback,loadingElement){
     //pass the token
     $postVars['_csrf_token'] = $CsrfToken;  //add token
+
+    //allow a loading div to place blesta ajaxwaiting.....
+    var loadingDiv = (loadingElement instanceof jQuery)?    loadingElement  : $CurrentPage;
+
+
+        //$("#createDatabaseForm .modal-content");
+
+        //(typeof loadingElement != "undefined" && $(loadingElement).length > 1)? $(loadingElement) : $CurrentPage;
+
+    console.log("loadingElement",loadingElement);
+    console.log("loadingDiv",loadingDiv);
 
     //remove any errors
     $(".error_section").remove();
@@ -44,14 +57,12 @@ function sendRequest($postVars,successCallback,errorCallback){
             console.log("ajaxError textStatus->",textStatus);
             console.log("ajaxError $postVars ->",$postVars);
 
-            if (typeof errorCallback == "function")
-                errorCallback(response);
         },
         beforeSend: function() {
-            $("#ajax_loader",$CurrentPage).append($(this).blestaLoadingDialog());
+            loadingDiv.append($(this).blestaLoadingDialog());
         },
         complete: function() {
-            $(".loading_container",$CurrentPage, $("#ajax_loader",$CurrentPage)).remove();
+            $(".loading_container",loadingDiv).remove();
         },
         dataType: 'json'
     })

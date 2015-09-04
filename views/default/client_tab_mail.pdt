@@ -90,7 +90,9 @@
 					);
 					?>
 				</div>
+				<!-- removing
 				<div id="ajax_loader" class="form-group"></div>
+				!-->
 				<button id="create_account" type="submit" class="btn btn-success pull-right">
 					<i class="fa fa-sign-in"></i> Create Account
 				</button>
