@@ -1695,11 +1695,11 @@ class VirtualminBlesta extends module
 
 
         //lets validate our rules against posts
-        $this->Input->setRules($this->addDatabaseRules($postRequest));
+        $this->Input->setRules($this->databaseParseRules($postRequest));
         $this->Input->validates($postRequest);
 
 
-        //validate rules before heading to editService
+        //validate rules before processing the request
         if ($errors = $this->Input->errors()){
             $response["errors"] = $errors;
             $response["message"] = "failed on validation";
@@ -1728,15 +1728,50 @@ class VirtualminBlesta extends module
      */
     public function delete_database($postRequest,$dataRequest = array()){
 
+        //get the email user account from the id
+        $database_name 		= $postRequest['database_name'];
+        $database_type      = 'mysql';  //@todo possible support other
 
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        //lets validate our rules against posts
+        $this->Input->setRules($this->databaseParseRules($postRequest));
+        $this->Input->validates($postRequest);
+
+        //validate rules before processing the request
+        if ($errors = $this->Input->errors()){
+            $response["errors"] = $errors;
+            $response["message"] = "failed on validation";
+            $this->getVirtualMinHelper()->sendAjax($response,false);
+        }
+
+        //delete_database
+        //lets create the database
+        $prams = array(
+            'domain' => $service_fields->virtualmin_domain,
+            'name'  =>  $database_name,
+            'type'  =>  $database_type
+        );
+
+        $database_response = $this->api()->delete_database($prams);
+        $this->api()->clearSession();
+
+        $this->getVirtualMinHelper()->sendAjax($database_response->output);
     }
+
     /**
      * Builds and returns the rules for add_mail_account
      *
      * @param array $vars An array of key/value data pairs
      * @return array An array of Input rules suitable for Input::setRules()
      */
-    public function addDatabaseRules(&$vars) {
+    public function databaseParseRules(&$vars) {
         return array(
             'database_name' => array(
                 'empty' => array(
