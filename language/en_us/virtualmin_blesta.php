@@ -90,6 +90,12 @@ $lang['virtualmin.service_field.password'] = "Password";
 $lang['virtualmin.service_field.not_active'] = "Sorry your service is either not provisioned yet or is disabled";
 
 //client tabs general
+$lang['virtualmin.client.tabs.generic.confirm'] = "Confirm Delete";
+$lang['virtualmin.client.tabs.generic.about_to'] = "You are about to delete";
+$lang['virtualmin.client.tabs.generic.delete_warning'] = "You can not revert this are you sure you want to delete?";
+$lang['virtualmin.client.tabs.generic.delete_button'] = "Delete";
+$lang['virtualmin.client.tabs.generic.cancel_button'] = "Cancel";
+
 
 //client tabs - Client Tab Status (client_tab_status.pdt)
 $lang['virtualmin.client.tabs.status.menu'] = "Server Status";
@@ -110,6 +116,12 @@ $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";
 //client tabs - Client Tab Database (client_tab_database.pdt)
 $lang['virtualmin.client.tabs.database.menu'] = "Databases";
 $lang['virtualmin.client.tabs.database.database_name.empty'] = "Database name can not be empty";
+$lang['virtualmin.client.tabs.database.table_db_name'] = "Database Name";
+$lang['virtualmin.client.tabs.database.table_db_table'] = "Tables";
+$lang['virtualmin.client.tabs.database.table_db_size'] = "Size";
+
+
+
 
 //client tabs - Client Tab Backup (client_tab_backup.pdt)
 $lang['virtualmin.client.tabs.backup.menu'] = "Backups";
