@@ -91,11 +91,11 @@ $lang['virtualmin.service_field.not_active'] = "Sorry your service is either not
 
 //client tabs general
 $lang['virtualmin.client.tabs.generic.confirm'] = "Confirm Delete";
-$lang['virtualmin.client.tabs.generic.about_to'] = "You are about to delete";
+$lang['virtualmin.client.tabs.generic.about_to'] = "You are about to delete ";
 $lang['virtualmin.client.tabs.generic.delete_warning'] = "You can not revert this are you sure you want to delete?";
 $lang['virtualmin.client.tabs.generic.delete_button'] = "Delete";
 $lang['virtualmin.client.tabs.generic.cancel_button'] = "Cancel";
-$lang['virtualmin.client.tabs.generic.cancel_button'] = "Create";
+$lang['virtualmin.client.tabs.generic.create_button'] = "Create";
 
 
 //client tabs - Client Tab Status (client_tab_status.pdt)

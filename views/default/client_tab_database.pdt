@@ -91,7 +91,7 @@
 				</div>
 
 				<div class="modal-body">
-					<p><?php $this->_("virtualmin.client.tabs.generic.about_to");?><strong><span id="confirm_database"></span></strong></p>
+					<p><?php $this->_("virtualmin.client.tabs.generic.about_to");?> <strong><span id="confirm_database"></span></strong></p>
 					<p><?php $this->_("virtualmin.client.tabs.generic.delete_warning");?></p>
 					<p class="debug-url"></p>
 				</div>
