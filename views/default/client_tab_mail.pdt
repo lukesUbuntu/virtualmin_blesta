@@ -148,7 +148,7 @@
 
 						<?php
 						if ($this->Html->ifSet($email_data['forward_mail_to']) != "")
-							echo "<td>Mail Forwarding on</td>";
+							echo "<td>Mail Forwarding to <small>".$email_data['forward_mail_to'][0]."</small></td>";
 						else
 							echo "<td></td>"; ?>
 
