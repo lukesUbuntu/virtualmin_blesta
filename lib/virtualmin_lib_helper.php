@@ -100,8 +100,16 @@ class virtualmin_lib_helper {
                     foreach($results->values as $result => $values )
 
                     if (count($values) > 1)      //if there is possible multiple values we will then store them as
-                        foreach($values as $value)
+                        $cleanArray[$index][$result] = $values;
+
+                        /*
+                        foreach($values as $value){
+                            print_r($value);
+                            print_r($values);
                             $cleanArray[$index][$values][] = $value;
+
+                        }*/
+
                     else
                         $cleanArray[$index][$result] = $values[0];
 
