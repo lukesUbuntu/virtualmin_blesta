@@ -414,7 +414,7 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
-
+    //https://www.virtualmin.com/documentation/developer/cli/list_scheduled_backups
     public function list_scheduled_backups(array $params = array()) {
         $required = array(
             'domain|user|reseller',
@@ -427,7 +427,7 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
-
+    //https://www.virtualmin.com/documentation/developer/cli/backup_domain
     public function backup_domain(array $params = array()) {
         $required = array(
             'dest',
@@ -496,7 +496,7 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
-
+    //https://www.virtualmin.com/documentation/developer/cli/list_scripts
     public function list_scripts(array $params = array()) {
         $required = array(
             'all-domains|domain|user',
@@ -509,7 +509,7 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
-
+    //https://www.virtualmin.com/documentation/developer/cli/list_available_scripts
     public function list_available_scripts(array $params = array()) {
         $params['program'] = 'list-available-scripts';
         $params['json'] = 1;
