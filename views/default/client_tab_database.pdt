@@ -1,7 +1,6 @@
 <div id="DatabasePage" class="inner">
+	<h4><?php $this->_("virtualmin.client.tabs.database.menu");?></h4>
 
-
-<h3>Account Details</h3>
 	<div>
 		<div class="btn-group pull-right">
 			<!-- @todo add change password
@@ -34,12 +33,12 @@
 	<?php if (count($databases) > 0) {
 	?>
 		<div  class="table-responsive" style="margin-top: 30px;">
-			<h3>Database's</h3>
+			<h3><?php $this->_("virtualmin.client.tabs.database.menu");?></h3>
 			<table id= "databases" class="table table-curved table-striped">
 				<tr>
-					<td>Database Name</td>
-					<td>Tables</td>
-					<td>Size</td>
+					<td><?php $this->_("virtualmin.client.tabs.database.table_db_name");?></td>
+					<td><?php $this->_("virtualmin.client.tabs.database.table_db_table");?></td>
+					<td><?php $this->_("virtualmin.client.tabs.database.table_db_size");?></td>
 				</tr>
 				<?php
 					foreach($databases as $database_id => $database )
@@ -84,18 +83,18 @@
 
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="delete_confirm">Confirm Delete</h4>
+					<h4 class="modal-title" id="delete_confirm"><?php $this->_("virtualmin.client.tabs.generic.confirm");?></h4>
 				</div>
 
 				<div class="modal-body">
-					<p>You are about to delete <strong><span id="confirm_database"></span></strong> Database..</p>
-					<p>You can not revert this are you sure you want to delete?</p>
+					<p><?php $this->_("virtualmin.client.tabs.generic.about_to");?><strong><span id="confirm_database"></span></strong></p>
+					<p><?php $this->_("virtualmin.client.tabs.generic.delete_warning");?></p>
 					<p class="debug-url"></p>
 				</div>
 
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<a href="#" class="btn btn-danger danger">Delete</a>
+					<button type="button" class="btn btn-default" data-dismiss="modal"><?php $this->_("virtualmin.client.tabs.generic.cancel_button");?></button>
+					<a href="#" class="btn btn-danger danger"><?php $this->_("virtualmin.client.tabs.generic.delete_button");?></a>
 				</div>
 			</div>
 		</div>
