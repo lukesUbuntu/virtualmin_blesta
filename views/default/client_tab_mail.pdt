@@ -292,21 +292,22 @@
 				$("#email_address", this).text(email_address);
 
 				$(this).find('.change_password').click(function(e){
-					change_password = $('#changePassword #change_password',$CurrentPage).val()
-					var $postVars = {
-						'email_id'		: 	email_id,
-						'email_address'	:	email_address,
-						'action'   :	"delete_user"
-					};
-					console.log("$postVars",$postVars);
-					console.log("change_password",change_password)
-					return;
-					sendRequest($postVars,function(response){
-						console.log("delete email response",response)
-						$('#confirm-delete',$CurrentPage).modal('hide');
-						$('#email_' + email_id,MailAccountsDiv).remove();
+					//doesn't matter if code gets injected as all code gets passed via blesta users domain
+					new_password = $('#changePassword #change_password',$CurrentPage).val();
 
-					});
+					var $postVars = {
+						'email_address'	:	email_address,
+						'new_password'	:	new_password,
+						'action'   		:	"change_password"
+					};
+
+					sendRequest($postVars,function(response){
+						console.log("change_password",response)
+						/*
+						$('#confirm-delete',$CurrentPage).modal('hide');
+						$('#email_' + email_id,MailAccountsDiv).remove();*/
+
+					},$("#changePassword .modal-content"));
 					//$('#confirm-delete').hide.bs.modal
 					return e.preventDefault();
 				})
