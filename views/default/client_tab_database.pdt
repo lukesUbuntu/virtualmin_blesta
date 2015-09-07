@@ -119,7 +119,6 @@
 						$this->Form->label("Database Name", "add_database_name");
 						?>
 							<?php
-
 							$this->Form->fieldText(
 								"add_database_name",
 								$this->Html->ifSet($vars->database_name),
