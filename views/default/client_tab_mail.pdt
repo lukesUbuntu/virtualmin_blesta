@@ -199,6 +199,42 @@
 		<?php
 	}
 	?>
+<!-- modals !-->
+<div class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title" id="confirmation">Change Password</h4>
+			</div>
+
+			<div class="modal-body">
+				<div class="form-group">
+					<?php
+					$this->Form->label("Database Name", "add_database_name");
+					?>
+					<?php
+					$this->Form->fieldText(
+						"update_password",
+						$this->Html->ifSet($vars->database_name),
+						array(
+							'id' => "update_password",
+							'style' => "display: inline;width:40%",
+							'class' => "form-control",
+							'placeholder' => "New Password", true)
+					);
+					?>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<a id="updatePassword" href="#" class="btn btn-danger danger">Update</a>
+			</div>
+		</div>
+	</div>
+</div>
 	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
