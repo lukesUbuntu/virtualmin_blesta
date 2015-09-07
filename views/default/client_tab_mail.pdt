@@ -300,14 +300,18 @@
 						'new_password'	:	new_password,
 						'action'   		:	"mail_change_password"
 					};
-
+					errorLocation = $("#changePassword .modal-body");
 					sendRequest($postVars,function(response){
-						console.log("change_password",response)
-						/*
-						$('#confirm-delete',$CurrentPage).modal('hide');
-						$('#email_' + email_id,MailAccountsDiv).remove();*/
+						if (response.success == false)
+							return processErrors(response,errorLocation);
 
-					},$("#changePassword .modal-content"));
+						console.log("database changepassword response",response)
+						$('#changePassword #change_password',$CurrentPage).val('')
+
+						attachSuccess(response.data);
+						return $('#changePassword').modal('toggle');
+
+					},errorLocation);
 					//$('#confirm-delete').hide.bs.modal
 					return e.preventDefault();
 				})

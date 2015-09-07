@@ -1589,46 +1589,43 @@ class VirtualminBlesta extends module
 
         $email_address 	= $postRequest["email_address"];
         $new_password 	= $postRequest["new_password"];
+
+        //lets validate our rules against posts before anything else gets done
+        $this->Input->setRules($this->changeMailAccountRules($postRequest));
+        $this->Input->validates($postRequest);
+
+
+
+        //pass issues back to client
+        if ($errors = $this->Input->errors()){
+            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        }
         //parse service & package
         $service = $dataRequest['service'];
         $package = $dataRequest['package'];
+
+
+
+
 
         //grab service details
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
         //pass account and user we want to change
-        $account = array(
+        $change_password = array(
             'domain'    => $service_fields->virtualmin_domain,
             'user'      =>  str_replace('@'.$service_fields->virtualmin_domain, "", $email_address),
             'pass'      =>  $new_password
         );
 
-        print_r($account);exit;
+        //send changepassword request.
+        $response = $this->parseResponse($this->api()->modify_user($change_password));
 
-        exit;
-        //grab the user account
-        $user_account = $mail_accounts->data[$email_id]->values;
-
-        //make sure that the email matches the users_accounts email that we are wanting to delete
-        if ($user_account->email_address[0] != $email_address){
-            $this->log(
-                $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
-                serialize(array($service_fields->virtualmin_username, $package->meta->package)
-                ), "output", true
-            );
-            $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
-        }
-
-        //	->unix_username[0];
-        //prepare to delete the user from account
-        $account['user']	= 	$user_account->unix_username[0];
-
-        //call api
-        $response = $this->parseResponse($this->api()->delete_user($account));
+        //check for errors.
         if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($errors,false);
+            $this->getVirtualMinHelper()->sendAjax($response,false);
         }
-        //clear the list-users
+
         //$api->clearSession("list-users");
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
