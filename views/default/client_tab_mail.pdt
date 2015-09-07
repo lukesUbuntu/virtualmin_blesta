@@ -165,8 +165,8 @@
 									aria-labelledby="dropdownMenu1">
 									<li class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
 											Account</a></li>
-									<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Change
-											Password</a></li>
+									<li data-toggle="modal" data-target="#changePassword" role="presentation"><a role="menuitem" tabindex="-1" href="#">Change Password</a></li>
+
 									<?php
 									if ($this->Html->ifSet($email_data['forward_mail_to']) != "") {
 										?>
@@ -181,8 +181,6 @@
 										</li<?php
 									}
 									?>
-
-
 									<li role="presentation" class="divider"></li>
 									<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
 								</ul>
@@ -206,31 +204,33 @@
 
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="confirmation">Change Password</h4>
+				<h4 class="modal-title" id="confirmation">New Password</h4>
 			</div>
 
 			<div class="modal-body">
 				<div class="form-group">
+					<p>User : <strong><span id="email_address"></span></strong></p>
 					<?php
-					$this->Form->label("Database Name", "add_database_name");
+					$this->Form->label("Change Password", "change_password");
 					?>
 					<?php
 					$this->Form->fieldText(
-						"update_password",
-						$this->Html->ifSet($vars->database_name),
+						"change_password",
+						null,
 						array(
-							'id' => "update_password",
+							'id' => "change_password",
 							'style' => "display: inline;width:40%",
 							'class' => "form-control",
 							'placeholder' => "New Password", true)
 					);
 					?>
 				</div>
+
 			</div>
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-				<a id="updatePassword" href="#" class="btn btn-danger danger">Update</a>
+				<a id="updatePassword" href="#" class="change_password btn btn-warning warning">Update</a>
 			</div>
 		</div>
 	</div>
@@ -277,6 +277,44 @@
 
             if (typeof sendRequest != "function") throw new Error("pagehelper.js has not loaded");
 
+			/**
+			 * Change password
+			 */
+			$('#changePassword',$CurrentPage).on('show.bs.modal', function(e) {
+
+				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
+				var email_id = $(e.relatedTarget).parent().data("email_id");
+
+				//not correct way should be binding data to the element but its just for basic display for now
+				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
+
+				console.log("email_address",email_address);
+				$("#email_address", this).text(email_address);
+
+				$(this).find('.change_password').click(function(e){
+					change_password = $('#changePassword #change_password',$CurrentPage).val()
+					var $postVars = {
+						'email_id'		: 	email_id,
+						'email_address'	:	email_address,
+						'action'   :	"delete_user"
+					};
+					console.log("$postVars",$postVars);
+					console.log("change_password",change_password)
+					return;
+					sendRequest($postVars,function(response){
+						console.log("delete email response",response)
+						$('#confirm-delete',$CurrentPage).modal('hide');
+						$('#email_' + email_id,MailAccountsDiv).remove();
+
+					});
+					//$('#confirm-delete').hide.bs.modal
+					return e.preventDefault();
+				})
+			});
+
+			/**
+			 * Confirm Deletion
+			 */
 			$('#ConfirmEmailDelete',$CurrentPage).on('show.bs.modal', function(e) {
 
 				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
