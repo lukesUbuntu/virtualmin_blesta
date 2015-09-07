@@ -113,7 +113,7 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
-
+    //https://www.virtualmin.com/documentation/developer/cli/modify_domain
     public function modify_domain(array $params = array()) {
         $required = array(
             'domain',
