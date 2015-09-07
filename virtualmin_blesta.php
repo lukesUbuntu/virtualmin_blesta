@@ -1064,7 +1064,7 @@ class VirtualminBlesta extends module
         if (($service_active = $this->serviceCheck($service)) !== true)
             return $service_active;
 
-        //allowed request to clientTabMail
+        //allowed request to clientTabDatabase
         $allowedRequests = array("add_database","delete_database");
         $dataRequest = array(
             'package'	=> $package,
@@ -1114,7 +1114,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account","delete_user");
+        $allowedRequests = array("add_mail_account","mail_delete_user","mail_change_password");
         $dataRequest = array(
             'package'	=> $package,
             'service'	=> $service,
@@ -1578,6 +1578,62 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Changes a password for mail account via Ajax for our Client Mail Tab
+     *
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     *
+     */
+    public function mail_change_password($postRequest, $dataRequest = array()){
+        //get the email user account from the id
+
+        $email_address 	= $postRequest["email_address"];
+        $new_password 	= $postRequest["new_password"];
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //pass account and user we want to change
+        $account = array(
+            'domain'    => $service_fields->virtualmin_domain,
+            'user'      =>  str_replace('@'.$service_fields->virtualmin_domain, "", $email_address),
+            'pass'      =>  $new_password
+        );
+
+        print_r($account);exit;
+
+        exit;
+        //grab the user account
+        $user_account = $mail_accounts->data[$email_id]->values;
+
+        //make sure that the email matches the users_accounts email that we are wanting to delete
+        if ($user_account->email_address[0] != $email_address){
+            $this->log(
+                $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
+                serialize(array($service_fields->virtualmin_username, $package->meta->package)
+                ), "output", true
+            );
+            $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
+        }
+
+        //	->unix_username[0];
+        //prepare to delete the user from account
+        $account['user']	= 	$user_account->unix_username[0];
+
+        //call api
+        $response = $this->parseResponse($this->api()->delete_user($account));
+        if ($errors = $this->Input->errors()){
+            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        }
+        //clear the list-users
+        //$api->clearSession("list-users");
+        $this->getVirtualMinHelper()->sendAjax($response->output);
+
+    }
+    /**
      * Manages adding a new mail account via Ajax for our Client Mail Tab
      *
      * @param $postRequest is the post passed by client
@@ -1616,9 +1672,10 @@ class VirtualminBlesta extends module
         //lets make sure there is no issues between query and service
         if ($errors = $this->Services->errors()){
             //$this->Input->setErrors($this->Services->errors());
-            echo "errors ->";
-            print_r($errors);
-            exit;
+            $this->getVirtualMinHelper()->sendAjax($errors);
+            //echo "errors ->";
+            //print_r($errors);
+            //exit;
         }
 
         //lets create the mail account on server
@@ -1653,7 +1710,7 @@ class VirtualminBlesta extends module
      * @param array $dataRequest is an array of the service & package
      * @throws Exception
      */
-    public function delete_user($postRequest,$dataRequest = array()){
+    public function mail_delete_user($postRequest,$dataRequest = array()){
 
     //get the email user account from the id
     $email_id 		= $postRequest['email_id'];
@@ -1834,14 +1891,35 @@ class VirtualminBlesta extends module
                     'negate' => true,
                     'message' => Language::_('virtualmin.client.tabs.database.database_name.empty', true)
                 )),
-                'action' => array(
-                    'empty' => array(
-                        'rule' => "isEmpty",
-                        'negate' => true,
-                        'message' => Language::_("virtualmin.!error.action.empty", true)
-                    )
+            'action' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("virtualmin.!error.action.empty", true)
                 )
-            );
+            )
+        );
+    }
+    /**
+     * Builds and returns the rules for changing password
+     *
+     * @param array $vars An array of key/value data pairs
+     * @return array An array of Input rules suitable for Input::setRules()
+     */
+    public function changeMailAccountRules(&$vars) {
+        return array(
+            'new_password' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_('virtualmin.!error.password.format', true)
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
+                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
+                )
+            )
+        );
     }
 
     /**

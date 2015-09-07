@@ -298,7 +298,7 @@
 					var $postVars = {
 						'email_address'	:	email_address,
 						'new_password'	:	new_password,
-						'action'   		:	"change_password"
+						'action'   		:	"mail_change_password"
 					};
 
 					sendRequest($postVars,function(response){
@@ -332,7 +332,7 @@
 					var $postVars = {
 						'email_id'		: 	email_id,
 						'email_address'	:	email_address,
-						'action'   :	"delete_user"
+						'action'   :	"mail_delete_user"
 					};
 
 					sendRequest($postVars,function(response){
