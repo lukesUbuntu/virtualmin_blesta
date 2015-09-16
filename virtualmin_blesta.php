@@ -21,12 +21,6 @@ class VirtualminBlesta extends module
     private static $authors = array(
         array('name' => "Luke Hardiman", 'url' => "https://github.com/lukesUbuntu")
     );
-    /**
-     * Initializes my little library helper that ive been using with blesta modules
-     *
-     * @return my_module_lib instance
-     */
-    private $my_module_lib = false;
 
     /**
      * Initializes the API and returns a Singleton instance of that object for api calls
@@ -1243,6 +1237,7 @@ class VirtualminBlesta extends module
             'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
             'clientTabMail' => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
             'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
+            //'clientTabFileMin' => array('name' => Language::_("virtualmin.client.tabs.filemin.menu", true), 'icon' => "fa  fa-file"),
             'clientTabScripts' => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
             'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
         );
@@ -1272,7 +1267,19 @@ class VirtualminBlesta extends module
 
         //get the list of current installed scripts
         $account = array('domain' => $service_fields->virtualmin_domain);
-        $current_scripts = $this->api()->list_scripts($account);
+        $response = $this->parseResponse($this->api()->list_scripts($account));
+
+        //check errors
+        if ($this->Input->errors())
+            return;
+
+
+        $current_scripts = $this->getVirtualMinHelper()->cleanArray($response);
+
+
+        print_r($current_scripts);
+        exit;
+
 
 
     }
@@ -1722,9 +1729,6 @@ class VirtualminBlesta extends module
         if ($errors = $this->Services->errors()){
             //$this->Input->setErrors($this->Services->errors());
             $this->getVirtualMinHelper()->sendAjax($errors);
-            //echo "errors ->";
-            //print_r($errors);
-            //exit;
         }
 
         //lets create the mail account on server
