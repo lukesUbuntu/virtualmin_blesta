@@ -1,0 +1,69 @@
+<!--
+@todo finish install options
+@todo missing scripts already installed options
+!-->
+<h4>Available Script Installation</h4>
+
+<?php
+if ((count($script_list)) > 1) {
+    ?>
+
+    <div class="table-responsive" style="margin-top: 60px;">
+        <table id="scripts" class="table table-curved table-striped">
+
+            <tr>
+                <td>Script Name</td>
+                <td>Description</td>
+                <td></td>
+            </tr>
+
+            <?php
+            foreach ($script_list as $script) {
+                ?>
+                <tr>
+
+
+                    <td class="script_name">
+                        <?php $this->Html->_($script['name']); ?>
+                    </td>
+                    <td>
+                        <?php $this->Html->_($script['description']); ?>
+                    </td>
+
+                    <!--actions !-->
+                    <td class="">
+                        <div class="pull-right">
+                            <button class="btn btn-success dropdown-toggle install disabled" type="button"
+                                    aria-expanded="true">
+                                Install
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+
+            </tbody>
+        </table>
+    </div>
+    <?php
+}
+?>
+
+<script type="text/javascript">
+
+    //declared for our external js pagehelper.js
+    var $action_url = '<?php echo $action_url; ?>';
+    var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
+    //var $CurrentPage = $("#");
+
+    $(document).ready(function () {
+        $(".install").click(function () {
+            alert("sorry not availble yet ")
+        })
+
+    })
+</script>
+<!--Include our javascript file !-->
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js'); ?>'></script>
