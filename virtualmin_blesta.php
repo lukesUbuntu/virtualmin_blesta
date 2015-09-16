@@ -1260,7 +1260,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //return as not available in this release
-        return "Not available in this release";
+        //return "Not available in this release";
 
         //get the service
         $service_fields = $this->serviceFieldsToObject($service->fields);
@@ -1269,16 +1269,39 @@ class VirtualminBlesta extends module
         $account = array('domain' => $service_fields->virtualmin_domain);
         $response = $this->parseResponse($this->api()->list_scripts($account));
 
-        //check errors
+
+        //check errors before any other server requests
         if ($this->Input->errors())
             return;
 
+        //current scripts
+        $installed_scripts = $this->getVirtualMinHelper()->cleanArray($response);
 
-        $current_scripts = $this->getVirtualMinHelper()->cleanArray($response);
+        //lets get list_available_scripts
+        $response = $this->parseResponse($this->api()->list_available_scripts());
 
+        //check errors before any other server requests
+        if ($this->Input->errors())
+            return;
 
-        print_r($current_scripts);
-        exit;
+        //list of scripts available to install
+        $script_list = $this->getVirtualMinHelper()->cleanArray($response);
+
+        //print_r($installed_scripts);
+        //print_r($script_list);
+
+        //lets build vars before render
+        $buildVars = array(
+            "script_list" => $script_list,
+            "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabScripts/",
+            "service_fields" => $service_fields,
+            "service_id" => $service->id,
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        //build page
+
+        return $this->renderTemplate("client_tab_scripts", $buildVars);
 
 
 
@@ -1299,6 +1322,50 @@ class VirtualminBlesta extends module
         }
 
         return true;
+    }
+
+    /**
+     * Initializes the virtualMinLib and returns an instance of that object
+     * see lib/virtualmin_lib_helper.php
+     * @return The virtualMinLib instance
+     */
+    private function getVirtualMinHelper()
+    {
+        if (!$this->_virtualmin_lib_helper) {
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_lib_helper.php");
+            $this->_virtualmin_lib_helper = new virtualmin_lib_helper();
+        }
+
+        return new $this->_virtualmin_lib_helper;
+    }
+
+    /**
+     *
+     * Helps renders a template view from an action in our controller
+     *
+     * @param $templateName     template we want to render to view
+     * @param $vars $vars we want to pass to view
+     * @param array $helpers optional array of helpers , form & html are default
+     * @return string           returns template view
+     */
+    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html"))
+    {
+        //create view
+        $this->view = new View($templateName, "default");
+        //load helpers
+        Loader::loadHelpers($this, $helpers);
+        //set base
+        $this->view->base_uri = $this->base_uri;
+        //set location
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+
+        //pass on our vars to template
+        foreach ($vars as $key => $value) {
+            $this->view->set($key, $value);
+        }
+
+        //return rendered template
+        return $this->view->fetch();
     }
 
     /**
@@ -1323,6 +1390,16 @@ class VirtualminBlesta extends module
 
         return "Not available in this release";
     }
+
+    /**
+     * Fetches a listing of all packages configured in VirtualMin for the given server
+     *
+     * @param stdClass $module_row A stdClass object representing a single server
+     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
+     * @return array An array of packages in key/value pairs
+     */
+    //@todo cleanup packahge plans
+    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
 
     /**
      *  client Tab Database handles all the database listings and manages databases for client
@@ -1371,59 +1448,6 @@ class VirtualminBlesta extends module
         //build page
 
         return $this->renderTemplate("client_tab_database", $buildVars);
-    }
-
-    /**
-     * Initializes the virtualMinLib and returns an instance of that object
-     * see lib/virtualmin_lib_helper.php
-     * @return The virtualMinLib instance
-     */
-    private function getVirtualMinHelper()
-    {
-        if (!$this->_virtualmin_lib_helper) {
-            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_lib_helper.php");
-            $this->_virtualmin_lib_helper = new virtualmin_lib_helper();
-        }
-
-        return new $this->_virtualmin_lib_helper;
-    }
-
-    /**
-     * Fetches a listing of all packages configured in VirtualMin for the given server
-     *
-     * @param stdClass $module_row A stdClass object representing a single server
-     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
-     * @return array An array of packages in key/value pairs
-     */
-    //@todo cleanup packahge plans
-    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
-    /**
-     *
-     * Helps renders a template view from an action in our controller
-     *
-     * @param $templateName     template we want to render to view
-     * @param $vars $vars we want to pass to view
-     * @param array $helpers optional array of helpers , form & html are default
-     * @return string           returns template view
-     */
-    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html"))
-    {
-        //create view
-        $this->view = new View($templateName, "default");
-        //load helpers
-        Loader::loadHelpers($this, $helpers);
-        //set base
-        $this->view->base_uri = $this->base_uri;
-        //set location
-        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
-
-        //pass on our vars to template
-        foreach ($vars as $key => $value) {
-            $this->view->set($key, $value);
-        }
-
-        //return rendered template
-        return $this->view->fetch();
     }
 
     /**
