@@ -190,13 +190,128 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Adds the service to the remote server. Sets Input errors on failure,
+     * preventing the service from being added.
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @param array $vars An array of user supplied info to satisfy the request
+     * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
+     * @param stdClass $parent_service A stdClass object representing the parent service of the service being added (if the current service is an addon service and parent service has already been provisioned)
+     * @param string $status The status of the service being added. These include:
+     *    - active
+     *    - canceled
+     *    - pending
+     *    - suspended
+     * @return array A numerically indexed array of meta fields to be stored for this service containing:
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     * @see Module::getModule()
+     * @see Module::getModuleRow()
+     */
+    public function addService($package, array $vars = null, $parent_package = null, $parent_service = null, $status = "pending")
+    {
+
+
+        //going to get the fields we need but passing some pacakage fields
+        $params = $this->getFieldsFromInput((array)$vars, $package);
+
+        //validate
+        $this->validateService($package, $vars);
+
+        if ($this->Input->errors())
+            return;
+
+        // Only provision the service if module is enabled
+        //if $vars['virtualmin_domain_already']
+        if (isset($vars['use_module']) && $vars['use_module'] == "true" && !isset($vars['virtualmin_domain_already'])) {
+            //get row
+            $row = $this->getModuleRow();
+
+            //hide passwords from log
+            $masked_params = $params;
+            $masked_params['password'] = "****";
+            $this->log($row->meta->host_name . "|" . 'addService', serialize($masked_params), "input", true);
+            unset($masked_params);
+
+            //get current clients details we want username
+            Loader::loadModels($this, array("Clients"));
+            $client = $this->Clients->get($vars['client_id'], false);
+
+
+            //we are going to process the account under the blesta email as username
+            $api = $this->api($row);
+
+            //$result = $api->create($params['domain'],$params['passwd']);
+            $account = array(
+                'domain' => $params['domain'],
+                'email' => $client->email,
+                'user' => $params['domain'],
+                'pass' => $params['passwd'],
+                'plan' => $params['package'],
+                'features-from-plan' => ''
+            );
+
+            //lets add the domain
+            $result = $api->add_domain($account);
+            $this->parseResponse($result);
+
+            $this->log(
+                $row->meta->host_name . "|" . 'addService', serialize($result), "output", true
+            );
+
+
+        }
+
+        // Return service fields
+        return array(
+            array(
+                'key' => "virtualmin_domain",
+                'value' => $params['domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "virtualmin_username",
+                'value' => $params['domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "virtualmin_password",
+                'value' => $params['passwd'],
+                'encrypted' => 1
+            )
+        );
+
+    }
+
+    /**
+     * Returns an array of service field to set for the service using the given input
+     *
+     * @param array $vars An array of key/value input pairs
+     * @param stdClass $package A stdClass object representing the package for the service
+     * @return array An array of key/value pairs representing service fields
+     */
+    private function getFieldsFromInput(array $vars, $package)
+    {
+        $fields = array(
+            'domain' => isset($vars['virtualmin_domain']) ? $vars['virtualmin_domain'] : null,
+            //'username' => isset($vars['virtualmin_domain']) ? $this->usernameFromDomain($vars['virtualmin_domain']): null,
+            'passwd' => isset($vars['virtualmin_password']) ? $vars['virtualmin_password'] : null,
+            'package' => isset($package->meta->package) ? $package->meta->package : null
+        );
+
+        return $fields;
+    }
+
+    /**
      * Attempts to validate service info. This is the top-level error checking method. Sets Input errors on failure.
      *
      * @param stdClass $package A stdClass object representing the selected package
      * @param array $vars An array of user supplied info to satisfy the request
      * @return boolean True if the service validates, false otherwise. Sets Input errors when false.
      */
-    public function validateService($package, array $vars=null, $editService = false) {
+    public function validateService($package, array $vars = null, $editService = false)
+    {
         // Validate the service fields
         $rules = array(
 
@@ -247,98 +362,87 @@ class VirtualminBlesta extends module
     }
 
     /**
-     * Adds the service to the remote server. Sets Input errors on failure,
-     * preventing the service from being added.
      *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @param array $vars An array of user supplied info to satisfy the request
-     * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
-     * @param stdClass $parent_service A stdClass object representing the parent service of the service being added (if the current service is an addon service and parent service has already been provisioned)
-     * @param string $status The status of the service being added. These include:
-     * 	- active
-     * 	- canceled
-     * 	- pending
-     * 	- suspended
-     * @return array A numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
-     * @see Module::getModule()
-     * @see Module::getModuleRow()
+     * Returns a singleton of Virtualmin API
+     *
+     * see lib/virtualmin_api.php
+     *
+     * @param bool|false $module_row
+     * @return bool|VirtualMinApi
      */
-    public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
+    private function api($module_row = false)
+    {
+        //load our api
+        if ($this->_api == false) {
 
+            if ($module_row == false)
+                $module_row = $this->getModuleRow();
 
+            if (!isset($module_row)) {
+                die("failed to get module row");
+            }
 
-        //going to get the fields we need but passing some pacakage fields
-        $params = $this->getFieldsFromInput((array)$vars, $package);
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
 
-        //validate
-        $this->validateService($package, $vars);
-
-        if ($this->Input->errors())
-            return;
-
-        // Only provision the service if module is enabled
-        //if $vars['virtualmin_domain_already']
-        if (isset($vars['use_module']) && $vars['use_module'] == "true" && !isset($vars['virtualmin_domain_already'])) {
-                //get row
-                $row = $this->getModuleRow();
-
-                //hide passwords from log
-                $masked_params = $params;
-                $masked_params['password'] = "****";
-                $this->log($row->meta->host_name . "|" . 'addService', serialize($masked_params), "input", true);
-                unset($masked_params);
-
-                //get current clients details we want username
-                Loader::loadModels($this,array("Clients"));
-                $client = $this->Clients->get($vars['client_id'],false);
-
-
-                //we are going to process the account under the blesta email as username
-                $api = $this->api($row);
-
-                //$result = $api->create($params['domain'],$params['passwd']);
-                $account = array(
-                    'domain'				=> $params['domain'],
-                    'email'					=> $client->email,
-                    'user'					=> $params['domain'],
-                    'pass'					=> $params['passwd'],
-                    'plan'					=> $params['package'],
-                    'features-from-plan' 	=> ''
-                );
-
-                //lets add the domain
-                $result = $api->add_domain($account);
-                $this->parseResponse($result);
-
-                $this->log(
-                    $row->meta->host_name . "|" . 'addService', serialize($result), "output", true
-                );
-
-
+            //$host, $username, $password, $port = "10000", $use_ssl = true
+            $this->_api = new VirtualMinApi(
+                $module_row->meta->host_name,            //hostname
+                $module_row->meta->user_name,            //username
+                $module_row->meta->password,            //password
+                $module_row->meta->port_number,            //port number
+                ($module_row->meta->use_ssl == "true")    //use secure
+            );
         }
 
-        // Return service fields
-        return array(
-            array(
-                'key' => "virtualmin_domain",
-                'value' => $params['domain'],
-                'encrypted' => 0
-            ),
-            array(
-                'key' => "virtualmin_username",
-                'value' => $params['domain'],
-                'encrypted' => 0
-            ),
-            array(
-                'key' => "virtualmin_password",
-                'value' => $params['passwd'],
-                'encrypted' => 1
-            )
-        );
+        return $this->_api;
+    }
 
+    /**
+     * Parses the response from the API into a stdClass object
+     *
+     * @param array $response The response from the API
+     * @param boolean $return_response Whether to return the response, regardless of error
+     * @return stdClass A stdClass object representing the response, void if the response was an error
+     */
+    private function parseResponse($response, $module_row = null, $ignore_error = false)
+    {
+
+        if (!$module_row)
+            $module_row = $this->getModuleRow();
+
+        $success = true;
+
+
+        // Set an internal error on no response or invalid response
+        if (empty($response)) {
+            $this->Input->setErrors(
+                array('errors' => Language::_("virtualmin.!error.api.internal", true))
+            );
+            $success = false;
+        }
+
+        // Set an error if given
+        if (isset($response->error) || $response->status != "success") {
+
+            $error = (isset($response->error) ? $response->error : Language::_("virtualmin.!error.api.internal", true));
+            $this->Input->setErrors(
+                array('errors' => $error)
+            );
+            $success = false;
+        }
+
+        //remove the full long error before logging
+        if (isset($response->full_error))
+            unset($response->full_error);
+
+        // Log the response
+        $this->log($module_row->meta->host_name, serialize($response), "output", $success);
+
+        // Return if any errors encountered
+        if (!$success && !$ignore_error)
+            return;
+
+        return $response;
     }
 
     /**
@@ -616,7 +720,8 @@ class VirtualminBlesta extends module
      * 	- value The value for this key
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
-    public function addModuleRow(array &$vars) {
+    public function addModuleRow(array &$vars)
+    {
         //our meta fields
         $meta_fields = array(
             "server_name",
@@ -659,578 +764,6 @@ class VirtualminBlesta extends module
     }
 
     /**
-     * Edits the module row on the remote server. Sets Input errors on failure,
-     * preventing the row from being updated.
-     *
-     * @param stdClass $module_row The stdClass representation of the existing module row
-     * @param array $vars An array of module info to update
-     * @return array A numerically indexed array of meta fields for the module row containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
-     */
-    public function editModuleRow($module_row, array &$vars) {
-        //define our meta fields
-        $meta_fields = array(
-            "server_name",
-            "host_name",
-            "port_number",
-            "user_name",
-            "password",
-            "use_ssl",
-            "account_limit",
-            "account_count",
-            "name_servers"
-        );
-        //set encrypted fields
-        $encrypted_fields = array("user_name", "password");
-
-        // Set unspecified checkboxes
-        if (empty($vars['use_ssl']))
-            $vars['use_ssl'] = "false";
-
-        $this->Input->setRules($this->getRowRules($vars));
-
-        // Validate module row
-        if ($this->Input->validates($vars)) {
-
-            // Build the meta data for this row
-            $meta = array();
-            foreach ($vars as $key => $value) {
-
-                if (in_array($key, $meta_fields)) {
-                    $meta[] = array(
-                        'key'=>$key,
-                        'value'=>$value,
-                        'encrypted'=>in_array($key, $encrypted_fields) ? 1 : 0
-                    );
-                }
-            }
-
-            return $meta;
-        }
-    }
-
-    /**
-     * Deletes the module row on the remote server. Sets Input errors on failure,
-     * preventing the row from being deleted.
-     *
-     * @param stdClass $module_row The stdClass representation of the existing module row
-     */
-    public function deleteModuleRow($module_row) {
-
-    }
-
-    /**
-     * Returns an array of available service delegation order methods. The module
-     * will determine how each method is defined. For example, the method "first"
-     * may be implemented such that it returns the module row with the least number
-     * of services assigned to it.
-     *
-     * @return array An array of order methods in key/value pairs where the key is the type to be stored for the group and value is the name for that option
-     * @see Module::selectModuleRow()
-     */
-    public function getGroupOrderOptions() {
-
-    }
-
-    /**
-     * Determines which module row should be attempted when a service is provisioned
-     * for the given group based upon the order method set for that group.
-     *
-     * @return int The module row ID to attempt to add the service with
-     * @see Module::getGroupOrderOptions()
-     */
-    public function selectModuleRow($module_group_id) {
-        if (!isset($this->ModuleManager))
-            Loader::loadModels($this, array("ModuleManager"));
-
-        $group = $this->ModuleManager->getGroup($module_group_id);
-
-        if ($group) {
-            switch ($group->add_order) {
-                default:
-                case "first":
-
-                    foreach ($group->rows as $row) {
-                        if ($row->meta->account_limit > (isset($row->meta->account_count) ? $row->meta->account_count : 0))
-                            return $row->id;
-                    }
-
-                    break;
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * Returns all fields used when adding/editing a package, including any
-     * javascript to execute when the page is rendered with these fields.
-     *
-     * @param $vars stdClass A stdClass object representing a set of post fields
-     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
-     */
-    public function getPackageFields($vars=null) {
-        Loader::loadHelpers($this, array("Html"));
-
-        $fields = new ModuleFields();
-        $module_row = $this->getOurModuleRows($vars);
-        //if virtualmin_package on change display the options for this
-
-        //lets get the packages
-        $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
-
-        $packagesOptions = array();
-        if ($module_row) {
-            $packages = $this->getVirtualMinPackages($module_row);
-            $packagesOptions = $packages['packages'];
-            $packagesValues = $packages['values'];
-        }
-
-        //print_r($packages);
-        //@todo if we don't have any packages then we need to display error
-        $package->attach(
-            $fields->fieldSelect(
-                "meta[package]",
-                $packagesOptions,
-                $this->Html->ifSet($vars->meta['package']),
-                array('id'=>"virtualmin_package",'data' => json_encode($packagesValues))
-            )
-        );
-        $fields->setField($package);
-        //@todo clean up package display of settings
-        $fields->setHtml("
-			<script type=\"text/javascript\">
-			    try{
-			        //pass our package data
-                    var packages = JSON.parse($('#virtualmin_package').attr('data'));
-                    console.log('packages data',packages);
-                 }catch(e){}
-
-                $(document).ready(function() {
-                    $('#virtualmin_package').change(function() {
-                        $('#virtualminPackageSettings').empty();
-                        //render package settings on page
-                         if (typeof packages[$(this).val()] == 'object'){
-                             var package_settings = packages[$(this).val()];
-                             console.log('value',package_settings);
-                             var setting = $.map(package_settings, function(value,name) {
-                                return('<div><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</div>');
-                            });
-                            $('#virtualminPackageSettings').html(setting.join(''));
-                         }
-
-
-					});
-                });
-			</script>
-			<div id='virtualminPackageSettings'></div>
-		");
-
-
-        return $fields;
-
-    }
-
-    /**
-     * Returns an array of key values for fields stored for a module, package,
-     * and service under this module, used to substitute those keys with their
-     * actual module, package, or service meta values in related emails.
-     *
-     * @return array A multi-dimensional array of key/value pairs where each key is one of 'module', 'package', or 'service' and each value is a numerically indexed array of key values that match meta fields under that category.
-     * @see Modules::addModuleRow()
-     * @see Modules::editModuleRow()
-     * @see Modules::addPackage()
-     * @see Modules::editPackage()
-     * @see Modules::addService()
-     * @see Modules::editService()
-     */
-    public function getEmailTags() {
-        if (isset($this->config->email_tags)) {
-            return (array)$this->config->email_tags;
-        }
-        return array();
-    }
-
-    /**
-     * Returns all fields to display to an admin attempting to add a service with the module
-     *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @param $vars stdClass A stdClass object representing a set of post fields
-     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
-     */
-    //@todo add generate password option
-    //@todo add option if server already exists on system
-    public function getAdminAddFields($package, $vars=null) {
-        //generate admin view to add service
-        Loader::loadHelpers($this, array("Html"));
-
-
-        $fields = new ModuleFields();
-
-        // Create domain label
-        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
-
-        // Create domain field and attach to domain label
-        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id'=>"virtualmin_domain")));
-
-
-        $fields->setField($domain);
-
-        // Create password label
-        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
-
-        // Create password field and attach to password label
-        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id'=>"virtualmin_password")));
-
-
-        $fields->setField($password);
-        unset($domain);
-        unset($password);
-
-
-        return $fields;
-    }
-
-    /**
-     * Returns all fields to display to a client attempting to add a service with the module
-     *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @param $vars stdClass A stdClass object representing a set of post fields
-     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
-     */
-    public function getClientAddFields($package, $vars=null) {
-
-        //render client buying options view
-        Loader::loadHelpers($this, array("Form","Html"));
-
-        $fields = new ModuleFields();
-
-        // Create domain label
-        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
-
-        // Create domain field and attach to domain label
-        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id'=>"virtualmin_domain")));
-
-
-        $fields->setField($domain);
-
-        // Create password label
-        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
-
-        // Create password field and attach to password label
-        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id'=>"virtualmin_password")));
-
-        $fields->setField($password);
-        unset($domain);
-        unset($password);
-        return $fields;
-    }
-
-    /**
-     * Returns all fields to display to an admin attempting to edit a service with the module
-     *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @param $vars stdClass A stdClass object representing a set of post fields
-     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
-     */
-    public function getAdminEditFields($package, $vars=null) {
-        return new ModuleFields();
-    }
-
-    /**
-     * Fetches the HTML content to display when viewing the service info in the
-     * admin interface.
-     *
-     * @param stdClass $service A stdClass object representing the service
-     * @param stdClass $package A stdClass object representing the service's package
-     * @return string HTML content containing information to display when viewing the service info
-     */
-    public function getAdminServiceInfo($service, $package) {
-        return "";
-    }
-
-    /**
-     * Fetches the HTML content to display when viewing the service info in the
-     * client interface.
-     *
-     * @param stdClass $service A stdClass object representing the service
-     * @param stdClass $package A stdClass object representing the service's package
-     * @return string HTML content containing information to display when viewing the service info
-     */
-    public function getClientServiceInfo($service, $package) {
-        return "";
-    }
-
-    /**
-     * Returns all tabs to display to an admin when managing a service whose
-     * package uses this module
-     *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @return array An array of tabs in the format of method => title. Example: array('methodName' => "Title", 'methodName2' => "Title2")
-     */
-    public function getAdminTabs($package) {
-        return array();
-    }
-
-    /**
-     * Returns all tabs to display to a client when managing a service whose
-     * package uses this module client tabs
-     *
-     * @param stdClass $package A stdClass object representing the selected package
-     * @return array An array of tabs in the format of method => title, or method => array where array contains:
-     * 	- name (required) The name of the link
-     * 	- icon (optional) use to display a custom icon
-     * 	- href (optional) use to link to a different URL
-     * 		Example: array('methodName' => "Title", 'methodName2' => "Title2")
-     * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
-     */
-    //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
-    public function getClientTabs($package) {
-        return array(
-            'clientTabStatus'          => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
-            'clientTabMail'            => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
-            'clientTabDatabase'        => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
-            'clientTabScripts'         => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
-            'clientTabBackups'         => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
-        );
-    }
-    /**
-     * Checks service status and returns true else returns service error message
-     *
-     * @param $service
-     * @return bool true or system generated messaging
-     */
-    private function serviceCheck($service){
-        //if service is not active lets show a error|status message
-        if ($service->status != "active"){
-            Loader::loadHelpers($this, array("Html"));
-            return $this->Html->safe("<h3>".Language::_("virtualmin.service_field.not_active" ,true)."</h3>",true);
-        }
-
-        return true;
-    }
-
-    /**
-     *  client Tab Scripts handles all available scripts that can be installed on client
-     *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
-     */
-    public function clientTabScripts($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
-    {
-        //check service is active
-        if (($service_active = $this->serviceCheck($service)) !== true)
-            return $service_active;
-
-        return "Not available in this release";
-    }
-
-    /**
-     *  client Tab Backups handles all available backups on virtual server for client
-     *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
-     */
-    public function clientTabBackups($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
-    {
-        //check service is active
-        if (($service_active = $this->serviceCheck($service)) !== true)
-            return $service_active;
-
-        return "Not available in this release";
-    }
-    /**
-     *  client Tab Database handles all the database listings and manages databases for client
-     *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
-     */
-    public function clientTabDatabase($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
-    {
-        //check service is active
-        if (($service_active = $this->serviceCheck($service)) !== true)
-            return $service_active;
-
-        //allowed request to clientTabDatabase
-        $allowedRequests = array("add_database","delete_database");
-        $dataRequest = array(
-            'package'	=> $package,
-            'service'	=> $service,
-        );
-        //process any ajax request first
-        $this->getVirtualMinHelper()->processAjax($this,$getRequest,$postRequest,$allowedRequests,$dataRequest);
-
-        //get the service
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-
-       //get the databases for this account
-        $account = array('domain' => $service_fields->virtualmin_domain);
-        $databases = $this->api()->list_databases($account);
-
-
-        //lets build vars before render
-        $buildVars = array(
-            "databases" 		 	=>	$databases->data,
-            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabDatabase/",
-            "service_fields" 		 =>	$service_fields,
-            "service_id"			 => $service->id,
-            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
-            //"action_buttons" => $this->clientActionButtons(),
-            "vars", (isset($vars) ? $vars : new stdClass())
-        );
-
-        //build page
-
-        return  $this->renderTemplate("client_tab_database",$buildVars);
-    }
-    /**
-     * client Tab Mail handles all the mail from listing to adding and deleting mailboxs
-     *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
-     */
-    public function clientTabMail($package, $service, array $getRequest=null, array $postRequest=null, array $files=null)
-    {
-
-        //check service is active
-        if (($service_active = $this->serviceCheck($service)) !== true)
-            return $service_active;
-
-        //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account","mail_delete_user","mail_change_password");
-        $dataRequest = array(
-            'package'	=> $package,
-            'service'	=> $service,
-        );
-
-        //process any ajax request first
-        $this->getVirtualMinHelper()->processAjax($this,$getRequest,$postRequest,$allowedRequests,$dataRequest);
-
-
-        //get the service
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-
-        //pass this account to api
-        $account = array('domain' => $service_fields->virtualmin_domain);
-
-        //grab the mailAccounts for domain
-        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
-
-        //lets build vars before render
-        $buildVars = array(
-            "mail_accounts" 		 =>	$mail_accounts,
-            "action_url"	 		 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabMail/",
-            "service_fields" 		 =>	$service_fields,
-            "service_id"			 => $service->id,
-            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
-            //"action_buttons" => $this->clientActionButtons(),
-            "vars", (isset($vars) ? $vars : new stdClass())
-        );
-
-        if (!empty($postRequest)) {
-
-
-
-            //lets checks some posts out
-            //virtualmin_confirm_password
-            /*
-            $data = array(
-                "virtualmin_action" 		=> $postRequest["action"] ,
-                "virtualmin_add_mail_username" 	=> $postRequest["add_mail_username"],
-                "virtualmin_add_mail_password"	=> $postRequest["add_mail_password"],
-                "virtualmin_add_mail_quota"		=> $postRequest["add_mail_quota"]
-            );
-
-
-
-            $this->Input->setRules($this->addMailAccountRules($data));
-            $this->Input->validates($data);
-
-
-
-            $vars = (object)$data;
-            //update page $vars
-            $buildVars["vars"] = $vars;*/
-        }
-
-        return  $this->renderTemplate("client_tab_mail",$buildVars);
-
-
-    }
-    /**
-     * client Tab Status provides details based on the virtual server
-     *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
-     */
-    public function clientTabStatus($package, $service, array $getRequest=null, array $post=null, array $files=null) {
-
-        //check if the service is currently active
-        if (($service_active = $this->serviceCheck($service)) !== true)
-            return $service_active;
-
-        //set out view
-        $current_view = 'client_tab_status';
-
-        //clear current session while testing
-        $this->api()->clearSession();
-
-        //parse service fields
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-
-        //retrieve domain info
-        $account = array('domain' => $service_fields->virtualmin_domain);
-
-        $serverDetails = $this->getVirtualMinHelper()->cleanArray($this->api()->get_domain_info($account));
-
-
-        //build vars to parse to view
-        $module_row = $this->getModuleRow($package->module_row);
-
-        $buildVars = array(
-            "serverDetails"  =>	(object)$serverDetails[0],
-            "action_url"	 =>	$this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
-            "service_fields" =>	$service_fields,
-            "service_id"	 => $service->id,
-            "name_servers"	 => $module_row->meta->name_servers,
-            "webmin_url"	 => ((($module_row->meta->use_ssl == "true") ? "https://" : "http://").$module_row->meta->host_name.":".$module_row->meta->port_number ),
-            //"action_buttons" => $this->clientActionButtons(),
-            "vars", (isset($vars) ? $vars : new stdClass())
-        );
-
-
-        // Perform any post request based on get request
-        if (!empty($post)) {
-
-        }
-
-
-        //render template
-        return  $this->renderTemplate($current_view,$buildVars);
-    }
-
-    /**
      * Retrieves a list of rules for validating adding/editing a module row
      *
      * @param array $vars A list of input vars
@@ -1238,7 +771,7 @@ class VirtualminBlesta extends module
      */
     private function getRowRules(array &$vars)
     {
-       return array(
+        return array(
             'server_name' => array(
                 'empty' => array(
                     'rule' => "isEmpty",
@@ -1285,78 +818,243 @@ class VirtualminBlesta extends module
                     'message' => Language::_("virtualmin.!error.account_limit.valid", true)
                 )
             ),
-            'name_servers'=>array(
-                'count'=>array(
-                    'rule'=>array(array($this, "validateNameServerCount")),
-                    'message'=>Language::_("virtualmin.!error.name_servers.count", true)
+            'name_servers' => array(
+                'count' => array(
+                    'rule' => array(array($this, "validateNameServerCount")),
+                    'message' => Language::_("virtualmin.!error.name_servers.count", true)
                 ),
-                'valid'=>array(
-                    'rule'=>array(array($this, "validateNameServers")),
-                    'message'=>Language::_("virtualmin.!error.name_servers.valid", true)
+                'valid' => array(
+                    'rule' => array(array($this, "validateNameServers")),
+                    'message' => Language::_("virtualmin.!error.name_servers.valid", true)
                 )
             )
         );
 
     }
-    /**
-     * Validates that the given hostname is valid
-     *
-     * @param string $host_name The host name to validate
-     * @return boolean True if the hostname is valid, false otherwise
-     */
-    public function validateHostName($host_name) {
-        if (strlen($host_name) > 255)
-            return false;
 
-        return $this->Input->matches($host_name, "/^([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9])(\.([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]))*$/");
+    /**
+     * Edits the module row on the remote server. Sets Input errors on failure,
+     * preventing the row from being updated.
+     *
+     * @param stdClass $module_row The stdClass representation of the existing module row
+     * @param array $vars An array of module info to update
+     * @return array A numerically indexed array of meta fields for the module row containing:
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     */
+    public function editModuleRow($module_row, array &$vars)
+    {
+        //define our meta fields
+        $meta_fields = array(
+            "server_name",
+            "host_name",
+            "port_number",
+            "user_name",
+            "password",
+            "use_ssl",
+            "account_limit",
+            "account_count",
+            "name_servers"
+        );
+        //set encrypted fields
+        $encrypted_fields = array("user_name", "password");
+
+        // Set unspecified checkboxes
+        if (empty($vars['use_ssl']))
+            $vars['use_ssl'] = "false";
+
+        $this->Input->setRules($this->getRowRules($vars));
+
+        // Validate module row
+        if ($this->Input->validates($vars)) {
+
+            // Build the meta data for this row
+            $meta = array();
+            foreach ($vars as $key => $value) {
+
+                if (in_array($key, $meta_fields)) {
+                    $meta[] = array(
+                        'key' => $key,
+                        'value' => $value,
+                        'encrypted' => in_array($key, $encrypted_fields) ? 1 : 0
+                    );
+                }
+            }
+
+            return $meta;
+        }
     }
 
     /**
-     * Validates port number is numeric
-     * @param $port_number
-     * @return bool
-     */
-    public function validatePortNumber($port_number) {
-        return is_numeric($port_number);
-    }
-    /**
-     * Validates that at least 2 name servers are set in the given array of name servers
+     * Deletes the module row on the remote server. Sets Input errors on failure,
+     * preventing the row from being deleted.
      *
-     * @param array $name_servers An array of name servers
-     * @return boolean True if the array count is >=2, false otherwise
+     * @param stdClass $module_row The stdClass representation of the existing module row
      */
-    public function validateNameServerCount($name_servers) {
-        if (is_array($name_servers) && count($name_servers) >= 2)
-            return true;
-        return false;
+    public function deleteModuleRow($module_row)
+    {
+
     }
 
     /**
-     * Validates that the nameservers given are formatted correctly
+     * Returns all fields to display to an admin attempting to add a service with the module
      *
-     * @param array $name_servers An array of name servers
-     * @return boolean True if every name server is formatted correctly, false otherwise
+     * @param stdClass $package A stdClass object representing the selected package
+     * @param $vars stdClass A stdClass object representing a set of post fields
+     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
-    public function validateNameServers($name_servers) {
-        if (is_array($name_servers)) {
-            foreach ($name_servers as $name_server) {
-                if (!$this->validateHostName($name_server))
-                    return false;
+    //@todo add generate password option
+    //@todo add option if server already exists on system
+    /**
+     * Returns an array of available service delegation order methods. The module
+     * will determine how each method is defined. For example, the method "first"
+     * may be implemented such that it returns the module row with the least number
+     * of services assigned to it.
+     *
+     * @return array An array of order methods in key/value pairs where the key is the type to be stored for the group and value is the name for that option
+     * @see Module::selectModuleRow()
+     */
+    public function getGroupOrderOptions()
+    {
+
+    }
+
+    /**
+     * Determines which module row should be attempted when a service is provisioned
+     * for the given group based upon the order method set for that group.
+     *
+     * @return int The module row ID to attempt to add the service with
+     * @see Module::getGroupOrderOptions()
+     */
+    public function selectModuleRow($module_group_id)
+    {
+        if (!isset($this->ModuleManager))
+            Loader::loadModels($this, array("ModuleManager"));
+
+        $group = $this->ModuleManager->getGroup($module_group_id);
+
+        if ($group) {
+            switch ($group->add_order) {
+                default:
+                case "first":
+
+                    foreach ($group->rows as $row) {
+                        if ($row->meta->account_limit > (isset($row->meta->account_count) ? $row->meta->account_count : 0))
+                            return $row->id;
+                    }
+
+                    break;
             }
         }
-        return true;
+        return 0;
     }
 
     /**
-     * Fetches a listing of all packages configured in VirtualMin for the given server
+     * Returns all fields used when adding/editing a package, including any
+     * javascript to execute when the page is rendered with these fields.
      *
-     * @param stdClass $module_row A stdClass object representing a single server
-     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
-     * @return array An array of packages in key/value pairs
+     * @param $vars stdClass A stdClass object representing a set of post fields
+     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
-    //@todo cleanup packahge plans
-    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
-    private function getVirtualMinPackages($module_row) {
+    public function getPackageFields($vars = null)
+    {
+        Loader::loadHelpers($this, array("Html"));
+
+        $fields = new ModuleFields();
+        $module_row = $this->getOurModuleRows($vars);
+        //if virtualmin_package on change display the options for this
+
+        //lets get the packages
+        $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
+
+        $packagesOptions = array();
+        if ($module_row) {
+            $packages = $this->getVirtualMinPackages($module_row);
+            $packagesOptions = $packages['packages'];
+            $packagesValues = $packages['values'];
+        }
+
+        //print_r($packages);
+        //@todo if we don't have any packages then we need to display error
+        $package->attach(
+            $fields->fieldSelect(
+                "meta[package]",
+                $packagesOptions,
+                $this->Html->ifSet($vars->meta['package']),
+                array('id' => "virtualmin_package", 'data' => json_encode($packagesValues))
+            )
+        );
+        $fields->setField($package);
+        //@todo clean up package display of settings
+        $fields->setHtml("
+			<script type=\"text/javascript\">
+			    try{
+			        //pass our package data
+                    var packages = JSON.parse($('#virtualmin_package').attr('data'));
+                    console.log('packages data',packages);
+                 }catch(e){}
+
+                $(document).ready(function() {
+                    $('#virtualmin_package').change(function() {
+                        $('#virtualminPackageSettings').empty();
+                        //render package settings on page
+                         if (typeof packages[$(this).val()] == 'object'){
+                             var package_settings = packages[$(this).val()];
+                             console.log('value',package_settings);
+                             var setting = $.map(package_settings, function(value,name) {
+                                return('<div><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</div>');
+                            });
+                            $('#virtualminPackageSettings').html(setting.join(''));
+                         }
+
+
+					});
+                });
+			</script>
+			<div id='virtualminPackageSettings'></div>
+		");
+
+
+        return $fields;
+
+    }
+
+    /**
+     *
+     * Get the current module row for the selected module group
+     * @param null $vars
+     * @return null|stdClass module row of current group
+     */
+    private function getOurModuleRows($vars = null)
+    {
+        // Fetch all packages available for the given server or server group
+        $module_row = null;
+
+        if (isset($vars->module_group) && $vars->module_group == "") {
+            if (isset($vars->module_row) && $vars->module_row > 0) {
+                $module_row = $this->getModuleRow($vars->module_row);
+            } else {
+                $rows = $this->getModuleRows();
+                if (isset($rows[0]))
+                    $module_row = $rows[0];
+                unset($rows);
+            }
+        } else {
+            // Fetch the 1st server from the list of servers in the selected group
+            $rows = $this->getModuleRows($vars->module_group);
+
+            if (isset($rows[0]))
+                $module_row = $rows[0];
+            unset($rows);
+        }
+
+        return $module_row;
+    }
+
+
+    private function getVirtualMinPackages($module_row)
+    {
 
         try {
             //get the packages from virtualmin
@@ -1371,15 +1069,14 @@ class VirtualminBlesta extends module
             $packages = array();
             $packages['packages']['-0'] = "--- SELECT PLAN ----";
             // Assign the key/value for each package
-            foreach ($plans as $package => $values){
+            foreach ($plans as $package => $values) {
                 $packages['packages'][$package] = $package;
                 $packages['values'][$package] = $values;
             }
 
 
             return $packages;
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             // API request failed
             $message = $e->getMessage();
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($message), "output", false);
@@ -1387,46 +1084,296 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Returns an array of key values for fields stored for a module, package,
+     * and service under this module, used to substitute those keys with their
+     * actual module, package, or service meta values in related emails.
      *
-     * Returns a singleton of Virtualmin API
-     *
-     * see lib/virtualmin_api.php
-     *
-     * @param bool|false $module_row
-     * @return bool|VirtualMinApi
+     * @return array A multi-dimensional array of key/value pairs where each key is one of 'module', 'package', or 'service' and each value is a numerically indexed array of key values that match meta fields under that category.
+     * @see Modules::addModuleRow()
+     * @see Modules::editModuleRow()
+     * @see Modules::addPackage()
+     * @see Modules::editPackage()
+     * @see Modules::addService()
+     * @see Modules::editService()
      */
-    private function api($module_row = false){
-        //load our api
-        if ($this->_api == false){
+    public function getEmailTags()
+    {
+        if (isset($this->config->email_tags)) {
+            return (array)$this->config->email_tags;
+        }
+        return array();
+    }
 
-            if ($module_row == false)
-                $module_row = $this->getModuleRow();
+    /**
+     * Returns all tabs to display to a client when managing a service whose
+     * package uses this module client tabs
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @return array An array of tabs in the format of method => title, or method => array where array contains:
+     * 	- name (required) The name of the link
+     * 	- icon (optional) use to display a custom icon
+     * 	- href (optional) use to link to a different URL
+     * 		Example: array('methodName' => "Title", 'methodName2' => "Title2")
+     * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
+     */
+    //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
 
-            if (!isset($module_row)){
-                die("failed to get module row");
-            }
+    public function getAdminAddFields($package, $vars = null)
+    {
+        //generate admin view to add service
+        Loader::loadHelpers($this, array("Html"));
 
-            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
 
-            //$host, $username, $password, $port = "10000", $use_ssl = true
-            $this->_api = new VirtualMinApi(
-                $module_row->meta->host_name,			//hostname
-                $module_row->meta->user_name,			//username
-                $module_row->meta->password,			//password
-                $module_row->meta->port_number,			//port number
-                ($module_row->meta->use_ssl == "true")	//use secure
-            );
+        $fields = new ModuleFields();
+
+        // Create domain label
+        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
+
+        // Create domain field and attach to domain label
+        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id' => "virtualmin_domain")));
+
+
+        $fields->setField($domain);
+
+        // Create password label
+        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
+
+        // Create password field and attach to password label
+        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id' => "virtualmin_password")));
+
+
+        $fields->setField($password);
+        unset($domain);
+        unset($password);
+
+
+        return $fields;
+    }
+
+    /**
+     * Returns all fields to display to a client attempting to add a service with the module
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @param $vars stdClass A stdClass object representing a set of post fields
+     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
+     */
+    public function getClientAddFields($package, $vars = null)
+    {
+
+        //render client buying options view
+        Loader::loadHelpers($this, array("Form", "Html"));
+
+        $fields = new ModuleFields();
+
+        // Create domain label
+        $domain = $fields->label(Language::_("virtualmin.service_field.domain", true), "virtualmin_domain");
+
+        // Create domain field and attach to domain label
+        $domain->attach($fields->fieldText("virtualmin_domain", $this->Html->ifSet($vars->virtualmin_domain, $this->Html->ifSet($vars->domain)), array('id' => "virtualmin_domain")));
+
+
+        $fields->setField($domain);
+
+        // Create password label
+        $password = $fields->label(Language::_("virtualmin.service_field.password", true), "virtualmin_password");
+
+        // Create password field and attach to password label
+        $password->attach($fields->fieldText("virtualmin_password", $this->Html->ifSet($vars->virtualmin_password), array('id' => "virtualmin_password")));
+
+        $fields->setField($password);
+        unset($domain);
+        unset($password);
+        return $fields;
+    }
+
+    /**
+     * Returns all fields to display to an admin attempting to edit a service with the module
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @param $vars stdClass A stdClass object representing a set of post fields
+     * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
+     */
+    public function getAdminEditFields($package, $vars = null)
+    {
+        return new ModuleFields();
+    }
+
+    /**
+     * Fetches the HTML content to display when viewing the service info in the
+     * admin interface.
+     *
+     * @param stdClass $service A stdClass object representing the service
+     * @param stdClass $package A stdClass object representing the service's package
+     * @return string HTML content containing information to display when viewing the service info
+     */
+    public function getAdminServiceInfo($service, $package)
+    {
+        return "";
+    }
+
+    /**
+     * Fetches the HTML content to display when viewing the service info in the
+     * client interface.
+     *
+     * @param stdClass $service A stdClass object representing the service
+     * @param stdClass $package A stdClass object representing the service's package
+     * @return string HTML content containing information to display when viewing the service info
+     */
+    public function getClientServiceInfo($service, $package)
+    {
+        return "";
+    }
+
+    /**
+     * Returns all tabs to display to an admin when managing a service whose
+     * package uses this module
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @return array An array of tabs in the format of method => title. Example: array('methodName' => "Title", 'methodName2' => "Title2")
+     */
+    public function getAdminTabs($package)
+    {
+        return array();
+    }
+
+
+    public function getClientTabs($package)
+    {
+        return array(
+            'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
+            'clientTabMail' => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
+            'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
+            'clientTabScripts' => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
+            'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
+        );
+    }
+
+    /**
+     *  client Tab Scripts handles all available scripts that can be installed on client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabScripts($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //return as not available in this release
+        return "Not available in this release";
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //get the list of current installed scripts
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $current_scripts = $this->api()->list_scripts($account);
+
+
+    }
+
+    /**
+     * Checks service status and returns true else returns service error message
+     *
+     * @param $service
+     * @return bool true or system generated messaging
+     */
+    private function serviceCheck($service)
+    {
+        //if service is not active lets show a error|status message
+        if ($service->status != "active") {
+            Loader::loadHelpers($this, array("Html"));
+            return $this->Html->safe("<h3>" . Language::_("virtualmin.service_field.not_active", true) . "</h3>", true);
         }
 
-        return $this->_api;
+        return true;
     }
+
+    /**
+     *  client Tab Backups handles all available backups on virtual server for client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabBackups($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        return "Not available in this release";
+    }
+
+    /**
+     *  client Tab Database handles all the database listings and manages databases for client
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabDatabase($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //allowed request to clientTabDatabase
+        $allowedRequests = array("add_database", "delete_database");
+        $dataRequest = array(
+            'package' => $package,
+            'service' => $service,
+        );
+        //process any ajax request first
+        $this->getVirtualMinHelper()->processAjax($this, $getRequest, $postRequest, $allowedRequests, $dataRequest);
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //get the databases for this account
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $databases = $this->api()->list_databases($account);
+
+
+        //lets build vars before render
+        $buildVars = array(
+            "databases" => $databases->data,
+            "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabDatabase/",
+            "service_fields" => $service_fields,
+            "service_id" => $service->id,
+            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        //build page
+
+        return $this->renderTemplate("client_tab_database", $buildVars);
+    }
+
     /**
      * Initializes the virtualMinLib and returns an instance of that object
      * see lib/virtualmin_lib_helper.php
      * @return The virtualMinLib instance
      */
-    private function getVirtualMinHelper() {
-        if (!$this->_virtualmin_lib_helper){
+    private function getVirtualMinHelper()
+    {
+        if (!$this->_virtualmin_lib_helper) {
             Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_lib_helper.php");
             $this->_virtualmin_lib_helper = new virtualmin_lib_helper();
         }
@@ -1435,128 +1382,24 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Fetches a listing of all packages configured in VirtualMin for the given server
      *
-     * Get the current module row for the selected module group
-     * @param null $vars
-     * @return null|stdClass module row of current group
+     * @param stdClass $module_row A stdClass object representing a single server
+     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
+     * @return array An array of packages in key/value pairs
      */
-    private function getOurModuleRows($vars=null){
-        // Fetch all packages available for the given server or server group
-        $module_row = null;
-
-        if (isset($vars->module_group) && $vars->module_group == "") {
-            if (isset($vars->module_row) && $vars->module_row > 0) {
-                $module_row = $this->getModuleRow($vars->module_row);
-            }
-            else {
-                $rows = $this->getModuleRows();
-                if (isset($rows[0]))
-                    $module_row = $rows[0];
-                unset($rows);
-            }
-        }
-        else {
-            // Fetch the 1st server from the list of servers in the selected group
-            $rows = $this->getModuleRows($vars->module_group);
-
-            if (isset($rows[0]))
-                $module_row = $rows[0];
-            unset($rows);
-        }
-
-        return $module_row;
-    }
-
-    /**
-     * Returns an array of service field to set for the service using the given input
-     *
-     * @param array $vars An array of key/value input pairs
-     * @param stdClass $package A stdClass object representing the package for the service
-     * @return array An array of key/value pairs representing service fields
-     */
-    private function getFieldsFromInput(array $vars, $package) {
-        $fields = array(
-            'domain' => isset($vars['virtualmin_domain']) ? $vars['virtualmin_domain'] : null,
-            //'username' => isset($vars['virtualmin_domain']) ? $this->usernameFromDomain($vars['virtualmin_domain']): null,
-            'passwd' => isset($vars['virtualmin_password']) ? $vars['virtualmin_password'] : null,
-            'package' => isset($package->meta->package) ? $package->meta->package : null
-        );
-
-        return $fields;
-    }
-
-    /**
-     * Returns a safe username from a domain name (not using for now)
-     *
-     * @param $domain domain name or possible url
-     * @return string safe string as keycdn name as refrence
-     */
-    private function usernameFromDomain($domain){
-        //generate name
-        $domain = preg_replace('#^https?://#', '', $domain);
-        $domain = preg_replace("/[^A-Za-z0-9 ]/", '', $domain);
-
-        return trim($domain);
-    }
-
-    /**
-     * Parses the response from the API into a stdClass object
-     *
-     * @param array $response The response from the API
-     * @param boolean $return_response Whether to return the response, regardless of error
-     * @return stdClass A stdClass object representing the response, void if the response was an error
-     */
-    private function parseResponse($response, $module_row = null, $ignore_error = false) {
-
-        if (!$module_row)
-            $module_row = $this->getModuleRow();
-
-        $success = true;
-
-
-        // Set an internal error on no response or invalid response
-        if (empty($response)) {
-            $this->Input->setErrors(
-                array('errors' => Language::_("virtualmin.!error.api.internal", true))
-            );
-            $success = false;
-        }
-
-        // Set an error if given
-        if (isset($response->error) || $response->status != "success" )
-        {
-
-            $error = (isset($response->error) ? $response->error : Language::_("virtualmin.!error.api.internal", true));
-            $this->Input->setErrors(
-                array('errors' => $error)
-            );
-            $success = false;
-        }
-
-        //remove the full long error before logging
-        if (isset($response->full_error))
-            unset($response->full_error);
-
-        // Log the response
-        $this->log($module_row->meta->host_name, serialize($response), "output", $success);
-
-        // Return if any errors encountered
-        if (!$success && !$ignore_error)
-            return;
-
-        return $response;
-    }
-
+    //@todo cleanup packahge plans
+    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
     /**
      *
      * Helps renders a template view from an action in our controller
      *
      * @param $templateName     template we want to render to view
-     * @param $vars             $vars we want to pass to view
-     * @param array $helpers    optional array of helpers , form & html are default
+     * @param $vars $vars we want to pass to view
+     * @param array $helpers optional array of helpers , form & html are default
      * @return string           returns template view
      */
-    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html") )
+    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html"))
     {
         //create view
         $this->view = new View($templateName, "default");
@@ -1568,13 +1411,201 @@ class VirtualminBlesta extends module
         $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
 
         //pass on our vars to template
-        foreach ($vars as $key => $value)
-        {
+        foreach ($vars as $key => $value) {
             $this->view->set($key, $value);
         }
 
         //return rendered template
         return $this->view->fetch();
+    }
+
+    /**
+     * client Tab Mail handles all the mail from listing to adding and deleting mailboxs
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabMail($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //allowed request to clientTabMail
+        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password");
+        $dataRequest = array(
+            'package' => $package,
+            'service' => $service,
+        );
+
+        //process any ajax request first
+        $this->getVirtualMinHelper()->processAjax($this, $getRequest, $postRequest, $allowedRequests, $dataRequest);
+
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //pass this account to api
+        $account = array('domain' => $service_fields->virtualmin_domain);
+
+        //grab the mailAccounts for domain
+        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
+
+        //lets build vars before render
+        $buildVars = array(
+            "mail_accounts" => $mail_accounts,
+            "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabMail/",
+            "service_fields" => $service_fields,
+            "service_id" => $service->id,
+            //"confirm"				 => $this->view->fetch("client_dialog_confirm"),
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        if (!empty($postRequest)) {
+
+
+            //lets checks some posts out
+            //virtualmin_confirm_password
+            /*
+            $data = array(
+                "virtualmin_action" 		=> $postRequest["action"] ,
+                "virtualmin_add_mail_username" 	=> $postRequest["add_mail_username"],
+                "virtualmin_add_mail_password"	=> $postRequest["add_mail_password"],
+                "virtualmin_add_mail_quota"		=> $postRequest["add_mail_quota"]
+            );
+
+
+
+            $this->Input->setRules($this->addMailAccountRules($data));
+            $this->Input->validates($data);
+
+
+
+            $vars = (object)$data;
+            //update page $vars
+            $buildVars["vars"] = $vars;*/
+        }
+
+        return $this->renderTemplate("client_tab_mail", $buildVars);
+
+
+    }
+
+    /**
+     * client Tab Status provides details based on the virtual server
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabStatus($package, $service, array $getRequest = null, array $post = null, array $files = null)
+    {
+
+        //check if the service is currently active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        //set out view
+        $current_view = 'client_tab_status';
+
+        //clear current session while testing
+        $this->api()->clearSession();
+
+        //parse service fields
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //retrieve domain info
+        $account = array('domain' => $service_fields->virtualmin_domain);
+
+        $serverDetails = $this->getVirtualMinHelper()->cleanArray($this->api()->get_domain_info($account));
+
+
+        //build vars to parse to view
+        $module_row = $this->getModuleRow($package->module_row);
+
+        $buildVars = array(
+            "serverDetails" => (object)$serverDetails[0],
+            "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
+            "service_fields" => $service_fields,
+            "service_id" => $service->id,
+            "name_servers" => $module_row->meta->name_servers,
+            "webmin_url" => ((($module_row->meta->use_ssl == "true") ? "https://" : "http://") . $module_row->meta->host_name . ":" . $module_row->meta->port_number),
+            //"action_buttons" => $this->clientActionButtons(),
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+
+        // Perform any post request based on get request
+        if (!empty($post)) {
+
+        }
+
+
+        //render template
+        return $this->renderTemplate($current_view, $buildVars);
+    }
+
+    /**
+     * Validates port number is numeric
+     * @param $port_number
+     * @return bool
+     */
+    public function validatePortNumber($port_number)
+    {
+        return is_numeric($port_number);
+    }
+
+    /**
+     * Validates that at least 2 name servers are set in the given array of name servers
+     *
+     * @param array $name_servers An array of name servers
+     * @return boolean True if the array count is >=2, false otherwise
+     */
+    public function validateNameServerCount($name_servers)
+    {
+        if (is_array($name_servers) && count($name_servers) >= 2)
+            return true;
+        return false;
+    }
+
+    /**
+     * Validates that the nameservers given are formatted correctly
+     *
+     * @param array $name_servers An array of name servers
+     * @return boolean True if every name server is formatted correctly, false otherwise
+     */
+    public function validateNameServers($name_servers)
+    {
+        if (is_array($name_servers)) {
+            foreach ($name_servers as $name_server) {
+                if (!$this->validateHostName($name_server))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validates that the given hostname is valid
+     *
+     * @param string $host_name The host name to validate
+     * @return boolean True if the hostname is valid, false otherwise
+     */
+    public function validateHostName($host_name)
+    {
+        if (strlen($host_name) > 255)
+            return false;
+
+        return $this->Input->matches($host_name, "/^([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9])(\.([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]))*$/");
     }
 
     /**
@@ -1584,28 +1615,25 @@ class VirtualminBlesta extends module
      * @param array $dataRequest is an array of the service & package
      *
      */
-    public function mail_change_password($postRequest, $dataRequest = array()){
+    public function mail_change_password($postRequest, $dataRequest = array())
+    {
         //get the email user account from the id
 
-        $email_address 	= $postRequest["email_address"];
-        $new_password 	= $postRequest["new_password"];
+        $email_address = $postRequest["email_address"];
+        $new_password = $postRequest["new_password"];
 
         //lets validate our rules against posts before anything else gets done
         $this->Input->setRules($this->changeMailAccountRules($postRequest));
         $this->Input->validates($postRequest);
 
 
-
         //pass issues back to client
-        if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($errors, false);
         }
         //parse service & package
         $service = $dataRequest['service'];
         $package = $dataRequest['package'];
-
-
-
 
 
         //grab service details
@@ -1613,23 +1641,47 @@ class VirtualminBlesta extends module
 
         //pass account and user we want to change
         $change_password = array(
-            'domain'    => $service_fields->virtualmin_domain,
-            'user'      =>  str_replace('@'.$service_fields->virtualmin_domain, "", $email_address),
-            'pass'      =>  $new_password
+            'domain' => $service_fields->virtualmin_domain,
+            'user' => str_replace('@' . $service_fields->virtualmin_domain, "", $email_address),
+            'pass' => $new_password
         );
 
         //send changepassword request.
         $response = $this->parseResponse($this->api()->modify_user($change_password));
 
         //check for errors.
-        if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($response,false);
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($response, false);
         }
 
         //$api->clearSession("list-users");
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
     }
+
+    /**
+     * Builds and returns the rules for changing password
+     *
+     * @param array $vars An array of key/value data pairs
+     * @return array An array of Input rules suitable for Input::setRules()
+     */
+    public function changeMailAccountRules(&$vars)
+    {
+        return array(
+            'new_password' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_('virtualmin.!error.password.format', true)
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
+                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
+                )
+            )
+        );
+    }
+
     /**
      * Manages adding a new mail account via Ajax for our Client Mail Tab
      *
@@ -1701,66 +1753,108 @@ class VirtualminBlesta extends module
     }
 
     /**
+     * Builds and returns the rules for add_mail_account
+     *
+     * @param array $vars An array of key/value data pairs
+     * @return array An array of Input rules suitable for Input::setRules()
+     */
+    public function addMailAccountRules(&$vars)
+    {
+        return array(
+            'virtualmin_add_mail_password' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_('virtualmin.!error.password.format', true)
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
+                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
+                )
+            ),
+            'virtualmin_add_mail_username' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_('virtualmin.!error.user_name.empty', true)
+                ),
+                'valid' => array(
+                    'rule' => array("matches", "/^[a-z0-9]*$/i"),
+                    'message' => Language::_('virtualmin.!error.virtualmin_username.format', true)
+                )
+            ),
+            'virtualmin_add_mail_quota' => array(
+                'format' => array(
+                    'if_set' => true,
+                    'rule' => array("matches", "/^[0-9]*$/i"),
+                    'message' => Language::_("virtualmin.!error.mail_account.quota", true)
+                )
+            )
+        );
+    }
+
+    /**
      * Deletes a mail account via Ajax for our Client Mail Tab
      *
      * @param $postRequest is the post passed by client
      * @param array $dataRequest is an array of the service & package
      * @throws Exception
      */
-    public function mail_delete_user($postRequest,$dataRequest = array()){
+    public function mail_delete_user($postRequest, $dataRequest = array())
+    {
 
-    //get the email user account from the id
-    $email_id 		= $postRequest['email_id'];
-    $email_address 	= $postRequest["email_address"];
+        //get the email user account from the id
+        $email_id = $postRequest['email_id'];
+        $email_address = $postRequest["email_address"];
 
-    //parse service & package
-    $service = $dataRequest['service'];
-    $package = $dataRequest['package'];
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
 
-    //grab service details
-    $service_fields = $this->serviceFieldsToObject($service->fields);
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
 
-    //get the mail accounts for domain
-    $account = array('domain' => $service_fields->virtualmin_domain);
-    $mail_accounts = $this->api()->list_users($account);
+        //get the mail accounts for domain
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $mail_accounts = $this->api()->list_users($account);
 
-    //grab the users account we are referencing
-    //check that the index passed is not more than our array
-    if ($email_id > count($mail_accounts)){
-        $this->log(
-            $service_fields->virtualmin_domain . "| delete_user account failed mailAccount[$email_id] is out of bounds" .
-            serialize(array($service_fields->virtualmin_username, $package->meta->package)
-            ), "output", true
+        //grab the users account we are referencing
+        //check that the index passed is not more than our array
+        if ($email_id > count($mail_accounts)) {
+            $this->log(
+                $service_fields->virtualmin_domain . "| delete_user account failed mailAccount[$email_id] is out of bounds" .
+                serialize(array($service_fields->virtualmin_username, $package->meta->package)
+                ), "output", true
+            );
+            //send error as email_id doesn't match account for that domain
+            $this->getVirtualMinHelper()->sendAjax("Incorrect email details", false);
+        }
+
+        //grab the user account
+        $user_account = $mail_accounts->data[$email_id]->values;
+
+        //make sure that the email matches the users_accounts email that we are wanting to delete
+        if ($user_account->email_address[0] != $email_address) {
+            $this->log(
+                $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
+                serialize(array($service_fields->virtualmin_username, $package->meta->package)
+                ), "output", true
         );
-        //send error as email_id doesn't match account for that domain
-        $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
-    }
+            $this->getVirtualMinHelper()->sendAjax("Incorrect email details", false);
+        }
 
-    //grab the user account
-    $user_account = $mail_accounts->data[$email_id]->values;
+        //	->unix_username[0];
+        //prepare to delete the user from account
+        $account['user'] = $user_account->unix_username[0];
 
-    //make sure that the email matches the users_accounts email that we are wanting to delete
-    if ($user_account->email_address[0] != $email_address){
-        $this->log(
-            $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
-            serialize(array($service_fields->virtualmin_username, $package->meta->package)
-            ), "output", true
-        );
-        $this->getVirtualMinHelper()->sendAjax("Incorrect email details",false);
-    }
-
-    //	->unix_username[0];
-    //prepare to delete the user from account
-    $account['user']	= 	$user_account->unix_username[0];
-
-    //call api
-    $response = $this->parseResponse($this->api()->delete_user($account));
-    if ($errors = $this->Input->errors()){
-        $this->getVirtualMinHelper()->sendAjax($errors,false);
-    }
-    //clear the list-users
-    //$api->clearSession("list-users");
-    $this->getVirtualMinHelper()->sendAjax($response->output);
+        //call api
+        $response = $this->parseResponse($this->api()->delete_user($account));
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($errors, false);
+        }
+        //clear the list-users
+        //$api->clearSession("list-users");
+        $this->getVirtualMinHelper()->sendAjax($response->output);
 
 
     }
@@ -1772,7 +1866,8 @@ class VirtualminBlesta extends module
      * @param array $dataRequest is an array of the service & package
      * @throws Exception
      */
-    public function add_database($postRequest,$dataRequest = array()){
+    public function add_database($postRequest, $dataRequest = array())
+    {
 
         //get the email user account from the id
         $database_name 		= $postRequest['database_name'];
@@ -1820,59 +1915,6 @@ class VirtualminBlesta extends module
         $this->getVirtualMinHelper()->sendAjax($database_response->output);
 
     }
-    /**
-     * Deletes a database from VirtualMin server
-     *
-     * @param $postRequest is the post passed by client
-     * @param array $dataRequest is an array of the service & package
-     * @throws Exception
-     */
-    public function delete_database($postRequest,$dataRequest = array()){
-
-        //get the email user account from the id
-        $database_name 		= $postRequest['database_name'];
-        $database_type      = 'mysql';  //@todo possible support other
-
-        //parse service & package
-        $service = $dataRequest['service'];
-        $package = $dataRequest['package'];
-
-        //grab service details
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-
-
-        //lets validate our rules against posts
-        $this->Input->setRules($this->databaseParseRules($postRequest));
-        $this->Input->validates($postRequest);
-
-        //validate rules before processing the request
-        if ($errors = $this->Input->errors()){
-            $response["errors"] = $errors;
-            $response["message"] = "failed on validation";
-            $this->getVirtualMinHelper()->sendAjax($response,false);
-        }
-
-        //delete_database
-        //lets create the database
-        $prams = array(
-            'domain' => $service_fields->virtualmin_domain,
-            'name'  =>  $database_name,
-            'type'  =>  $database_type
-        );
-
-        //clear database session as we have modified session data
-        $this->api()->clearSession();
-
-        $database_response = $this->parseResponse($this->api()->delete_database($prams));
-
-        //pass issues back to client
-        if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($errors,false);
-        }
-
-        //database added send back
-        $this->getVirtualMinHelper()->sendAjax($database_response->output);
-    }
 
     /**
      * Builds and returns the rules for add_mail_account
@@ -1897,66 +1939,75 @@ class VirtualminBlesta extends module
             )
         );
     }
+
     /**
-     * Builds and returns the rules for changing password
+     * Deletes a database from VirtualMin server
      *
-     * @param array $vars An array of key/value data pairs
-     * @return array An array of Input rules suitable for Input::setRules()
+     * @param $postRequest is the post passed by client
+     * @param array $dataRequest is an array of the service & package
+     * @throws Exception
      */
-    public function changeMailAccountRules(&$vars) {
-        return array(
-            'new_password' => array(
-                'empty' => array(
-                    'rule' => "isEmpty",
-                    'negate' => true,
-                    'message' => Language::_('virtualmin.!error.password.format', true)
-                ),
-                'valid' => array(
-                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
-                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
-                )
-            )
+    public function delete_database($postRequest, $dataRequest = array())
+    {
+
+        //get the email user account from the id
+        $database_name = $postRequest['database_name'];
+        $database_type = 'mysql';  //@todo possible support other
+
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        //lets validate our rules against posts
+        $this->Input->setRules($this->databaseParseRules($postRequest));
+        $this->Input->validates($postRequest);
+
+        //validate rules before processing the request
+        if ($errors = $this->Input->errors()) {
+            $response["errors"] = $errors;
+            $response["message"] = "failed on validation";
+            $this->getVirtualMinHelper()->sendAjax($response, false);
+        }
+
+        //delete_database
+        //lets create the database
+        $prams = array(
+            'domain' => $service_fields->virtualmin_domain,
+            'name' => $database_name,
+            'type' => $database_type
         );
+
+        //clear database session as we have modified session data
+        $this->api()->clearSession();
+
+        $database_response = $this->parseResponse($this->api()->delete_database($prams));
+
+        //pass issues back to client
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($errors, false);
+        }
+
+        //database added send back
+        $this->getVirtualMinHelper()->sendAjax($database_response->output);
     }
 
     /**
-     * Builds and returns the rules for add_mail_account
+     * Returns a safe username from a domain name (not using for now)
      *
-     * @param array $vars An array of key/value data pairs
-     * @return array An array of Input rules suitable for Input::setRules()
+     * @param $domain domain name or possible url
+     * @return string safe string as keycdn name as refrence
      */
-    public function addMailAccountRules(&$vars) {
-        return array(
-            'virtualmin_add_mail_password' => array(
-                'empty' => array(
-                    'rule' => "isEmpty",
-                    'negate' => true,
-                    'message' => Language::_('virtualmin.!error.password.format', true)
-                ),
-                'valid' => array(
-                    'rule' => array("matches", "/^[(\x20-\x7F)]*$/"), // ASCII 32-127,
-                    'message' => Language::_('virtualmin.!error.virtualmin_password.length', true)
-                )
-            ),
-            'virtualmin_add_mail_username' => array(
-                'empty' => array(
-                    'rule' => "isEmpty",
-                    'negate' => true,
-                    'message' => Language::_('virtualmin.!error.user_name.empty', true)
-                ),
-                'valid' => array(
-                    'rule' => array("matches", "/^[a-z0-9]*$/i"),
-                    'message' =>  Language::_('virtualmin.!error.virtualmin_username.format', true)
-                )
-            ),
-            'virtualmin_add_mail_quota' => array(
-                'format' => array(
-                    'if_set' => true,
-                    'rule' => array("matches", "/^[0-9]*$/i"),
-                    'message' => Language::_("virtualmin.!error.mail_account.quota", true)
-                )
-            )
-        );
+    private function usernameFromDomain($domain)
+    {
+        //generate name
+        $domain = preg_replace('#^https?://#', '', $domain);
+        $domain = preg_replace("/[^A-Za-z0-9 ]/", '', $domain);
+
+        return trim($domain);
     }
 
 
