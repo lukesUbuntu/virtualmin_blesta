@@ -1237,10 +1237,84 @@ class VirtualminBlesta extends module
             'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
             'clientTabMail' => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
             'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
-            //'clientTabFileMin' => array('name' => Language::_("virtualmin.client.tabs.filemin.menu", true), 'icon' => "fa  fa-file"),
+            //'clientTabFileMin' => array('name' => Language::_("virtualmin.client.tabs.filemin.menu", true), 'icon' => "fa  fa-file"), //still working on this may have to write custom perl module to enable
             'clientTabScripts' => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
             'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
         );
+    }
+    /**
+     *  client Tab FileMin handles filemanager for virtualmin server
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function clientTabFileMin($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        /**
+         * Going to have to do a custom perl module for this
+         */
+        //check service is active
+        if (($service_active = $this->serviceCheck($service)) !== true)
+            return $service_active;
+
+        return "Not available in this release";
+
+
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //retrieve domain info
+        $account = array('domain' => $service_fields->virtualmin_domain);
+
+        $serverDetails = (object)$this->getVirtualMinHelper()->cleanArray($this->api()->get_domain_info($account))[0];
+
+        //build vars to parse to view
+        $module_row = $this->getModuleRow($package->module_row);
+
+        $webmin_url = ((($module_row->meta->use_ssl == "true") ? "https://" : "http://") . $module_row->meta->host_name . ":" . $module_row->meta->port_number);
+
+        if ($serverDetails->password_storage == "Plain text" && strpos($serverDetails->allowed_features, 'webmin') !== false) {
+
+            return sprintf('<form id="filemin" action="%s/session_login.cgi?page=/filemin" method="post" target="_blank">' .
+                '<input type="hidden" name="user" value="%s" />' .
+                '<input type="hidden" name="pass" value="%s" />' .
+                '<input type="hidden" name="notestingcookie" value="1" />' .
+                '<input type="hidden" name="page" value="filemin" />' .
+                '<script>
+                $(document).ready(function(){
+                    $("#filemin").submit()
+                });
+                </script>',
+                //'<input type="submit" value="%s" class="btn btn-success" />' . '</form>',
+                $webmin_url,
+                $serverDetails->username,
+                $serverDetails->password
+            //$this->_("virtualmin.client.tabs.status.login_webmin",true)
+            );
+        } else
+            return "Not available in this release";
+
+    }
+
+    /**
+     * Checks service status and returns true else returns service error message
+     *
+     * @param $service
+     * @return bool true or system generated messaging
+     */
+    private function serviceCheck($service)
+    {
+        //if service is not active lets show a error|status message
+        if ($service->status != "active") {
+            Loader::loadHelpers($this, array("Html"));
+            return $this->Html->safe("<h3>" . Language::_("virtualmin.service_field.not_active", true) . "</h3>", true);
+        }
+
+        return true;
     }
 
     /**
@@ -1303,25 +1377,6 @@ class VirtualminBlesta extends module
 
         return $this->renderTemplate("client_tab_scripts", $buildVars);
 
-
-
-    }
-
-    /**
-     * Checks service status and returns true else returns service error message
-     *
-     * @param $service
-     * @return bool true or system generated messaging
-     */
-    private function serviceCheck($service)
-    {
-        //if service is not active lets show a error|status message
-        if ($service->status != "active") {
-            Loader::loadHelpers($this, array("Html"));
-            return $this->Html->safe("<h3>" . Language::_("virtualmin.service_field.not_active", true) . "</h3>", true);
-        }
-
-        return true;
     }
 
     /**
