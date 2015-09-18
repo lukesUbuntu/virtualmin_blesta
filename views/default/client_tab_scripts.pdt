@@ -5,9 +5,9 @@
 <h4>Available Script Installation</h4>
 
 <?php
+
 if ((count($script_list)) > 1) {
     ?>
-
     <div class="table-responsive" style="margin-top: 60px;">
         <table id="scripts" class="table table-curved table-striped">
 
@@ -16,20 +16,16 @@ if ((count($script_list)) > 1) {
                 <td>Description</td>
                 <td></td>
             </tr>
-
             <?php
             foreach ($script_list as $script) {
                 ?>
                 <tr>
-
-
                     <td class="script_name">
                         <?php $this->Html->_($script['name']); ?>
                     </td>
                     <td>
                         <?php $this->Html->_($script['description']); ?>
                     </td>
-
                     <!--actions !-->
                     <td class="">
                         <div class="pull-right">
@@ -43,7 +39,6 @@ if ((count($script_list)) > 1) {
                 <?php
             }
             ?>
-
             </tbody>
         </table>
     </div>
