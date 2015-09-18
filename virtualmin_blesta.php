@@ -1352,28 +1352,26 @@ class VirtualminBlesta extends module
         //current scripts
         $installed_scripts = array();
         $installed = $this->getVirtualMinHelper()->cleanArray($response);
-        
-        //lets get list_available_scripts
+
+        //store the script type
+        foreach ($installed as $script)
+            $installed_scripts[] = $script['type'];
+
+        //lets get list_available_scripts the server has allowed us to install
         $response = $this->parseResponse($this->api()->list_available_scripts());
 
         //check errors before any other server requests
         if ($this->Input->errors())
             return;
 
-        //list of scripts available to install
+        //clean up our script
         $script_list = $this->getVirtualMinHelper()->cleanArray($response);
 
-        //lets check which ones have been installed and parse
-        foreach ($script_list as $script) {
 
-        }
-        print_r($installed_scripts);
-        print_r($script_list);
-        exit;
         //lets build vars before render
         $buildVars = array(
             "script_list" => $script_list,
-            "installed_scripts" => $installed_scripts,
+            "installed_scripts" => array_flip($installed_scripts),
             "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabScripts/",
             "service_fields" => $service_fields,
             "service_id" => $service->id,
@@ -1381,7 +1379,6 @@ class VirtualminBlesta extends module
         );
 
         //build page
-
         return $this->renderTemplate("client_tab_scripts", $buildVars);
 
     }
@@ -1399,6 +1396,35 @@ class VirtualminBlesta extends module
         }
 
         return new $this->_virtualmin_lib_helper;
+    }
+
+    /**
+     *
+     * Helps renders a template view from an action in our controller
+     *
+     * @param $templateName     template we want to render to view
+     * @param $vars $vars we want to pass to view
+     * @param array $helpers optional array of helpers , form & html are default
+     * @return string           returns template view
+     */
+    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html"))
+    {
+        //create view
+        $this->view = new View($templateName, "default");
+        //load helpers
+        Loader::loadHelpers($this, $helpers);
+        //set base
+        $this->view->base_uri = $this->base_uri;
+        //set location
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+
+        //pass on our vars to template
+        foreach ($vars as $key => $value) {
+            $this->view->set($key, $value);
+        }
+
+        //return rendered template
+        return $this->view->fetch();
     }
 
     /**
@@ -1423,6 +1449,16 @@ class VirtualminBlesta extends module
 
         return "Not available in this release";
     }
+
+    /**
+     * Fetches a listing of all packages configured in VirtualMin for the given server
+     *
+     * @param stdClass $module_row A stdClass object representing a single server
+     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
+     * @return array An array of packages in key/value pairs
+     */
+    //@todo cleanup packahge plans
+    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
 
     /**
      *  client Tab Database handles all the database listings and manages databases for client
@@ -1471,45 +1507,6 @@ class VirtualminBlesta extends module
         //build page
 
         return $this->renderTemplate("client_tab_database", $buildVars);
-    }
-
-    /**
-     * Fetches a listing of all packages configured in VirtualMin for the given server
-     *
-     * @param stdClass $module_row A stdClass object representing a single server
-     * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
-     * @return array An array of packages in key/value pairs
-     */
-    //@todo cleanup packahge plans
-    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
-
-    /**
-     *
-     * Helps renders a template view from an action in our controller
-     *
-     * @param $templateName     template we want to render to view
-     * @param $vars $vars we want to pass to view
-     * @param array $helpers optional array of helpers , form & html are default
-     * @return string           returns template view
-     */
-    private function renderTemplate($templateName, $vars, $helpers = array("Form", "Html"))
-    {
-        //create view
-        $this->view = new View($templateName, "default");
-        //load helpers
-        Loader::loadHelpers($this, $helpers);
-        //set base
-        $this->view->base_uri = $this->base_uri;
-        //set location
-        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
-
-        //pass on our vars to template
-        foreach ($vars as $key => $value) {
-            $this->view->set($key, $value);
-        }
-
-        //return rendered template
-        return $this->view->fetch();
     }
 
     /**

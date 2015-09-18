@@ -28,11 +28,28 @@ if ((count($script_list)) > 1) {
                     </td>
                     <!--actions !-->
                     <td class="">
+
                         <div class="pull-right">
-                            <button class="btn btn-success dropdown-toggle install disabled" type="button"
-                                    aria-expanded="true">
-                                Install
-                            </button>
+                            <?php
+                            if (isset($installed_scripts[strtolower($script['name'])])) {
+                                ?>
+                                <button class="btn btn-warning install disabled" type="button"
+                                        aria-expanded="true">
+                                    Remove
+                                </button>
+
+                                <?php
+                            } else {
+                                ?>
+                                <button class="btn btn-success install disabled" type="button"
+                                        aria-expanded="true">
+                                    Install
+                                </button>
+
+                                <?php
+                            }
+                            ?>
+
                         </div>
                     </td>
                 </tr>
