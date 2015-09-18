@@ -1242,6 +1242,7 @@ class VirtualminBlesta extends module
             'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
         );
     }
+
     /**
      *  client Tab FileMin handles filemanager for virtualmin server
      *
@@ -1367,6 +1368,7 @@ class VirtualminBlesta extends module
         //lets build vars before render
         $buildVars = array(
             "script_list" => $script_list,
+            "installed_scripts" => $installed_scripts,
             "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabScripts/",
             "service_fields" => $service_fields,
             "service_id" => $service->id,
