@@ -108,7 +108,7 @@ $lang['virtualmin.client.tabs.status.bandwidth_title'] = "Bandwidth Usage";
 $lang['virtualmin.client.tabs.status.server_details'] = "Server Details";
 $lang['virtualmin.client.tabs.status.name_servers'] = "Name Server";
 $lang['virtualmin.client.tabs.status.login_webmin'] = "Login to Control Panel";
-$lang['virtualmin.client.tabs.status.web_folder'] = "Website Path";
+$lang['virtualmin.client.tabs.status.web_folder'] = "www Folder";
 $lang['virtualmin.client.tabs.status.web_address'] = "Website Address";
 
 //client tabs - Client Tab Mail (client_tab_mail.pdt)
