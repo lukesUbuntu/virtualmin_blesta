@@ -1621,9 +1621,13 @@ class VirtualminBlesta extends module
 
         //build vars to parse to view
         $module_row = $this->getModuleRow($package->module_row);
+        //get host
+        //^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)
+        //lets just get the host
 
         $buildVars = array(
             "serverDetails" => (object)$serverDetails[0],
+            "hostname" => $service_fields->virtualmin_domain,
             "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabStatus/",
             "service_fields" => $service_fields,
             "service_id" => $service->id,
