@@ -11,13 +11,17 @@
  * Send ajax request
  */
 
+//$CurrentPage will be the bpdy of our plugin
 
+if (typeof $CsrfToken !== "string" || typeof $action_url !== "string" || typeof $CurrentPage == "undefined")
+    throw new Error("pagehelper.js could not load properly 17");
+/*
+if ($ instanceof jQuery)
+    console.log("pagehelper.js loaded okay")
+else
+ throw new Error("pagehelper.js could not load properly 22");
+ */
 
-if (typeof $CsrfToken !== "string" || typeof $action_url !== "string")
-    throw new Error("pagehelper.js could not load properly");
-
-
-console.log("pagehelper.js loaded okay")
 
 
 function sendRequest($postVars,successCallback,loadingElement){
@@ -156,3 +160,17 @@ $.fn.serializeFormToObject = function()
 
     return values;
 };
+/**
+ * Document Ready
+ */
+$(document).ready(function () {
+    /**
+     * Show the main database password
+     * $CurrentPage
+     */
+
+    $(".show_password").click(function () {
+        $(this).hide();
+        $(".show_password").removeClass('hide');
+    });
+})
