@@ -1,135 +1,152 @@
-<h4><?php $this->_("virtualmin.client.tabs.status.heading");?></h4>
+<h4><?php $this->_("virtualmin.client.tabs.status.heading"); ?></h4>
+
+<div id="statusPage">
+    <h3><?php $this->_("virtualmin.client.tabs.status.disk_title"); ?></h3>
+    <?php
+    $disk = array(
+        'used' => round($this->Html->ifSet($serverDetails->server_quota_used, 0), 2),
+        'limit' => round($this->Html->ifSet($serverDetails->server_quota, 0), 2)
+    );
+    $unlimited = empty($serverDetails->server_quota);
+    $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0) / $this->Html->ifSet($disk['limit'])) * 100, 0));
+    ?>
+    <small>
+        <?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit']))); ?>
+    </small>
+    <div class="progress">
+        <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+             aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0" aria-valuemax="100"
+             style="width: <?php $this->Html->_($percent_used); ?>%">
+            <span
+                class="sr-only"><?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit']))); ?></span>
+        </div>
+    </div>
+
+    <h3><?php $this->_("virtualmin.client.tabs.status.bandwidth_title"); ?></h3>
+    <?php
+
+    $bandwidth = array(
+        'used' => round($this->Html->ifSet($serverDetails->bandwidth_usage, 0), 2),
+        'limit' => round($this->Html->ifSet($serverDetails->bandwidth_limit, 0), 2)
+    );
+    $unlimited = empty($serverDetails->bandwidth_limit);
+    $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 0) / $this->Html->ifSet($bandwidth['limit'])) * 100, 0));
+    ?>
+    <small>
+        <?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit']))); ?>
+    </small>
+    <div class="progress">
+        <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"
+             aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0" aria-valuemax="100"
+             style="width: <?php $this->Html->_($percent_used); ?>%">
+            <span
+                class="sr-only"><?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit']))); ?></span>
+        </div>
+    </div>
 
 
-<h3><?php $this->_("virtualmin.client.tabs.status.disk_title");?></h3>
-<?php
-$disk = array(
-	'used' => round($this->Html->ifSet($serverDetails->server_quota_used, 0), 2),
-	'limit' => round($this->Html->ifSet($serverDetails->server_quota, 0), 2)
-);
-$unlimited = empty($serverDetails->server_quota);
-$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0)/$this->Html->ifSet($disk['limit']))*100, 0));
-?>
-<small>
-	<?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit'])));?>
-</small>
-<div class="progress">
-	<div class="progress-bar progress-bar-success progress-bar-striped"  role="progressbar" aria-valuenow="<?php $this->Html->_($percent_used);?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php $this->Html->_($percent_used);?>%">
-		<span class="sr-only"><?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit'])));?></span>
-	</div>
-</div>
+    <h3><?php $this->_("virtualmin.client.tabs.status.server_details"); ?></h3>
 
-<h3><?php $this->_("virtualmin.client.tabs.status.bandwidth_title");?></h3>
-<?php
+    <?php
+    if (isset($serverDetails->html_directory)) {
 
-$bandwidth = array(
-	'used' => round($this->Html->ifSet($serverDetails->bandwidth_usage, 0), 2),
-	'limit' => round($this->Html->ifSet($serverDetails->bandwidth_limit, 0), 2)
-);
-$unlimited = empty($serverDetails->bandwidth_limit);
-$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($bandwidth['used'], 0)/$this->Html->ifSet($bandwidth['limit']))*100, 0));
-?>
-<small>
-	<?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit'])));?>
-</small>
-<div class="progress">
-	<div class="progress-bar progress-bar-info progress-bar-striped"  role="progressbar" aria-valuenow="<?php $this->Html->_($percent_used);?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php $this->Html->_($percent_used);?>%">
-		<span class="sr-only"><?php echo ($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit'])));?></span>
-	</div>
-</div>
+        ?>
 
 
-<h3><?php $this->_("virtualmin.client.tabs.status.server_details");?></h3>
-
-<?php
-if (isset($serverDetails->html_directory)) {
-
-	?>
-
-
-	<div>
-		Domain : 		<span id="hostname">
+        <div>
+            Domain : 		<span id="hostname">
 									<?php echo $this->Html->ifSet($hostname) ?>
 								</span>
-	</div>
-	<div>
-		Username : <span id="username">
+        </div>
+        <div>
+            Username : <span id="username">
 									<?php echo $this->Html->ifSet($serverDetails->username) ?>
 								</span>
-	</div>
-	<div>
-		Password :
+        </div>
+        <div>
+            Password :
 					<span id="password" class="hide"><?php echo $this->Html->ifSet($serverDetails->password) ?>
 					</span>
-		<button id="show_password" class="btn btn-success btn-xs"><i class="fa fa-unlock"></i>
-			<?php $this->_("virtualmin.client.tabs.database.show_password"); ?>
-		</button>
-	</div>
+            <button class="btn btn-success btn-xs show_password"><i class="fa fa-unlock"></i>
+                <?php $this->_("virtualmin.client.tabs.database.show_password"); ?>
+            </button>
+        </div>
 
-	<?php
-	//@todo check for multiple assigning of ips
-	$server_ip = $serverDetails->ip_address;
-	if (preg_match('#(?:[0-9]{1,3}\.){3}[0-9]{1,3}#', $serverDetails->ip_address, $serverIp)) {
-		$server_ip = $serverIp[0];
-	}
+        <?php
+        //@todo check for multiple assigning of ips
+        $server_ip = $serverDetails->ip_address;
+        if (preg_match('#(?:[0-9]{1,3}\.){3}[0-9]{1,3}#', $serverDetails->ip_address, $serverIp)) {
+            $server_ip = $serverIp[0];
+        }
 
-}
-?>
-<div>
-	<span><?php $this->_("virtualmin.client.tabs.status.web_folder"); ?></span>
-	<spand><?php $this->Html->_($serverDetails->html_directory); ?></spand>
+    }
+    ?>
+
 </div>
-<div class="table-responsive">
-	<table class="table table-curved table-striped">
-		<?php
-		if (isset($serverDetails->url)){
-			?>
-			<tr>
-				<td><?php $this->_("virtualmin.client.tabs.status.web_address");?></td>
-				<td><?php $this->Html->_($serverDetails->url);?></td>
-			</tr>
-			<?
-		}
-		?>
+<div class="table-responsive" style="margin-top: 20px;">
+    <table class="table table-curved table-striped">
+        <tr>
+            <td>
+                <span><?php $this->_("virtualmin.client.tabs.status.web_folder"); ?></span>
+            </td>
+            <td>
+                <spand><?php $this->Html->_($serverDetails->html_directory); ?></spand>
+            </td>
+        </tr>
+        <?php
+        if (isset($serverDetails->url)) {
+            ?>
+            <tr>
+                <td><?php $this->_("virtualmin.client.tabs.status.web_address"); ?></td>
+                <td><?php $this->Html->_($serverDetails->url); ?></td>
+            </tr>
+            <?
+        }
+        ?>
 
-		<tr>
-			<td>IP Address</td>
-			<td><?php
-				$this->Html->_($server_ip); ?>
-			</td>
-		</tr>
+        <tr>
+            <td>IP Address</td>
+            <td><?php
+                $this->Html->_($server_ip); ?>
+            </td>
+        </tr>
 
-		<!-- name servers !-->
-		<?php
-		foreach($name_servers as $server)
-		{
-			?>
-			<tr>
+        <!-- name servers !-->
+        <?php
+        foreach ($name_servers as $server) {
+            ?>
+            <tr>
 
-				<td><?php $this->_("virtualmin.client.tabs.status.name_servers");?></td>
-				<td><?php $this->Html->_($server);?></td>
-			</tr>
-		<?php
-		}
-		?>
+                <td><?php $this->_("virtualmin.client.tabs.status.name_servers"); ?></td>
+                <td><?php $this->Html->_($server); ?></td>
+            </tr>
+            <?php
+        }
+        ?>
 
-		</tbody>
-	</table>
+        </tbody>
+    </table>
 </div>
 <?php
 // auto login to webmin server may remove as not secure
-if ($serverDetails->password_storage == "Plain text" && strpos($serverDetails->allowed_features,'webmin') !== false ){
-echo sprintf( '<form action="%s/session_login.cgi" method="post" target="_blank">' .
-	'<input type="hidden" name="user" value="%s" />' .
-	'<input type="hidden" name="pass" value="%s" />' .
-	'<input type="hidden" name="notestingcookie" value="1" />' .
-	'<input type="submit" value="%s" class="btn btn-success" />' . '</form>',
-	$webmin_url,
-	$serverDetails->username,
-	$serverDetails->password,
-	$this->_("virtualmin.client.tabs.status.login_webmin",true)
-	);
+if ($serverDetails->password_storage == "Plain text" && strpos($serverDetails->allowed_features, 'webmin') !== false) {
+    echo sprintf('<form action="%s/session_login.cgi" method="post" target="_blank">' .
+        '<input type="hidden" name="user" value="%s" />' .
+        '<input type="hidden" name="pass" value="%s" />' .
+        '<input type="hidden" name="notestingcookie" value="1" />' .
+        '<input type="submit" value="%s" class="btn btn-success" />' . '</form>',
+        $webmin_url,
+        $serverDetails->username,
+        $serverDetails->password,
+        $this->_("virtualmin.client.tabs.status.login_webmin", true)
+    );
 }
-
-
 ?>
+<script type="text/javascript">
+    //declared for our external js pagehelper.js
+    var $action_url = '<?php echo $action_url; ?>';
+    var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
+    var $CurrentPage = $("#statusPage");
+</script>
+<!--Include our javascript file !-->
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js'); ?>'></script>
