@@ -168,7 +168,6 @@ $(document).ready(function () {
      * Show the main database password
      * $CurrentPage
      */
-
     $(".show_password").click(function () {
         $(this).hide();
         $(".show_password").removeClass('hide');
