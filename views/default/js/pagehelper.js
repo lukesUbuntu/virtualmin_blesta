@@ -170,6 +170,6 @@ $(document).ready(function () {
      */
     $(".show_password").click(function () {
         $(this).hide();
-        $(".show_password").removeClass('hide');
+        $('#password').removeClass('hide');
     });
 })
