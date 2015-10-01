@@ -65,7 +65,8 @@
         </div>
         <div>
             Password :
-					<span id="password" class="hide"><?php echo $this->Html->ifSet($serverDetails->password) ?>
+					<span id="password" class="hide">
+                        <?php echo $this->Html->ifSet($serverDetails->password) ?>
 					</span>
             <button class="btn btn-success btn-xs show_password"><i class="fa fa-unlock"></i>
                 <?php $this->_("virtualmin.client.tabs.database.show_password"); ?>
