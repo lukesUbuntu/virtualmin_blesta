@@ -28,6 +28,9 @@ $lang['virtualmin.manage.module_groups.delete'] = "Delete";
 $lang['virtualmin.manage.module_rows.confirm_delete'] = "Are you sure you want to delete this server?";
 $lang['virtualmin.manage.module_groups.confirm_delete'] = "Are you sure you want to delete this server group?";
 
+//package
+$lang['virtualmin.packages.mail'] = "mail";
+
 //module management add row
 $lang['virtualmin.row_meta.server_name'] = "Server Name";
 $lang['virtualmin.row_meta.host_name'] = "Host Name";

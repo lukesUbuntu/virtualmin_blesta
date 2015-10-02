@@ -14,7 +14,7 @@ class VirtualminBlesta extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.1";
+    private static $version = "0.1.2";
     /**
      * @var string The authors of this module
      */
@@ -980,6 +980,7 @@ class VirtualminBlesta extends module
             )
         );
         $fields->setField($package);
+
         //@todo clean up package display of settings
         $fields->setHtml("
 			<script type=\"text/javascript\">
@@ -997,7 +998,7 @@ class VirtualminBlesta extends module
                              var package_settings = packages[$(this).val()];
                              console.log('value',package_settings);
                              var setting = $.map(package_settings, function(value,name) {
-                                return('<div><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</div>');
+                                return('<li><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</li>');
                             });
                             $('#virtualminPackageSettings').html(setting.join(''));
                          }
@@ -1010,9 +1011,36 @@ class VirtualminBlesta extends module
 		");
 
 
+        //$name, $for=null, array $attributes=null, $preserve_tags=false
+        $panel_options = $fields->label(
+            Language::_("virtualmin.packages.mail", true),
+            "sad",
+            array('style' => "font-size:15px")
+        );
+        //$fields->setField($panel_options);
+        //padding:5px;margin-right:5px
+        //array('style'=>"padding:5px;margin-right:5px")
+        //$panel_options = $fields->label(Language::_("VirtualMin.package_fields.info", true), "virtualmin_enable_mail_panel");
+        $style = array('style' => "padding:2px;margin-right:10px");
+        $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "virtualmin_panel_options_mail", $style);
+
+        $panel_options->attach(
+        //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
+            $fields->fieldCheckbox(
+                "meta[enable_mail]",
+                "enable_mail",
+                $this->Html->ifSet($vars->meta['enable_mail'], "enable_mail") == "enable_mail",
+                array('id' => "virtualmin_panel_options_mail",
+                    'class' => "virtualmin_panel_options_mail "),
+                $panel_options_mail
+            )
+        );
+        $fields->setField($panel_options);
+
         return $fields;
 
     }
+
 
     /**
      *
