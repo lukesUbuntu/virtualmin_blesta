@@ -991,6 +991,8 @@ class VirtualminBlesta extends module
                  }catch(e){}
 
                 $(document).ready(function() {
+                    console.log('getPackageFields loaded');
+
                     $('#virtualmin_package').change(function() {
                         $('#virtualminPackageSettings').empty();
                         //render package settings on page
@@ -1002,25 +1004,22 @@ class VirtualminBlesta extends module
                             });
                             $('#virtualminPackageSettings').html(setting.join(''));
                          }
-
-
+                         //update from preloaded
 					});
+					 $('#virtualmin_package').trigger('change');
                 });
 			</script>
 			<div id='virtualminPackageSettings'></div>
 		");
 
-
+        //@todo wrap the attache into a function we can ref
         //$name, $for=null, array $attributes=null, $preserve_tags=false
         $panel_options = $fields->label(
             Language::_("virtualmin.packages.mail", true),
             "sad",
             array('style' => "font-size:15px")
         );
-        //$fields->setField($panel_options);
-        //padding:5px;margin-right:5px
-        //array('style'=>"padding:5px;margin-right:5px")
-        //$panel_options = $fields->label(Language::_("VirtualMin.package_fields.info", true), "virtualmin_enable_mail_panel");
+
         $style = array('style' => "padding:2px;margin-right:10px");
         $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "virtualmin_panel_options_mail", $style);
 
