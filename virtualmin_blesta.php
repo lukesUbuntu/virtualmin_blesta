@@ -987,6 +987,8 @@ class VirtualminBlesta extends module
 			    try{
 			        //pass our package data
                     var packages = JSON.parse($('#virtualmin_package').attr('data'));
+                    //var edit_package   = $('#edit_package');
+
                     console.log('packages data',packages);
                  }catch(e){}
 
@@ -1003,6 +1005,17 @@ class VirtualminBlesta extends module
                                 return('<li><b>' +name.replace(/\_/g,' ') +'</b> : ' +  value + '</li>');
                             });
                             $('#virtualminPackageSettings').html(setting.join(''));
+
+                            //display the option checkbox for this pacakage
+                            console.log('package_settings',package_settings['allowed_features']);
+                            var enabled_features = package_settings['allowed_features'][0].split(' ');
+                            console.log('enabled_features',enabled_features);
+
+                            $.each(enabled_features,function(index,value){
+                                $('.allowed_features.'+value).removeClass('hidden');
+                                console.log('value',value);
+                            });
+
                          }
                          //update from preloaded
 					});
@@ -1015,13 +1028,17 @@ class VirtualminBlesta extends module
         //@todo wrap the attache into a function we can ref
         //$name, $for=null, array $attributes=null, $preserve_tags=false
         $panel_options = $fields->label(
-            Language::_("virtualmin.packages.mail", true),
-            "sad",
+            "Enable Options.",
+            "options",
             array('style' => "font-size:15px")
         );
 
+        //default style
         $style = array('style' => "padding:2px;margin-right:10px");
-        $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "virtualmin_panel_options_mail", $style);
+
+        //append classes we need
+        $style['class'] = 'allowed_features mail hidden';
+        $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "enable_mail", $style);
 
         $panel_options->attach(
         //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
@@ -1030,11 +1047,12 @@ class VirtualminBlesta extends module
                 "enable_mail",
                 $this->Html->ifSet($vars->meta['enable_mail'], "enable_mail") == "enable_mail",
                 array('id' => "virtualmin_panel_options_mail",
-                    'class' => "virtualmin_panel_options_mail "),
+                    'class' => "allowed_features mail hidden"),
                 $panel_options_mail
             )
         );
         $fields->setField($panel_options);
+
 
         return $fields;
 
