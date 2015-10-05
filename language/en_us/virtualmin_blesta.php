@@ -30,6 +30,7 @@ $lang['virtualmin.manage.module_groups.confirm_delete'] = "Are you sure you want
 
 //package
 $lang['virtualmin.packages.mail'] = "mail";
+$lang['virtualmin.packages.webmin'] = 'Webmail';
 
 //module management add row
 $lang['virtualmin.row_meta.server_name'] = "Server Name";
