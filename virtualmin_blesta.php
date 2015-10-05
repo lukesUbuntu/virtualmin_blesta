@@ -1034,11 +1034,14 @@ class VirtualminBlesta extends module
         );
 
         //default style
-        $style = array('style' => "padding:2px;margin-right:10px");
 
-        //append classes we need
-        $style['class'] = 'allowed_features mail hidden';
-        $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "enable_mail", $style);
+
+        //append default classes
+        $theStyle = $this->LabelStyle();
+        $theStyle['class'] += ' mail';
+
+        //mail
+        $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "enable_mail", $theStyle);
 
         $panel_options->attach(
         //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
@@ -1047,17 +1050,52 @@ class VirtualminBlesta extends module
                 "enable_mail",
                 $this->Html->ifSet($vars->meta['enable_mail'], "enable_mail") == "enable_mail",
                 array('id' => "virtualmin_panel_options_mail",
-                    'class' => "allowed_features mail hidden"),
+                    'class' => $theStyle['class']),
                 $panel_options_mail
             )
         );
         $fields->setField($panel_options);
 
+        $theStyle = $this->LabelStyle();
+        $theStyle['class'] += ' webmin';
+
+        //webmin
+        $panel_options_webmin = $fields->label(Language::_("virtualmin.packages.webmin", true), "enable_webmin", $theStyle);
+
+        $panel_options->attach(
+        //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
+            $fields->fieldCheckbox(
+                "meta[enable_webmin]",
+                "enable_mail",
+                $this->Html->ifSet($vars->meta['enable_webmin'], "enable_webmin") == "enable_webmin",
+                array('id' => "virtualmin_panel_options_webmin",
+                    'class' => $theStyle['class']),
+                $panel_options_webmin
+            )
+        );
+        $fields->setField($panel_options_webmin);
+
+        //mysql
+        $theStyle = $this->LabelStyle();
+        $theStyle['class'] += ' mysql';
+        $panel_options_database = $fields->label(Language::_("virtualmin.packages.database", true), "enable_database", $theStyle);
+
+        $panel_options->attach(
+        //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
+            $fields->fieldCheckbox(
+                "meta[enable_database]",
+                "enable_mail",
+                $this->Html->ifSet($vars->meta['enable_database'], "enable_database") == "enable_database",
+                array('id' => "virtualmin_panel_options_database",
+                    'class' => $theStyle['class']),
+                $panel_options_database
+            )
+        );
+        $fields->setField($panel_options_database);
 
         return $fields;
 
     }
-
 
     /**
      *
@@ -1091,7 +1129,6 @@ class VirtualminBlesta extends module
         return $module_row;
     }
 
-
     private function getVirtualMinPackages($module_row)
     {
 
@@ -1113,13 +1150,20 @@ class VirtualminBlesta extends module
                 $packages['values'][$package] = $values;
             }
 
-
             return $packages;
         } catch (Exception $e) {
             // API request failed
             $message = $e->getMessage();
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($message), "output", false);
         }
+    }
+
+    private function LabelStyle()
+    {
+        return array(
+            'style' => "padding:2px;margin-right:10px",
+            'class' => 'allowed_features hidden'
+        );
     }
 
     /**
