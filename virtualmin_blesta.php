@@ -1093,6 +1093,40 @@ class VirtualminBlesta extends module
         );
         $fields->setField($panel_options_database);
 
+
+        $theStyle = $this->LabelStyle();
+        $theStyle['class'] += ' scripts';
+        $panel_options_scripts = $fields->label(Language::_("virtualmin.packages.scripts", true), "enable_scripts", $theStyle);
+
+        $panel_options->attach(
+        //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
+            $fields->fieldCheckbox(
+                "meta[enable_scripts]",
+                "enable_scripts",
+                $this->Html->ifSet($vars->meta['enable_scripts'], "enable_scripts") == "enable_scripts",
+                array('id' => "virtualmin_panel_options_scripts",
+                    'class' => $theStyle['class']),
+                $panel_options_scripts
+            )
+        );
+        $fields->setField($panel_options_scripts);
+
+        $theStyle = $this->LabelStyle();
+        $theStyle['class'] += ' backups';
+        $panel_options_backups = $fields->label(Language::_("virtualmin.packages.backups", true), "enable_scripts", $theStyle);
+
+        $panel_options->attach(
+        //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
+            $fields->fieldCheckbox(
+                "meta[enable_backups]",
+                "enable_backups",
+                $this->Html->ifSet($vars->meta['enable_backups'], "enable_backups") == "enable_backups",
+                array('id' => "virtualmin_panel_options_backups",
+                    'class' => $theStyle['class']),
+                $panel_options_backups
+            )
+        );
+        $fields->setField($panel_options_backups);
         return $fields;
 
     }
