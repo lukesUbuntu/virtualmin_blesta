@@ -1066,13 +1066,14 @@ class VirtualminBlesta extends module
         //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
             $fields->fieldCheckbox(
                 "meta[enable_webmin]",
-                "enable_mail",
+                "enable_webmin",
                 $this->Html->ifSet($vars->meta['enable_webmin'], "enable_webmin") == "enable_webmin",
                 array('id' => "virtualmin_panel_options_webmin",
                     'class' => $theStyle['class']),
                 $panel_options_webmin
             )
         );
+
         $fields->setField($panel_options_webmin);
 
         //mysql
@@ -1084,7 +1085,7 @@ class VirtualminBlesta extends module
         //$name, $value=null, $checked=false, $attributes=array(), ModuleField $label=null
             $fields->fieldCheckbox(
                 "meta[enable_database]",
-                "enable_mail",
+                "enable_database",
                 $this->Html->ifSet($vars->meta['enable_database'], "enable_database") == "enable_database",
                 array('id' => "virtualmin_panel_options_database",
                     'class' => $theStyle['class']),
@@ -1130,7 +1131,6 @@ class VirtualminBlesta extends module
         return $fields;
 
     }
-
     /**
      *
      * Get the current module row for the selected module group
@@ -1353,10 +1353,22 @@ class VirtualminBlesta extends module
         return array();
     }
 
-
+    /**
+     * Returns all tabs to display to a client when managing a service whose
+     * package uses this module
+     *
+     * @param stdClass $package A stdClass object representing the selected package
+     * @return array An array of tabs in the format of method => title, or method => array where array contains:
+     *    - name (required) The name of the link
+     *    - icon (optional) use to display a custom icon
+     *    - href (optional) use to link to a different URL
+     *        Example: array('methodName' => "Title", 'methodName2' => "Title2")
+     *        array('methodName' => array('name' => "Title", 'icon' => "icon"))
+     */
     public function getClientTabs($package)
     {
-        return array(
+
+        $tabs = array(
             'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
             'clientTabMail' => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
             'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
@@ -1364,6 +1376,12 @@ class VirtualminBlesta extends module
             'clientTabScripts' => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
             'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
         );
+
+        if (!isset($package->meta->enable_database)) unset($tabs['clientTabDatabase']);
+        if (!isset($package->meta->enable_mail)) unset($tabs['clientTabMail']);
+        if (!isset($package->meta->enable_scripts)) unset($tabs['clientTabScripts']);
+        if (!isset($package->meta->enable_backups)) unset($tabs['clientTabBackups']);
+        return $tabs;
     }
 
     /**
@@ -1722,6 +1740,7 @@ class VirtualminBlesta extends module
      */
     public function clientTabStatus($package, $service, array $getRequest = null, array $post = null, array $files = null)
     {
+
 
         //check if the service is currently active
         if (($service_active = $this->serviceCheck($service)) !== true)
