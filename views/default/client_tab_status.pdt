@@ -130,7 +130,7 @@
 </div>
 <?php
 // auto login to webmin server may remove as not secure
-if ($serverDetails->password_storage == "Plain text" && strpos($serverDetails->allowed_features, 'webmin') !== false) {
+if ($serverDetails->password_storage == "Plain text" && $webmin_access == true) {
     echo sprintf('<form action="%s/session_login.cgi" method="post" target="_blank">' .
         '<input type="hidden" name="user" value="%s" />' .
         '<input type="hidden" name="pass" value="%s" />' .

@@ -1774,6 +1774,7 @@ class VirtualminBlesta extends module
             "service_fields" => $service_fields,
             "service_id" => $service->id,
             "name_servers" => $module_row->meta->name_servers,
+            "webmin_access" => (strpos($serverDetails[0]['allowed_features'], 'webmin') !== false && isset($package->meta->enable_webmin)),
             "webmin_url" => ((($module_row->meta->use_ssl == "true") ? "https://" : "http://") . $module_row->meta->host_name . ":" . $module_row->meta->port_number),
             //"action_buttons" => $this->clientActionButtons(),
             "vars", (isset($vars) ? $vars : new stdClass())
