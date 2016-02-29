@@ -42,6 +42,6 @@ This is first initial release so please use at your *own risk*, I have done a to
 1. [Download](https://github.com/lukesUbuntu/virtualmin_blesta/archive/master.zip) this module
 2. Uncompress file,and rename folder to *virtualmin_blesta* 
 3. Upload *virtualmin_blesta* folder to your blesta root dir to */componets/modules/* directory.
-3. Go to Blesta Admin, and click on Setings->Modules and it will list the GoGetSSLv2 module, Click on "INSTALL"
+3. Go to Blesta Admin, and click on Setings->Modules and it will list the Virtualmin module, Click on "INSTALL"
 4. Go to Virtualmin module and add your Virtualmin Server Details.
 
