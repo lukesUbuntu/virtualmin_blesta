@@ -4,8 +4,8 @@
  *
  * @author Justas Jutaz Brazauskas <jutaz@jutaz.lt>
  */
-
-class VirtualMinApi {
+class VirtualMinApi
+{
 
     private $username;
     private $password;
@@ -16,7 +16,8 @@ class VirtualMinApi {
     private $running = false;
     private $response = false;
 
-    public function __construct($host, $username, $password, $port = "10000", $use_ssl = true) {
+    public function __construct($host, $username, $password, $port = "10000", $use_ssl = true)
+    {
 
         $this->host = $host;
         $this->port = $port;
@@ -27,7 +28,8 @@ class VirtualMinApi {
 
     }
 
-    public function get_domains($user = false) {
+    public function get_domains($user = false)
+    {
         if ($user === false) {
             $params = array(
                 'program' => 'list-domains',
@@ -43,7 +45,8 @@ class VirtualMinApi {
         return false;
     }
 
-    public function get_domain_info(array $params = array()) {
+    public function get_domain_info(array $params = array())
+    {
         $required = array(
             'domain'
         );
@@ -55,13 +58,14 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     /**
      * example of basic @param usage
      * @param array $params required keys: domain, pass, and at least one option: unix, dir, webmin, web, dns, mail, limits-from-plan
-
      * @return mixed
      */
-    public function add_domain(array $params = array()) {
+    public function add_domain(array $params = array())
+    {
         $required = array(
             'domain',
             'pass',
@@ -75,7 +79,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_domain(array $params = array()) {
+    public function delete_domain(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -88,7 +93,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function suspend_domain(array $params = array()) {
+    public function suspend_domain(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -101,7 +107,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function unsuspend_domain(array $params = array()) {
+    public function unsuspend_domain(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -113,8 +120,10 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     //https://www.virtualmin.com/documentation/developer/cli/modify_domain
-    public function modify_domain(array $params = array()) {
+    public function modify_domain(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -127,7 +136,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_database(array $params = array()) {
+    public function create_database(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -142,7 +152,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_database(array $params = array()) {
+    public function delete_database(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -157,7 +168,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_databases(array $params = array()) {
+    public function list_databases(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -170,7 +182,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function disconnect_database(array $params = array()) {
+    public function disconnect_database(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -185,7 +198,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_database_hosts(array $params = array()) {
+    public function modify_database_hosts(array $params = array())
+    {
         $required = array(
             'domain|all-domain',
             'type' => 'mysql|postgres',
@@ -199,7 +213,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function import_database(array $params = array()) {
+    public function import_database(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -214,7 +229,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_reseller(array $params = array()) {
+    public function create_reseller(array $params = array())
+    {
         $required = array(
             'name',
             'pass',
@@ -228,7 +244,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_reseller(array $params = array()) {
+    public function delete_reseller(array $params = array())
+    {
         $required = array(
             'name',
         );
@@ -241,14 +258,16 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_resellers(array $params = array()) {
+    public function list_resellers(array $params = array())
+    {
         $params['program'] = 'list-resellers';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function modify_reseller(array $params = array()) {
+    public function modify_reseller(array $params = array())
+    {
         $required = array(
             'name',
         );
@@ -261,7 +280,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_user(array $params = array()) {
+    public function create_user(array $params = array())
+    {
         $required = array(
             'domain',
             'user',
@@ -274,11 +294,12 @@ class VirtualMinApi {
         $params['json'] = 1;
         $params[] = 'multiline';
         //clear the list users session
-        $this->clearSession($params['domain'],"list-users");
+        $this->clearSession($params['domain'], "list-users");
         return json_decode($this->callServer($params));
     }
 
-    public function delete_user(array $params = array()) {
+    public function delete_user(array $params = array())
+    {
         $required = array(
             'domain',
             'user',
@@ -290,11 +311,12 @@ class VirtualMinApi {
         $params['json'] = 1;
         $params[] = 'multiline';
         //clear the list users session
-        $this->clearSession($params['domain'],"list-users");
+        $this->clearSession($params['domain'], "list-users");
         return json_decode($this->callServer($params));
     }
 
-    public function modify_user(array $params = array()) {
+    public function modify_user(array $params = array())
+    {
         $required = array(
             'domain',
             'user',
@@ -308,7 +330,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_mailbox(array $params = array()) {
+    public function list_mailbox(array $params = array())
+    {
         $required = array(
             'domain',
             'user',
@@ -322,7 +345,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_users(array $params = array()) {
+    public function list_users(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -335,7 +359,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_database_user(array $params = array()) {
+    public function modify_database_user(array $params = array())
+    {
         $required = array(
             'domain',
             'type' => 'mysql|postgres',
@@ -350,7 +375,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_resources(array $params = array()) {
+    public function modify_resources(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -363,7 +389,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_limits(array $params = array()) {
+    public function modify_limits(array $params = array())
+    {
         $required = array(
             'domain|user',
         );
@@ -376,7 +403,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function enable_limit(array $params = array()) {
+    public function enable_limit(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -389,7 +417,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function disable_limit(array $params = array()) {
+    public function disable_limit(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -402,7 +431,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function restore_domain(array $params = array()) {
+    public function restore_domain(array $params = array())
+    {
         $required = array(
             'source',
         );
@@ -414,8 +444,10 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     //https://www.virtualmin.com/documentation/developer/cli/list_scheduled_backups
-    public function list_scheduled_backups(array $params = array()) {
+    public function list_scheduled_backups(array $params = array())
+    {
         $required = array(
             'domain|user|reseller',
         );
@@ -427,8 +459,10 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     //https://www.virtualmin.com/documentation/developer/cli/backup_domain
-    public function backup_domain(array $params = array()) {
+    public function backup_domain(array $params = array())
+    {
         $required = array(
             'dest',
         );
@@ -441,7 +475,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_admin(array $params = array()) {
+    public function create_admin(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -456,7 +491,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_admin(array $params = array()) {
+    public function delete_admin(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -470,7 +506,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_admins(array $params = array()) {
+    public function list_admins(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -483,7 +520,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_admin(array $params = array()) {
+    public function modify_admin(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -496,8 +534,10 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     //https://www.virtualmin.com/documentation/developer/cli/list_scripts
-    public function list_scripts(array $params = array()) {
+    public function list_scripts(array $params = array())
+    {
         $required = array(
             'all-domains|domain|user',
         );
@@ -509,15 +549,18 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     //https://www.virtualmin.com/documentation/developer/cli/list_available_scripts
-    public function list_available_scripts(array $params = array()) {
+    public function list_available_scripts(array $params = array())
+    {
         $params['program'] = 'list-available-scripts';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function install_script(array $params = array()) {
+    public function install_script(array $params = array())
+    {
         $required = array(
             'domain',
             'type',
@@ -532,7 +575,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_script(array $params = array()) {
+    public function delete_script(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -545,7 +589,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_svn_repository(array $params = array()) {
+    public function create_svn_repository(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -559,7 +604,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_svn_repository(array $params = array()) {
+    public function delete_svn_repository(array $params = array())
+    {
         $required = array(
             'domain',
             'name',
@@ -573,14 +619,16 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_svn_repositories(array $params = array()) {
+    public function list_svn_repositories(array $params = array())
+    {
         $params['program'] = 'list-svn-repositories';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function modify_plan(array $params = array()) {
+    public function modify_plan(array $params = array())
+    {
         $required = array(
             'name|id',
         );
@@ -592,24 +640,27 @@ class VirtualMinApi {
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
+
     /*
      * List the plans on the virtualmin server and 
      */
-    public function list_plans(array $params = array()) {
+    public function list_plans(array $params = array())
+    {
+
         $params['program'] = 'list-plans';
         $params['json'] = 1;
         $params[] = 'multiline';
 
         //requesting plans from session
-        if (isset($params['cache'])){
+        if (isset($params['cache'])) {
 
             //we have it in session
-            if ($response = $this->readSession("default","list-plans")){
+            if ($response = $this->readSession("default", "list-plans")) {
 
                 //if we have passed a plan name with the session we will unset the other results
-                if (!empty($params['cache']) && $response != false){
+                if (!empty($params['cache']) && $response != false) {
                     $data = $response->data;
-                    foreach($data as $plan => $value) {
+                    foreach ($data as $plan => $value) {
                         if ($params['cache'] != $plan)
                             unset($response->data[$plan]);
                     }
@@ -622,29 +673,35 @@ class VirtualMinApi {
         }
 
         //clear the list-plans as we only want to store after we have setup selected plan
-        $this->clearSession("default","list-plans");
-        //lets store the plans into there own array
-        $response = json_decode($this->callServer($params));
+        $this->clearSession("default", "list-plans");
 
-        if ($response->status == "success"){
-           $plans = $response->data;
+        //lets store the plans into there own array
+        $response = $this->callServer($params);
+
+        if ($this->isJson($response) == false) return $response;
+
+        $response = json_decode($response);
+
+        if ($response->status == "success") {
+            $plans = $response->data;
             $thePlans = array();
             //print_r($plans);
-            foreach($plans as $plan){
+            foreach ($plans as $plan) {
                 //$plan->values->name[0]
                 $thePlans[$plan->values->name[0]] = $plan->values;
             }
 
             $response->data = $thePlans;
 
-            $this->writeSession($response,"default","list-plans");
+            $this->writeSession($response, "default", "list-plans");
         }
 
-        
+
         return $response;
     }
 
-    public function delete_plan(array $params = array()) {
+    public function delete_plan(array $params = array())
+    {
         $required = array(
             'name|id',
         );
@@ -657,7 +714,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_plan(array $params = array()) {
+    public function create_plan(array $params = array())
+    {
         $required = array(
             'name',
         );
@@ -670,7 +728,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_template(array $params = array()) {
+    public function modify_template(array $params = array())
+    {
         $required = array(
             'name|id',
         );
@@ -683,14 +742,16 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_templates(array $params = array()) {
+    public function list_templates(array $params = array())
+    {
         $params['program'] = 'list-templates';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function get_template(array $params = array()) {
+    public function get_template(array $params = array())
+    {
         $required = array(
             'name|id',
         );
@@ -703,7 +764,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_template(array $params = array()) {
+    public function delete_template(array $params = array())
+    {
         $required = array(
             'name|id',
         );
@@ -716,7 +778,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_template(array $params = array()) {
+    public function create_template(array $params = array())
+    {
         $required = array(
             'name',
             'empty|clone'
@@ -730,7 +793,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_certs(array $params = array()) {
+    public function list_certs(array $params = array())
+    {
         $required = array(
             'all-domains|domain|user',
         );
@@ -743,7 +807,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function install_cert(array $params = array()) {
+    public function install_cert(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -756,7 +821,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function generate_cert(array $params = array()) {
+    public function generate_cert(array $params = array())
+    {
         $required = array(
             'domain',
             'self|csr',
@@ -770,7 +836,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_proxies(array $params = array()) {
+    public function list_proxies(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -783,7 +850,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_proxy(array $params = array()) {
+    public function delete_proxy(array $params = array())
+    {
         $required = array(
             'domain',
             'path',
@@ -797,7 +865,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_proxy(array $params = array()) {
+    public function create_proxy(array $params = array())
+    {
         $required = array(
             'domain',
             'path',
@@ -812,7 +881,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function change_license(array $params = array()) {
+    public function change_license(array $params = array())
+    {
         $required = array(
             'serial',
             'key',
@@ -831,7 +901,8 @@ class VirtualMinApi {
      * @TODO    clearify it`s documentation
      */
 
-    public function change_password(array $params = array()) {
+    public function change_password(array $params = array())
+    {
         $required = array(
             'username',
         );
@@ -844,14 +915,16 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function check_config(array $params = array()) {
+    public function check_config(array $params = array())
+    {
         $params['program'] = 'check-config';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function check_connectivity(array $params = array()) {
+    public function check_connectivity(array $params = array())
+    {
         $required = array(
             'domain|user',
         );
@@ -864,7 +937,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function copy_mailbox(array $params = array()) {
+    public function copy_mailbox(array $params = array())
+    {
         $required = array(
             'source',
             'dest',
@@ -878,7 +952,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_redirect(array $params = array()) {
+    public function create_redirect(array $params = array())
+    {
         $required = array(
             'domain',
             'path',
@@ -893,7 +968,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_redirect(array $params = array()) {
+    public function delete_redirect(array $params = array())
+    {
         $required = array(
             'domain',
             'path',
@@ -907,7 +983,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function create_shared_address(array $params = array()) {
+    public function create_shared_address(array $params = array())
+    {
         $required = array(
             'ip|allocate-ip',
         );
@@ -920,7 +997,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function delete_shared_address(array $params = array()) {
+    public function delete_shared_address(array $params = array())
+    {
         $required = array(
             'ip',
         );
@@ -933,7 +1011,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function disable_writelogs(array $params = array()) {
+    public function disable_writelogs(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -946,7 +1025,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function enable_writelogs(array $params = array()) {
+    public function enable_writelogs(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -959,7 +1039,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function get_command(array $params = array()) {
+    public function get_command(array $params = array())
+    {
         $required = array(
             'command',
         );
@@ -972,7 +1053,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function get_dns(array $params = array()) {
+    public function get_dns(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -985,7 +1067,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function get_ssl(array $params = array()) {
+    public function get_ssl(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -998,14 +1081,16 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function info(array $params = array()) {
+    public function info(array $params = array())
+    {
         $params['program'] = 'info';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function list_bandwidth(array $params = array()) {
+    public function list_bandwidth(array $params = array())
+    {
         $required = array(
             'domain|all-domains',
         );
@@ -1018,21 +1103,24 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function get_commands(array $params = array()) {
+    public function get_commands(array $params = array())
+    {
         $params['program'] = 'list-commands';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function list_features(array $params = array()) {
+    public function list_features(array $params = array())
+    {
         $params['program'] = 'get-ssl';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function list_php_ini(array $params = array()) {
+    public function list_php_ini(array $params = array())
+    {
         $required = array(
             'domain|all-domains|user',
         );
@@ -1045,7 +1133,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_redirects(array $params = array()) {
+    public function list_redirects(array $params = array())
+    {
         $required = array(
             'domain',
         );
@@ -1058,21 +1147,24 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function list_shared_addresses(array $params = array()) {
+    public function list_shared_addresses(array $params = array())
+    {
         $params['program'] = 'list-shared-addresses';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function list_styles(array $params = array()) {
+    public function list_styles(array $params = array())
+    {
         $params['program'] = 'list-styles';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function modify_database_pass(array $params = array()) {
+    public function modify_database_pass(array $params = array())
+    {
         $required = array(
             'domain',
             'type',
@@ -1087,7 +1179,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function modify_php_ini(array $params = array()) {
+    public function modify_php_ini(array $params = array())
+    {
         $required = array(
             'domain|all-domains|user',
         );
@@ -1100,21 +1193,24 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function search_maillogs(array $params = array()) {
+    public function search_maillogs(array $params = array())
+    {
         $params['program'] = 'search-maillogs';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function set_spam(array $params = array()) {
+    public function set_spam(array $params = array())
+    {
         $params['program'] = 'set-spam';
         $params['json'] = 1;
         $params[] = 'multiline';
         return json_decode($this->callServer($params));
     }
 
-    public function test_imap(array $params = array()) {
+    public function test_imap(array $params = array())
+    {
         $required = array(
             'user',
             'pass',
@@ -1130,7 +1226,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function test_pop3(array $params = array()) {
+    public function test_pop3(array $params = array())
+    {
         $required = array(
             'user',
             'pass',
@@ -1146,7 +1243,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    public function test_smtp(array $params = array()) {
+    public function test_smtp(array $params = array())
+    {
         $required = array(
             'to',
         );
@@ -1159,7 +1257,8 @@ class VirtualMinApi {
         return json_decode($this->callServer($params));
     }
 
-    private function buildQueryString(array $query = array(), $questionMark = false) {
+    private function buildQueryString(array $query = array(), $questionMark = false)
+    {
         if (empty($query)) {
             return "";
         }
@@ -1184,9 +1283,13 @@ class VirtualMinApi {
         return $querySring;
     }
 
-    private function callServer(array $params = array()) {
+    private function callServer(array $params = array())
+    {
+
+
         //program's not to cache
-        $no_store = array("create-domain","create-user","delete-user","list-plans");
+
+        $no_store = array("create-domain", "create-user", "delete-user", "list-plans");
         $no_session = false;
 
         //store session under default if no domain provided
@@ -1199,9 +1302,7 @@ class VirtualMinApi {
         if (in_array($program, $no_store))
             $no_session = true;
 
-
-        //print_r($_SESSION);exit;
-        if ($no_session == true || ($response = $this->readSession($domain,$program)) == false){
+        if ($no_session == true || ($response = $this->readSession($domain, $program)) == false) {
 
             $querySring = $this->buildQueryString($params);
             unset($params);
@@ -1215,23 +1316,23 @@ class VirtualMinApi {
             $response = $this->get($url, true, $params);
             //want to store the plans
             //don't sotre
-            if(!$no_session)
-            $this->writeSession($response,$domain,$program);
+            if (!$no_session)
+                $this->writeSession($response, $domain, $program);
         }
 
         return $response;
-        //$this->running = true;
 
 
     }
 
-    private function get($url = false, $return = true, array $params = array()) {
+    private function get($url = false, $return = true, array $params = array())
+    {
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, $return);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
-        //
 
         //curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
@@ -1241,13 +1342,14 @@ class VirtualMinApi {
         }
 
         $data = curl_exec($ch);
-
-		//curl_close($ch);
-        if ($data) {
-            return $data;
+        if ($data === false) {
+            throw new \Exception('Virtualmin API Curl error: ' . curl_error($ch));
         }
-        return true;
+
+        return $data;
+
     }
+
     /*
         private function decodeResponse($response = false, $format = "json") {
             if ($format == "json") {
@@ -1295,7 +1397,8 @@ class VirtualMinApi {
             return substr(md5(time() . microtime(true) . mt_rand()), -8);
         }
         */
-    public function checkIfAllParamsGood($params, $required) {
+    public function checkIfAllParamsGood($params, $required)
+    {
         $i = 0;
         foreach ($required as $key => $val) {
             if (is_numeric($key) && !is_string($key) && !is_array(explode("|", $key))) {
@@ -1351,7 +1454,8 @@ class VirtualMinApi {
      * @param string $key
      * @return bool if key was not found
      */
-    private function readSession($domain = "default", $program = "default"){
+    private function readSession($domain = "default", $program = "default")
+    {
         //just check we have not already loaded
         return (@$_SESSION["virtualmin_module"][$domain][$program] !== null) ? $_SESSION["virtualmin_module"][$domain][$program] : false;
 
@@ -1362,16 +1466,19 @@ class VirtualMinApi {
      * @param $domain
      * @return bool
      */
-    public function Session($domain = "default"){
+    public function Session($domain = "default")
+    {
         //just check we have not already loaded
         return (@$_SESSION["virtualmin_module"][$domain] !== null) ? $_SESSION["virtualmin_module"][$domain] : false;
     }
+
     /**
      * Writes a key & value to Session, if no key will use default
      * @param $value
      * @param string $key
      */
-    private function writeSession($value, $domain = "default" , $program = "default"){
+    private function writeSession($value, $domain = "default", $program = "default")
+    {
         //just check we have not already loaded
         $_SESSION["virtualmin_module"][$domain][$program] = $value;
     }
@@ -1380,19 +1487,26 @@ class VirtualMinApi {
      * Clears our virtualmin_module session or a array off the virtualmin_module session if parsed
      * @param bool $key
      */
-    public function clearSession($domain = false,$key = false){
+    public function clearSession($domain = false, $key = false)
+    {
         //if called with no key we are going to reset all values
 
-        if (!$domain){
+        if (!$domain) {
             unset($_SESSION["virtualmin_module"]);
             return;
         }
-        if (!$key){
+        if (!$key) {
             unset($_SESSION["virtualmin_module"][$domain]);
             return;
         }
 
         unset($_SESSION["virtualmin_module"][$domain][$key]);
+    }
+
+    private function isJson($string)
+    {
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
     }
 
 }

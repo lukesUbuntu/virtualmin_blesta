@@ -88,6 +88,7 @@ $lang['virtualmin.!error.virtualmin_email.format'] = "Please enter a valid email
 $lang['virtualmin.!error.virtualmin_password.matches'] = "Password and Confirm Password do not match.";
 $lang['virtualmin.!error.mail_account.quota'] = "Quota must be number values only";
 $lang['virtualmin.!error.action.empty'] = "Can not process this request, incorrect data sent";
+$lang['virtualmin.!error.invalid_connection'] = "Invalid connection. please check server details and check blesta log";
 
 // Service fields
 $lang['virtualmin.service_field.domain'] = "Domain";
