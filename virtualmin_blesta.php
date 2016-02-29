@@ -1576,6 +1576,7 @@ class VirtualminBlesta extends module
         $response = $this->parseResponse($this->api()->list_scripts($account));
 
 
+
         //check errors before any other server requests
         if ($this->Input->errors())
             return;
@@ -1584,7 +1585,9 @@ class VirtualminBlesta extends module
         $installed_scripts = array();
         $installed = $this->getVirtualMinHelper()->cleanArray($response);
 
+
         //store the script type
+        if (count($installed) > 1)
         foreach ($installed as $script)
             $installed_scripts[] = $script['type'];
 
