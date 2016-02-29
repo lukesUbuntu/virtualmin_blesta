@@ -28,4 +28,20 @@ please note not all tabs are active in this repo module version
 
 ![Databases](http://i.imgur.com/7i5DLMa.png)
 
-### Virtualmin Blesta Module ###
+####### NOTES #######
+This is first initial release so please use at your *own risk*, I have done a ton of *sandbox* testing, and only several **live** testing, please [submit](https://github.com/lukesUbuntu/gogetsslv2/issues) any issues, and check [todo list](#-todo)
+  
+## Installation instructions
+### Via Git
+1. CD into blesta root folder */components/modules* directory
+2. run `$ git clone https://github.com/lukesUbuntu/virtualmin_blesta.git`
+3. Go to Blesta Admin, and click on Setings->Modules and it will list the Virtualmin module, Click on "INSTALL"
+4. Go to Virtualmin module and add your Virtualmin Server Details.
+
+#### Via FTP
+1. [Download](https://github.com/lukesUbuntu/virtualmin_blesta/archive/master.zip) this module
+2. Uncompress file,and rename folder to *virtualmin_blesta* 
+3. Upload *virtualmin_blesta* folder to your blesta root dir to */componets/modules/* directory.
+3. Go to Blesta Admin, and click on Setings->Modules and it will list the GoGetSSLv2 module, Click on "INSTALL"
+4. Go to Virtualmin module and add your Virtualmin Server Details.
+
