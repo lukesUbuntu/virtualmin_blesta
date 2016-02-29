@@ -7,7 +7,6 @@
  * Time: 12:51 PM
  * copyright Luke Hardiman 2015
  */
-
 class VirtualminBlesta extends module
 {
 
@@ -56,7 +55,8 @@ class VirtualminBlesta extends module
      *
      * @return string The common name of this module
      */
-    public function getName() {
+    public function getName()
+    {
         return Language::_("virtualmin.name", true);
     }
 
@@ -65,7 +65,8 @@ class VirtualminBlesta extends module
      *
      * @return string The current version of this module
      */
-    public function getVersion() {
+    public function getVersion()
+    {
         return self::$version;
     }
 
@@ -74,7 +75,8 @@ class VirtualminBlesta extends module
      *
      * @return array A numerically indexed array that contains an array with key/value pairs for 'name' and 'url', representing the name and URL of the authors of this module
      */
-    public function getAuthors() {
+    public function getAuthors()
+    {
         return self::$authors;
     }
 
@@ -84,7 +86,8 @@ class VirtualminBlesta extends module
      * @param stdClass $service A stdClass object representing the service
      * @return string A value used to identify this service amongst other similar services
      */
-    public function getServiceName($service) {
+    public function getServiceName($service)
+    {
         foreach ($service->fields as $field) {
             if ($field->key == "virtualmin_domain")
                 return $field->value;
@@ -97,7 +100,8 @@ class VirtualminBlesta extends module
      *
      * @return string The noun used to refer to a module row
      */
-    public function moduleRowName() {
+    public function moduleRowName()
+    {
         return Language::_("virtualmin.module_row", true);
     }
 
@@ -106,7 +110,8 @@ class VirtualminBlesta extends module
      *
      * @return string The noun used to refer to a module row in plural form
      */
-    public function moduleRowNamePlural() {
+    public function moduleRowNamePlural()
+    {
         return Language::_("virtualmin.module_row_plural", true);
     }
 
@@ -115,7 +120,8 @@ class VirtualminBlesta extends module
      *
      * @return string The noun used to refer to a module group
      */
-    public function moduleGroupName() {
+    public function moduleGroupName()
+    {
         return null;
     }
 
@@ -125,7 +131,8 @@ class VirtualminBlesta extends module
      *
      * @return string The key used to identify the primary field from the set of module row meta fields
      */
-    public function moduleRowMetaKey() {
+    public function moduleRowMetaKey()
+    {
         return "server_name";
     }
 
@@ -134,11 +141,12 @@ class VirtualminBlesta extends module
      * failure, preventing the module from being added.
      *
      * @return array A numerically indexed array of meta data containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
-    public function install() {
+    public function install()
+    {
 
     }
 
@@ -149,7 +157,8 @@ class VirtualminBlesta extends module
      *
      * @param string $current_version The current installed version of this module
      */
-    public function upgrade($current_version) {
+    public function upgrade($current_version)
+    {
 
     }
 
@@ -160,11 +169,10 @@ class VirtualminBlesta extends module
      * @param int $module_id The ID of the module being uninstalled
      * @param boolean $last_instance True if $module_id is the last instance across all companies for this module, false otherwise
      */
-    public function uninstall($module_id, $last_instance) {
+    public function uninstall($module_id, $last_instance)
+    {
 
     }
-
-
 
 
     /**
@@ -177,7 +185,8 @@ class VirtualminBlesta extends module
      * @return string The value used to identify this package service
      * @see Module::getServiceName()
      */
-    public function getPackageServiceName($packages, array $vars=null) {
+    public function getPackageServiceName($packages, array $vars = null)
+    {
         if (isset($vars['virtualmin_domain']))
             return $vars['virtualmin_domain'];
         return null;
@@ -340,13 +349,13 @@ class VirtualminBlesta extends module
             //add our rule for editing
 
             //loop all arrays
-            foreach($rules as $rule => $value){
+            foreach ($rules as $rule => $value) {
                 // || $vars[$rule] == ""
                 if (!array_key_exists($rule, $vars))
                     unset($rules[$rule]);
             }
 
-        }else{
+        } else {
             //we are adding a service remove the edit_action
             //unset($rules["virtualmin_edit_action"]);
         }
@@ -449,13 +458,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being edited (if the current service is an addon service)
      * @return array A numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function editService($package, $service, array $vars=array(), $parent_package=null, $parent_service=null) {
+    public function editService($package, $service, array $vars = array(), $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -468,13 +478,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being canceled (if the current service is an addon service)
      * @return mixed null to maintain the existing meta fields or a numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function cancelService($package, $service, $parent_package=null, $parent_service=null) {
+    public function cancelService($package, $service, $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -487,13 +498,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being suspended (if the current service is an addon service)
      * @return mixed null to maintain the existing meta fields or a numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function suspendService($package, $service, $parent_package=null, $parent_service=null) {
+    public function suspendService($package, $service, $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -506,13 +518,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being unsuspended (if the current service is an addon service)
      * @return mixed null to maintain the existing meta fields or a numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function unsuspendService($package, $service, $parent_package=null, $parent_service=null) {
+    public function unsuspendService($package, $service, $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -525,13 +538,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being renewed (if the current service is an addon service)
      * @return mixed null to maintain the existing meta fields or a numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function renewService($package, $service, $parent_package=null, $parent_service=null) {
+    public function renewService($package, $service, $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -545,13 +559,14 @@ class VirtualminBlesta extends module
      * @param stdClass $parent_package A stdClass object representing the parent service's selected package (if the current service is an addon service)
      * @param stdClass $parent_service A stdClass object representing the parent service of the service being changed (if the current service is an addon service)
      * @return mixed null to maintain the existing meta fields or a numerically indexed array of meta fields to be stored for this service containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function changeServicePackage($package_from, $package_to, $service, $parent_package=null, $parent_service=null) {
+    public function changeServicePackage($package_from, $package_to, $service, $parent_package = null, $parent_service = null)
+    {
         return null;
     }
 
@@ -563,13 +578,14 @@ class VirtualminBlesta extends module
      *
      * @param array An array of key/value pairs used to add the package
      * @return array A numerically indexed array of meta fields to be stored for this package containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function addPackage(array $vars=null) {
+    public function addPackage(array $vars = null)
+    {
 
         $meta = array();
         if (isset($vars['meta']) && is_array($vars['meta'])) {
@@ -595,13 +611,14 @@ class VirtualminBlesta extends module
      * @param stdClass $package A stdClass object representing the selected package
      * @param array An array of key/value pairs used to edit the package
      * @return array A numerically indexed array of meta fields to be stored for this package containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function editPackage($package, array $vars=null) {
+    public function editPackage($package, array $vars = null)
+    {
 
         $meta = array();
         if (isset($vars['meta']) && is_array($vars['meta'])) {
@@ -626,7 +643,8 @@ class VirtualminBlesta extends module
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    public function deletePackage($package) {
+    public function deletePackage($package)
+    {
 
     }
 
@@ -637,7 +655,8 @@ class VirtualminBlesta extends module
      * @param array $vars An array of post data submitted to or on the manage module page (used to repopulate fields after an error)
      * @return string HTML content containing information to display when viewing the manager module page
      */
-    public function manageModule($module, array &$vars) {
+    public function manageModule($module, array &$vars)
+    {
         // Load the view into this object, so helpers can be automatically added to the view
 
         $this->view = new View("manage", "default");
@@ -658,7 +677,8 @@ class VirtualminBlesta extends module
      * @param array $vars An array of post data submitted to or on the add module row page (used to repopulate fields after an error)
      * @return string HTML content containing information to display when viewing the add module row page
      */
-    public function manageAddRow(array &$vars) {
+    public function manageAddRow(array &$vars)
+    {
         // Load the view into this object, so helpers can be automatically added to the view
         $this->view = new View("add_row", "default");
         $this->view->base_uri = $this->base_uri;
@@ -684,7 +704,8 @@ class VirtualminBlesta extends module
      * @param array $vars An array of post data submitted to or on the edit module row page (used to repopulate fields after an error)
      * @return string HTML content containing information to display when viewing the edit module row page
      */
-    public function manageEditRow($module_row, array &$vars) {
+    public function manageEditRow($module_row, array &$vars)
+    {
         $this->view = new View("edit_row", "default");
         $this->view->base_uri = $this->base_uri;
         $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
@@ -710,9 +731,9 @@ class VirtualminBlesta extends module
      *
      * @param array $vars An array of module info to add
      * @return array A numerically indexed array of meta fields for the module row containing:
-     * 	- key The key for this meta field
-     * 	- value The value for this key
-     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     *    - key The key for this meta field
+     *    - value The value for this key
+     *    - encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function addModuleRow(array &$vars)
     {
@@ -731,6 +752,7 @@ class VirtualminBlesta extends module
         //encrypted fields
         $encrypted_fields = array("user_name", "password");
 
+
         // Set use_ssl as false if not checked
         if (empty($vars['use_ssl']))
             $vars['use_ssl'] = "false";
@@ -746,9 +768,9 @@ class VirtualminBlesta extends module
 
                 if (in_array($key, $meta_fields)) {
                     $meta[] = array(
-                        'key'=>$key,
-                        'value'=>$value,
-                        'encrypted'=>in_array($key, $encrypted_fields) ? 1 : 0
+                        'key' => $key,
+                        'value' => $value,
+                        'encrypted' => in_array($key, $encrypted_fields) ? 1 : 0
                     );
                 }
             }
@@ -756,6 +778,7 @@ class VirtualminBlesta extends module
             return $meta;
         }
     }
+
 
     /**
      * Retrieves a list of rules for validating adding/editing a module row
@@ -777,6 +800,10 @@ class VirtualminBlesta extends module
                 'format' => array(
                     'rule' => array(array($this, "validateHostName")),
                     'message' => Language::_("virtualmin.!error.host_name.format", true)
+                ),
+                'valid_connection' => array(
+                    'rule' => array(array($this, "validateConnection"), $vars, $vars),
+                    'message' => Language::_("virtualmin.!error.invalid_connection", true)
                 )
             ),
             'port_number' => array(
@@ -823,6 +850,42 @@ class VirtualminBlesta extends module
                 )
             )
         );
+
+    }
+
+    /**
+     * Validates connection by calling list_plans smallest transaction possible
+     *
+     */
+    public function validateConnection($host, $account)
+    {
+        // print_r($password . $hostname . $port . $user . $realm);
+
+        Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
+        try {
+            $test = new VirtualMinApi(
+                $host,            //hostname
+                $account['user_name'],            //username
+                $account['password'],            //password
+                $account['port_number'],            //port number
+                ($account['use_ssl'] == "true")    //use secure
+            );
+
+
+            $response = $test->list_plans();
+            if ($response && $response->status == 'success') return true;
+
+            $this->log($account['host_name'], serialize($response), "connection error", $response);
+
+        } catch (Exception $e) {
+            $errorMessage = $e->getMessage();
+            /*
+            $this->Input->setErrors(
+                array('errors' => $errorMessage)
+            );*/
+            $this->log($account['host_name'], serialize($errorMessage), "connection error", $errorMessage);
+        }
+
 
     }
 
@@ -953,7 +1016,9 @@ class VirtualminBlesta extends module
      */
     public function getPackageFields($vars = null)
     {
+
         Loader::loadHelpers($this, array("Html"));
+
 
         $fields = new ModuleFields();
         $module_row = $this->getOurModuleRows($vars);
@@ -962,11 +1027,18 @@ class VirtualminBlesta extends module
         //lets get the packages
         $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
 
+
         $packagesOptions = array();
         if ($module_row) {
             $packages = $this->getVirtualMinPackages($module_row);
-            $packagesOptions = $packages['packages'];
-            $packagesValues = $packages['values'];
+
+            if ($packages != false || is_array($packages)) {
+                $packagesOptions = $packages['packages'];
+                $packagesValues = $packages['values'];
+            } else
+                $packagesValues = array('error' => true, 'message' => 'Please check <a href=\'{log_link}\'>blesta log </a>, Could not get packages from server.');
+
+
         }
 
         //print_r($packages);
@@ -987,7 +1059,14 @@ class VirtualminBlesta extends module
 			    try{
 			        //pass our package data
                     var packages = JSON.parse($('#virtualmin_package').attr('data'));
+
                     //var edit_package   = $('#edit_package');
+                    if (typeof packages.error != 'undefined' && typeof packages.message == 'string'){
+                        console.log('appending error');
+                        var log_link = top.window.location.href.replace('packages/add','tools/logs');
+
+                        $('#module_row').parent().append('<li><pre>'+packages.message.replace('{log_link}',log_link)+'</pre></li>')
+                    }
 
                     console.log('packages data',packages);
                  }catch(e){}
@@ -1131,6 +1210,7 @@ class VirtualminBlesta extends module
         return $fields;
 
     }
+
     /**
      *
      * Get the current module row for the selected module group
@@ -1168,9 +1248,18 @@ class VirtualminBlesta extends module
 
         try {
             //get the packages from virtualmin
+
             $response = $this->api($module_row)->list_plans();
 
+
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($response), "output", !empty($response));
+
+
+            $response = $this->parseResponse($response, $module_row);
+
+            if ($this->Input->errors())
+                return false;
+
 
             // Packages are set in 'list'
             $plans = (isset($response->data) ? $response->data : array());
@@ -1189,6 +1278,7 @@ class VirtualminBlesta extends module
             // API request failed
             $message = $e->getMessage();
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($message), "output", false);
+            return false;
         }
     }
 
@@ -1227,11 +1317,11 @@ class VirtualminBlesta extends module
      *
      * @param stdClass $package A stdClass object representing the selected package
      * @return array An array of tabs in the format of method => title, or method => array where array contains:
-     * 	- name (required) The name of the link
-     * 	- icon (optional) use to display a custom icon
-     * 	- href (optional) use to link to a different URL
-     * 		Example: array('methodName' => "Title", 'methodName2' => "Title2")
-     * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
+     *    - name (required) The name of the link
+     *    - icon (optional) use to display a custom icon
+     *    - href (optional) use to link to a different URL
+     *        Example: array('methodName' => "Title", 'methodName2' => "Title2")
+     *        array('methodName' => array('name' => "Title", 'icon' => "icon"))
      */
     //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
 
@@ -1926,16 +2016,17 @@ class VirtualminBlesta extends module
      * @param array $dataRequest is an array of the service & package
      * @throws Exception
      */
-    public function add_mail_account($postRequest, $dataRequest = array()){
+    public function add_mail_account($postRequest, $dataRequest = array())
+    {
 
         //set our data & required post
         $vars = array(
-            "virtualmin_action"      			=> $postRequest["action"] ,
-            "virtualmin_add_mail_username" 		=> $postRequest["add_mail_username"],
-            "virtualmin_add_mail_password"		=> $postRequest["add_mail_password"],
-            "virtualmin_add_mail_quota"			=> $postRequest["add_mail_quota"],
-            "virtualmin_enable_mail_forward"	=> $postRequest["enable_mail_forward"],
-            "virtualmin_email_forward_to"		=> $postRequest["email_forward_to"]
+            "virtualmin_action" => $postRequest["action"],
+            "virtualmin_add_mail_username" => $postRequest["add_mail_username"],
+            "virtualmin_add_mail_password" => $postRequest["add_mail_password"],
+            "virtualmin_add_mail_quota" => $postRequest["add_mail_quota"],
+            "virtualmin_enable_mail_forward" => $postRequest["enable_mail_forward"],
+            "virtualmin_email_forward_to" => $postRequest["email_forward_to"]
         );
 
         //lets validate our rules
@@ -1944,10 +2035,10 @@ class VirtualminBlesta extends module
 
 
         //validate rules before heading to editService
-        if ($errors = $this->Input->errors()){
+        if ($errors = $this->Input->errors()) {
             $response["errors"] = $errors;
             $response["message"] = "failed on validation";
-            $this->getVirtualMinHelper()->sendAjax($response,false);
+            $this->getVirtualMinHelper()->sendAjax($response, false);
         }
 
         //lets grab the service
@@ -1956,7 +2047,7 @@ class VirtualminBlesta extends module
         Loader::loadModels($this, array("Services"));
         $this->Services->edit($service->id, $vars);
         //lets make sure there is no issues between query and service
-        if ($errors = $this->Services->errors()){
+        if ($errors = $this->Services->errors()) {
             //$this->Input->setErrors($this->Services->errors());
             $this->getVirtualMinHelper()->sendAjax($errors);
         }
@@ -1966,9 +2057,9 @@ class VirtualminBlesta extends module
 
 
         $account = array(
-            'domain'	=> $service_fields->virtualmin_domain,
-            'user'		=> $vars["virtualmin_add_mail_username"],
-            'pass'		=> $vars["virtualmin_add_mail_password"]
+            'domain' => $service_fields->virtualmin_domain,
+            'user' => $vars["virtualmin_add_mail_username"],
+            'pass' => $vars["virtualmin_add_mail_password"]
         );
         /*
          * [status] => success
@@ -1977,8 +2068,8 @@ class VirtualminBlesta extends module
          */
         $response = $this->parseResponse($this->api()->create_user($account));
 
-        if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($errors, false);
         }
         //clear the list-users
         //$api->clearSession("list-users");
@@ -2073,7 +2164,7 @@ class VirtualminBlesta extends module
                 $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
                 serialize(array($service_fields->virtualmin_username, $package->meta->package)
                 ), "output", true
-        );
+            );
             $this->getVirtualMinHelper()->sendAjax("Incorrect email details", false);
         }
 
@@ -2104,8 +2195,8 @@ class VirtualminBlesta extends module
     {
 
         //get the email user account from the id
-        $database_name 		= $postRequest['database_name'];
-        $database_type      = 'mysql';  //@todo possible support other
+        $database_name = $postRequest['database_name'];
+        $database_type = 'mysql';  //@todo possible support other
 
         //parse service & package
         $service = $dataRequest['service'];
@@ -2121,10 +2212,10 @@ class VirtualminBlesta extends module
 
 
         //validate rules before processing the request
-        if ($errors = $this->Input->errors()){
+        if ($errors = $this->Input->errors()) {
             $response["errors"] = $errors;
             $response["message"] = "failed on validation";
-            $this->getVirtualMinHelper()->sendAjax($response,false);
+            $this->getVirtualMinHelper()->sendAjax($response, false);
         }
 
         //clear database session as we are now processing a request
@@ -2133,16 +2224,16 @@ class VirtualminBlesta extends module
         //lets create the database
         $prams = array(
             'domain' => $service_fields->virtualmin_domain,
-            'name'  =>  $database_name,
-            'type'  =>  $database_type
+            'name' => $database_name,
+            'type' => $database_type
         );
 
         //check for issues
         $database_response = $this->parseResponse($this->api()->create_database($prams));
 
         //pass issues back to client
-        if ($errors = $this->Input->errors()){
-            $this->getVirtualMinHelper()->sendAjax($errors,false);
+        if ($errors = $this->Input->errors()) {
+            $this->getVirtualMinHelper()->sendAjax($errors, false);
         }
 
         //database added send back
@@ -2156,7 +2247,8 @@ class VirtualminBlesta extends module
      * @param array $vars An array of key/value data pairs
      * @return array An array of Input rules suitable for Input::setRules()
      */
-    public function databaseParseRules(&$vars) {
+    public function databaseParseRules(&$vars)
+    {
         return array(
             'database_name' => array(
                 'empty' => array(
@@ -2243,7 +2335,6 @@ class VirtualminBlesta extends module
 
         return trim($domain);
     }
-
 
 
 }
