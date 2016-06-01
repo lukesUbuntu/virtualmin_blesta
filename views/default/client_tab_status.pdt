@@ -101,7 +101,7 @@
                 <td><?php $this->_("virtualmin.client.tabs.status.web_address"); ?></td>
                 <td><?php $this->Html->_($serverDetails->url); ?></td>
             </tr>
-            <?
+            <?php
         }
         ?>
 
