@@ -1,6 +1,12 @@
-# 23/05/2020 Update
-Just getting back into hosting and doing a re-write of this module for Blesta v4.9+  
-Found several pain points including limited support for cloudflare dns updating in virtualmin + blesta so will be adding this.  If you have any feature request please open up a issue.
+# 23/05/2020 Blesta v4.9+ Update
+Doing a re-write of this module for Blesta v4.9+ orginally did this plugin for someone else 4 years ago but they stopped webhosting... so i stopped development...  
+  
+I myself have now got into webhosting and re-writing this plugin for my own needs as i want all my hosting automated from billing to the client controlling everything within blesta.
+This also includes Cloudflare support option to update DNS
+
+   
+  If you have any suggestion's feel free to create an issue.
+
 
 **Virtualmin Blesta Module version 0.1.3**
 
