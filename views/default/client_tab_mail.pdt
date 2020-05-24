@@ -148,8 +148,21 @@
 
 
 						<?php
-						if ($this->Html->ifSet($email_data['forward_mail_to']) != "")
-							echo "<td>Mail Forwarding to <small>".$email_data['forward_mail_to'][0]."</small></td>";
+						
+						if ($this->Html->ifSet($email_data['forward_mail_to']) != ""){
+							$email_address = '';
+							if (is_array($email_data['forward_mail_to'])){
+								
+								foreach ($email_data['forward_mail_to'] as $email) {
+									$email_address = $email_address . "<li>$email</li>";
+								}
+					
+							}else{
+								$email_address = $email_data['forward_mail_to'];
+							}
+							echo "<td>Mail Forwarding to <small>".$email_address."</small></td>";
+						}
+							
 						else
 							echo "<td></td>"; ?>
 
@@ -171,7 +184,7 @@
 									<?php
 									if ($this->Html->ifSet($email_data['forward_mail_to']) != "") {
 										?>
-										<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
+										<li id="disable_forward" role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
 												Forwarding</a></li>
 										<?php
 									} else {
@@ -351,7 +364,21 @@
 				})
 			});
 
+			$("#disable_forward" , $CurrentPage).click(function(e){
+				var email_id = $(this).parent().data("email_id");
+				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
+				var $postVars = {
+						'email_id'		: 	email_id,
+						'email_address'	:	email_address,
+						'action'   :	"mail_disable_forward"
+				};
+				sendRequest($postVars,function(response){
+						console.log("disabling forwarder",response)
+					
 
+				});
+				
+			})
 			/*
 			 * Create Email Account
 			 */
@@ -424,5 +451,6 @@
 
 
 	</script>
+	
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>

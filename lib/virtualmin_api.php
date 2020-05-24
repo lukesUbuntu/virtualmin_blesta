@@ -1290,7 +1290,7 @@ class VirtualMinApi
         //program's not to cache
 
         $no_store = array("create-domain", "create-user", "delete-user", "list-plans");
-        $no_session = false;
+        $no_session = true;
 
         //store session under default if no domain provided
         $domain = (isset($params['domain'])) ? $params['domain'] : 'default';

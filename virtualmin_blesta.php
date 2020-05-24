@@ -530,6 +530,7 @@ class VirtualminBlesta extends module
             $api = $this->api($row);
 
             $response = $api->suspend_domain(['domain' => $service_fields->virtualmin_domain]);
+            // $response = $api->suspend_domain(['domain' => $service_fields->virtualmin_domain]);
 
             if (isset($response->output) && isset($response->error) && $response->status !== 'success') {
                 $this->log($row->meta->host_name . '| suspend_domain', serialize($response), 'output');
@@ -1833,7 +1834,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password");
+        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password", '');
         $dataRequest = array(
             'package' => $package,
             'service' => $service,
@@ -2193,6 +2194,23 @@ class VirtualminBlesta extends module
         );
     }
 
+    public function mail_disable_forward($postRequest, $dataRequest = array()){
+        $email_id = $postRequest['email_id'];
+        $email_address = $postRequest["email_address"];
+
+        //parse service & package
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+
+        //grab service details
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //get the mail accounts for domain
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $mail_accounts = $this->api()->list_users($account);
+        // virtualmin modify-user --domain domain.name
+
+    }
     /**
      * Deletes a mail account via Ajax for our Client Mail Tab
      *
