@@ -79,7 +79,7 @@ function attachError($message,toElement){
     error_holder.prepend(
         '<section class=\"error_section\">'+
         '<article class=\"error_box error alert alert-danger alert-dismissable\">'+
-        '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+        '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">ï¿½</a>'+
             //	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
         '<p>'+$message+'</p>'+
         '</article>'+
@@ -92,7 +92,7 @@ function attachSuccess($message,toElement){
     error_holder.prepend(
         '<section class=\"success_section\">'+
         '<article class=\"alert alert-success alert-dismissable\">'+
-        '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">×</a>'+
+        '<a href="#" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">ï¿½</a>'+
             //	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">'+
         '<p>'+$message+'</p>'+
         '</article>'+
@@ -172,4 +172,5 @@ $(document).ready(function () {
         $(this).hide();
         $('#password').removeClass('hide');
     });
+
 })

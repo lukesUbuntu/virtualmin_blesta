@@ -118,6 +118,7 @@ $lang['virtualmin.client.tabs.status.name_servers'] = "Name Server";
 $lang['virtualmin.client.tabs.status.login_webmin'] = "Login to Control Panel";
 $lang['virtualmin.client.tabs.status.web_folder'] = "www Folder";
 $lang['virtualmin.client.tabs.status.web_address'] = "Website Address";
+$lang['virtualmin.client.tabs.status.php_version'] = "PHP Version";
 
 //client tabs - Client Tab Mail (client_tab_mail.pdt)
 $lang['virtualmin.client.tabs.mail.menu'] = "Mail Accounts";

@@ -1,3 +1,6 @@
+<script>
+    var VirtualMinModuleServerDetails = JSON.parse('<?php echo json_encode($serverDetails); ?>');
+</script>
 <h4><?php $this->_("virtualmin.client.tabs.status.heading"); ?></h4>
 
 <div id="statusPage">
@@ -7,24 +10,27 @@
         'used' => round($this->Html->ifSet($serverDetails->server_quota_used, 0), 2),
         'limit' => round($this->Html->ifSet($serverDetails->server_quota, 0), 2)
     );
+    // print_r($serverDetails);exit;
     $unlimited = empty($serverDetails->server_quota);
-    $percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0) / $this->Html->ifSet($disk['limit'])) * 100, 0));
+
+    $percent_used = 0;
+    // ($unlimited ? 0 : round(($this->Html->ifSet($disk['used'], 0) / $this->Html->ifSet($disk['limit'])) * 100, 0));
     ?>
     <small>
-        <?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit']))); ?>
+        <span class="server_quota_used"></span> / <span class="server_quota"></span>
     </small>
     <div class="progress">
-        <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
-             aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0" aria-valuemax="100"
-             style="width: <?php $this->Html->_($percent_used); ?>%">
-            <span
-                class="sr-only"><?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($disk['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($disk['used']), $this->Html->safe($disk['limit']))); ?></span>
+        <div id="disk_progress" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            
         </div>
     </div>
 
-    <h3><?php $this->_("virtualmin.client.tabs.status.bandwidth_title"); ?></h3>
+    
     <?php
 
+    if ($this->Html->ifSet($serverDetails->bandwidth_limit)){
+        ?><h3><?php $this->_("virtualmin.client.tabs.status.bandwidth_title"); ?></h3><?php
     $bandwidth = array(
         'used' => round($this->Html->ifSet($serverDetails->bandwidth_usage, 0), 2),
         'limit' => round($this->Html->ifSet($serverDetails->bandwidth_limit, 0), 2)
@@ -43,8 +49,9 @@
                 class="sr-only"><?php echo($unlimited ? $this->_("virtualmin.client.tabs.status.disk_usage_unlimited", true, $this->Html->safe($bandwidth['used'])) : $this->_("virtualmin.client.tabs.status.disk_usage", true, $this->Html->safe($bandwidth['used']), $this->Html->safe($bandwidth['limit']))); ?></span>
         </div>
     </div>
-
-
+    <?php
+    }
+    ?>
     <h3><?php $this->_("virtualmin.client.tabs.status.server_details"); ?></h3>
 
     <?php
@@ -92,6 +99,15 @@
             </td>
             <td>
                 <spand><?php $this->Html->_($serverDetails->html_directory); ?></spand>
+            </td>
+        </tr>
+        <!-- php version !-->
+        <tr>
+            <td>
+                <span><?php $this->_("virtualmin.client.tabs.status.php_version"); ?></span>
+            </td>
+            <td>
+                <spand><?php $this->Html->_($serverDetails->php_version); ?></spand>
             </td>
         </tr>
         <?php
@@ -151,3 +167,4 @@ if ($serverDetails->password_storage == "Plain text" && $webmin_access == true) 
 </script>
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js'); ?>'></script>
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/client_tab_status.js'); ?>'></script>
