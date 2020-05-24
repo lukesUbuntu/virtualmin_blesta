@@ -1001,20 +1001,38 @@ class VirtualminBlesta extends module
     public function getPackageFields($vars = null)
     {
 
-        Loader::loadHelpers($this, array("Html"));
-
-
+        Loader::loadHelpers($this, ['Html']);
         $fields = new ModuleFields();
-        $module_row = $this->getOurModuleRows($vars);
-        //if virtualmin_package on change display the options for this
+       
+    
+        
+        // Fetch all packages available for the given server or server group
+        $module_row = null;
+        if (isset($vars->module_row) && $vars->module_row > 0) {
+            $module_row = $this->getModuleRow($vars->module_row);
+        } else {
+            $rows = $this->getModuleRows();
+            if (isset($rows[0])) {
+                $module_row = $rows[0];
+            }
 
+            unset($rows);
+        }
+        
+        //if virtualmin_package on change display the options for this
+       
         //lets get the packages
         $package = $fields->label(Language::_("virtualmin.package_fields.package", true), "virtualmin_package");
-
+       
 
         $packagesOptions = array();
+        
         if ($module_row) {
+           
+           
             $packages = $this->getVirtualMinPackages($module_row);
+
+            
 
             if ($packages != false || is_array($packages)) {
                 $packagesOptions = $packages['packages'];
@@ -1024,21 +1042,30 @@ class VirtualminBlesta extends module
 
 
         }
-
-        //print_r($packages);
+        // $plan->attach(
+        //     $fields->fieldSelect(
+        //         'meta[plan]',
+        //         $plans,
+        //         $this->Html->ifSet($vars->meta['plan']),
+        //         ['id' => 'virtualmin_plan']
+        //     )
+        // );
+       
         //@todo if we don't have any packages then we need to display error
         $package->attach(
             $fields->fieldSelect(
                 "meta[package]",
                 $packagesOptions,
                 $this->Html->ifSet($vars->meta['package']),
-                array('id' => "virtualmin_package", 'data' => json_encode($packagesValues))
+                ['id' => "virtualmin_package", 'data' => json_encode($packagesValues)]
             )
         );
+        
         $fields->setField($package);
 
-        //@todo clean up package display of settings
+        // TODO Clean up package disaply when selecting package
         $fields->setHtml("
+        
 			<script type=\"text/javascript\">
 			    try{
 			        //pass our package data
@@ -1087,7 +1114,7 @@ class VirtualminBlesta extends module
 			</script>
 			<div id='virtualminPackageSettings'></div>
 		");
-
+       
         //@todo wrap the attache into a function we can ref
         //$name, $for=null, array $attributes=null, $preserve_tags=false
         $panel_options = $fields->label(
@@ -1096,13 +1123,15 @@ class VirtualminBlesta extends module
             array('style' => "font-size:15px")
         );
 
+        
         //default style
 
 
         //append default classes
         $theStyle = $this->LabelStyle();
-        $theStyle['class'] += ' mail';
-
+        
+        $theStyle['class'] = $theStyle['class'].' mail';
+       
         //mail
         $panel_options_mail = $fields->label(Language::_("virtualmin.packages.mail", true), "enable_mail", $theStyle);
 
@@ -1120,7 +1149,7 @@ class VirtualminBlesta extends module
         $fields->setField($panel_options);
 
         $theStyle = $this->LabelStyle();
-        $theStyle['class'] += ' webmin';
+        $theStyle['class'] = $theStyle['class'].' webmin';
 
         //webmin
         $panel_options_webmin = $fields->label(Language::_("virtualmin.packages.webmin", true), "enable_webmin", $theStyle);
@@ -1141,7 +1170,7 @@ class VirtualminBlesta extends module
 
         //mysql
         $theStyle = $this->LabelStyle();
-        $theStyle['class'] += ' mysql';
+        $theStyle['class'] = $theStyle['class'].' mysql';
         $panel_options_database = $fields->label(Language::_("virtualmin.packages.database", true), "enable_database", $theStyle);
 
         $panel_options->attach(
@@ -1159,7 +1188,8 @@ class VirtualminBlesta extends module
 
 
         $theStyle = $this->LabelStyle();
-        $theStyle['class'] += ' scripts';
+        $theStyle['class'] = $theStyle['class'].' scripts';
+
         $panel_options_scripts = $fields->label(Language::_("virtualmin.packages.scripts", true), "enable_scripts", $theStyle);
 
         $panel_options->attach(
@@ -1176,7 +1206,8 @@ class VirtualminBlesta extends module
         $fields->setField($panel_options_scripts);
 
         $theStyle = $this->LabelStyle();
-        $theStyle['class'] += ' backups';
+        $theStyle['class'] = $theStyle['class'].' backups';
+
         $panel_options_backups = $fields->label(Language::_("virtualmin.packages.backups", true), "enable_scripts", $theStyle);
 
         $panel_options->attach(
@@ -1232,10 +1263,10 @@ class VirtualminBlesta extends module
 
         try {
             //get the packages from virtualmin
-
+           
             $response = $this->api($module_row)->list_plans();
 
-
+           
             $this->log($module_row->meta->host_name . "|" . 'getVirtualMinPackages', serialize($response), "output", !empty($response));
 
 
@@ -1270,7 +1301,8 @@ class VirtualminBlesta extends module
     {
         return array(
             'style' => "padding:2px;margin-right:10px",
-            'class' => 'allowed_features hidden'
+            'class' => 'allowed_features '
+            // TODO fix up hidden features on dropdown change
         );
     }
 
