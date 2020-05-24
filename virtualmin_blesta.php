@@ -679,21 +679,24 @@ class VirtualminBlesta extends module
      */
     public function manageAddRow(array &$vars)
     {
+
+        
         // Load the view into this object, so helpers can be automatically added to the view
-        $this->view = new View("add_row", "default");
+        $this->view = new View('add_row', 'default');
         $this->view->base_uri = $this->base_uri;
-        $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
+        $this->view->setDefaultView('components' . DS . 'modules' . DS . 'virtualmin_blesta' . DS);
 
         // Load the helpers required for this view
-        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+        Loader::loadHelpers($this, ['Form', 'Html', 'Widget']);
 
         // Set unspecified checkboxes
         if (!empty($vars)) {
-            if (empty($vars['use_ssl']))
-                $vars['use_ssl'] = "false";
+            if (empty($vars['use_ssl'])) {
+                $vars['use_ssl'] = 'false';
+            }
         }
 
-        $this->view->set("vars", (object)$vars);
+        $this->view->set('vars', (object) $vars);
         return $this->view->fetch();
     }
 
@@ -737,6 +740,9 @@ class VirtualminBlesta extends module
      */
     public function addModuleRow(array &$vars)
     {
+        
+        $vars['host_name'] = strtolower($vars['host_name']);
+
         //our meta fields
         $meta_fields = array(
             "server_name",
@@ -751,19 +757,22 @@ class VirtualminBlesta extends module
         );
         //encrypted fields
         $encrypted_fields = array("user_name", "password");
+       
 
-
+       
         // Set use_ssl as false if not checked
         if (empty($vars['use_ssl']))
             $vars['use_ssl'] = "false";
 
         // Set rules to validate against
         $this->Input->setRules($this->getRowRules($vars));
-
+       
         // Validate module row
+       
         if ($this->Input->validates($vars)) {
             // Build the meta data for this row
             $meta = array();
+           
             foreach ($vars as $key => $value) {
 
                 if (in_array($key, $meta_fields)) {
@@ -774,7 +783,7 @@ class VirtualminBlesta extends module
                     );
                 }
             }
-
+            
             return $meta;
         }
     }
@@ -786,71 +795,46 @@ class VirtualminBlesta extends module
      * @param array $vars A list of input vars
      * @return array A list of rules
      */
-    private function getRowRules(array &$vars)
+    private function getRowRules($vars)
     {
-        return array(
-            'server_name' => array(
-                'empty' => array(
-                    'rule' => "isEmpty",
+        $rules = [
+            'server_name' => [
+                'valid' => [
+                    'rule' => 'isEmpty',
                     'negate' => true,
-                    'message' => Language::_("virtualmin.!error.server_name.empty", true)
-                )
-            ),
-            'host_name' => array(
-                'format' => array(
-                    'rule' => array(array($this, "validateHostName")),
-                    'message' => Language::_("virtualmin.!error.host_name.format", true)
-                ),
-                'valid_connection' => array(
-                    'rule' => array(array($this, "validateConnection"), $vars, $vars),
-                    'message' => Language::_("virtualmin.!error.invalid_connection", true)
-                )
-            ),
-            'port_number' => array(
-                'format' => array(
-                    'rule' => array(array($this, "validatePortNumber")),    //is_numeric
-                    'message' => Language::_("virtualmin.!error.port_number.format", true)
-                )
-            ),
-            'user_name' => array(
-                'empty' => array(
-                    'rule' => "isEmpty",
+                    'message' => Language::_('Virtualmin.!error.server_name_valid', true)
+                ]
+            ],
+            'host_name' => [
+                'valid' => [
+                    'rule' => [[$this, 'validateHostName']],
+                    'message' => Language::_('Virtualmin.!error.host_name_valid', true)
+                ]
+            ],
+            'user_name' => [
+                'valid' => [
+                    'rule' => 'isEmpty',
                     'negate' => true,
-                    'message' => Language::_("virtualmin.!error.user_name.empty", true)
-                )
-            ),
-            'password' => array(
-                'format' => array(
-                    'rule' => "isEmpty",
+                    'message' => Language::_('Virtualmin.!error.user_name_valid', true)
+                ]
+            ],
+            'port_number' => [
+                'valid' => [
+                    'rule' => 'isEmpty',
                     'negate' => true,
-                    'message' => Language::_("virtualmin.!error.password.format", true)
-                )
-            ),
-            'use_ssl' => array(
-                'format' => array(
-                    'if_set' => true,
-                    'rule' => array("in_array", array("true", "false")),
-                    'message' => Language::_("virtualmin.!error.use_ssl.format", true)
-                )
-            ),
-            'account_limit' => array(
-                'valid' => array(
-                    'rule' => array("matches", "/^([0-9]+)?$/"),
-                    'message' => Language::_("virtualmin.!error.account_limit.valid", true)
-                )
-            ),
-            'name_servers' => array(
-                'count' => array(
-                    'rule' => array(array($this, "validateNameServerCount")),
-                    'message' => Language::_("virtualmin.!error.name_servers.count", true)
-                ),
-                'valid' => array(
-                    'rule' => array(array($this, "validateNameServers")),
-                    'message' => Language::_("virtualmin.!error.name_servers.valid", true)
-                )
-            )
-        );
+                    'message' => Language::_('Virtualmin.!error.port_valid', true)
+                ]
+            ],
+            'password' => [
+                'valid' => [
+                    'rule' => 'isEmpty',
+                    'negate' => true,
+                    'message' => Language::_('Virtualmin.!error.password_valid', true)
+                ]
+            ]
+        ];
 
+        return $rules;
     }
 
     /**

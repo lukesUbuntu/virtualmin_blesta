@@ -83,7 +83,7 @@
 					<tbody>
 						<?php
 						//@todo make namservers optional
-						$num_servers = count($this->Html->ifSet($vars->name_servers));
+						$num_servers = count($this->Html->ifSet($vars->name_servers,[]));
 						for ($i=0; $i<max(2,$num_servers); $i++) {
 						?>
 						<tr class="ns_row<?php echo ($i%2 == 1) ? " odd_row" : "";?>">
@@ -117,7 +117,24 @@ $(document).ready(function() {
 
 	$("#testConnection").click(function(e){
 		e.preventDefault();
-		alert("currently not implmented")
+		// TODO finish connection testing current issues with cors via client testing will move this call to backend call from surver
+		var url = (($("#use_ssl").prop('checked')) ? "https" : "http") + '://' +$("#host_name").val() +':'+ $("#port_number").val()
+
+		console.log("url",url)
+		$.ajax({
+			url : url + '/virtual-server/remote.cgi?list-plans',
+			data: {
+				username: $("#user_name").val(),
+				password: $("#password").val()
+       		 },
+			type: "POST",
+			dataType : "json",
+		})
+		.done(function(a,b){
+			console.log("a",a)
+			console.log("b",b)
+		})
+		// alert("currently not implmented")
 	});
 
 	// Add a row
