@@ -103,10 +103,11 @@
 		</div>
 	</form>
 	<?php
-	//$this->Form->end();
-	if (($account_index = count($mail_accounts)) > 1) {
-		?>
+	//$this->Form->end();	
+	//print_r($mail_accounts);exit;
 
+	if ($this->Html->ifSet($mail_accounts) && count($mail_accounts) > 0) {
+		?>
 		<div class="table-responsive" style="margin-top: 60px;">
 			<table id="mail_accounts" class="table table-curved table-striped">
 

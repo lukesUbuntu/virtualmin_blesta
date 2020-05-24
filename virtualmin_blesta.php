@@ -1794,7 +1794,7 @@ class VirtualminBlesta extends module
 
         //grab the mailAccounts for domain
         $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
-
+       
         //lets build vars before render
         $buildVars = array(
             "mail_accounts" => $mail_accounts,
