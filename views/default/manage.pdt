@@ -78,18 +78,19 @@
 			</tr>
 			<?php
 			for ($i=0; $i<$num_rows; $i++) {
+				
 			?>
 			<tr<?php echo ($i%2 == 1) ? " class=\"odd_row\"" : "";?>>				
 				<td><?php $this->Html->_($module->groups[$i]->name);?></td>
 				<td><?php echo count($this->Html->ifSet($module->groups[$i]->rows));?></td>
 				<td>
-					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/editgroup/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->groups[$i]->id) . "/");?>"><?php $this->_("VirtualMin.manage.module_groups.edit");?></a>
+					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/editgroup/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->groups[$i]->id) . "/");?>"><?php $this->_("virtualmin.manage.module_groups.edit");?></a>
 					<?php
 					$this->Form->create($this->base_uri . "settings/company/modules/deletegroup/");
 					$this->Form->fieldHidden("id", $this->Html->ifSet($module->id));
 					$this->Form->fieldHidden("group_id", $this->Html->ifSet($module->groups[$i]->id));
 					?>
-					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/deletegroup/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->groups[$i]->id) . "/");?>" class="manage" rel="<?php echo $this->Html->safe($this->_("VirtualMin.manage.module_groups.confirm_delete", true));?>"><?php $this->_("VirtualMin.manage.module_groups.delete");?></a>
+					<a href="<?php echo $this->Html->safe($this->base_uri . "settings/company/modules/deletegroup/" . $this->Html->ifSet($module->id) . "/" . $this->Html->ifSet($module->groups[$i]->id) . "/");?>" class="manage" rel="<?php echo $this->Html->safe($this->_("virtualmin.manage.module_groups.confirm_delete", true));?>"><?php $this->_("virtualmin.manage.module_groups.delete");?></a>
 					<?php
 					$this->Form->end();
 					?>
