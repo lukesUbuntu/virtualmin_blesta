@@ -1583,40 +1583,46 @@ class VirtualminBlesta extends module
 
         //return as not available in this release
         //return "Not available in this release";
-
+      
         //get the service
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
+    
         //get the list of current installed scripts
         $account = array('domain' => $service_fields->virtualmin_domain);
         $response = $this->parseResponse($this->api()->list_scripts($account));
 
-
+       
         //check errors before any other server requests
         if ($this->Input->errors())
             return;
 
+         
         //current scripts
-        $installed_scripts = array();
+        $installed_scripts = [];
+       
         $installed = $this->getVirtualMinHelper()->cleanArray($response);
         
-
+       
         //store the script type
-        if (count($installed) > 1)
+        if (!empty($installed) && count($installed) > 1)
         foreach ($installed as $script)
             $installed_scripts[] = $script['type'];
 
+        
         //lets get list_available_scripts the server has allowed us to install
         $response = $this->parseResponse($this->api()->list_available_scripts());
 
+       
         //check errors before any other server requests
         if ($this->Input->errors())
             return;
 
+           
         //clean up our script
         $script_list = $this->getVirtualMinHelper()->cleanArray($response);
 
-
+       
         //lets build vars before render
         $buildVars = array(
             "script_list" => $script_list,

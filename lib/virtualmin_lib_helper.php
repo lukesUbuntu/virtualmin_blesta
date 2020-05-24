@@ -94,11 +94,12 @@ class virtualmin_lib_helper {
      * @return object| bool   Returns a virtualmin clean object with values
      */
     public function cleanArray($arrayData){
-        $cleanArray = array();
+        $cleanArray = [];
         if (isset($arrayData->data) && isset($arrayData->data[0]->values)){
                 foreach ($arrayData->data as $index => $results) {
-                    foreach($results->values as $result => $values )
 
+                foreach($results->values as $result => $values ){
+                   
                     if (count($values) > 1)      //if there is possible multiple values we will then store them as
                         $cleanArray[$index][$result] = $values;
 
@@ -112,12 +113,15 @@ class virtualmin_lib_helper {
 
                     else
                         $cleanArray[$index][$result] = $values[0];
+                }
+
+
 
                 }
 
         }
 
         unset($data); // or $mainArr = $resultArr;
-        return count($cleanArray) > 0 ? (array)$cleanArray : false;
+        return (!empty($cleanArray) && count($cleanArray) > 0) ? (array)$cleanArray : false;
     }
 }

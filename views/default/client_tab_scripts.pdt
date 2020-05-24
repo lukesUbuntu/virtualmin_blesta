@@ -6,7 +6,7 @@
 
 <?php
 
-if ((count($script_list)) > 1) {
+if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
     ?>
     <div class="table-responsive" style="margin-top: 60px;">
         <table id="scripts" class="table table-curved table-striped">
