@@ -1,5 +1,5 @@
 <?php
-
+set_time_limit(0);
 /**
  * Created by PhpStorm.
  * User: Luke Hardiman
@@ -225,6 +225,7 @@ class VirtualminBlesta extends module
         if ($this->Input->errors())
             return;
 
+        
         // Only provision the service if module is enabled
         //if $vars['virtualmin_domain_already']
         if (isset($vars['use_module']) && $vars['use_module'] == "true" && !isset($vars['virtualmin_domain_already'])) {
@@ -486,6 +487,21 @@ class VirtualminBlesta extends module
      */
     public function cancelService($package, $service, $parent_package = null, $parent_service = null)
     {
+        // TODO if service is canceled add an option to delete the package for now we will just disable the service on virtualmin
+        if (($row = $this->getModuleRow())) {
+            $service_fields = $this->serviceFieldsToObject($service->fields);
+            
+            $api = $this->api($row);
+
+            $response = $api->suspend_domain(['domain' => $service_fields->virtualmin_domain]);
+
+            if (isset($response->output) && isset($response->error) && $response->status !== 'success') {
+                $this->log($row->meta->host_name . '| cancelService', serialize($response), 'output');
+                $this->Input->setErrors(array(array($response->output)));
+            } else {
+                $this->log($row->meta->host_name . '| cancelService', serialize($response), 'output', true);
+            }
+        }
         return null;
     }
 
@@ -506,6 +522,24 @@ class VirtualminBlesta extends module
      */
     public function suspendService($package, $service, $parent_package = null, $parent_service = null)
     {
+        // $service_reasone =
+       
+        if (($row = $this->getModuleRow())) {
+            $service_fields = $this->serviceFieldsToObject($service->fields);
+            
+            $api = $this->api($row);
+
+            $response = $api->suspend_domain(['domain' => $service_fields->virtualmin_domain]);
+
+            if (isset($response->output) && isset($response->error) && $response->status !== 'success') {
+                $this->log($row->meta->host_name . '| suspend_domain', serialize($response), 'output');
+                $this->Input->setErrors(array(array($response->output)));
+            } else {
+                $this->log($row->meta->host_name . '| suspend_domain', serialize($response), 'output', true);
+            }
+        }
+       
+
         return null;
     }
 
@@ -526,6 +560,23 @@ class VirtualminBlesta extends module
      */
     public function unsuspendService($package, $service, $parent_package = null, $parent_service = null)
     {
+        if (($row = $this->getModuleRow())) {
+            $service_fields = $this->serviceFieldsToObject($service->fields);
+            
+            $api = $this->api($row);
+
+            $response = $api->unsuspend_domain(['domain' => $service_fields->virtualmin_domain]);
+
+            if (isset($response->output) && isset($response->error) && $response->status !== 'success') {
+                $this->log($row->meta->host_name . '| unsuspend_domain', serialize($response), 'output');
+                $this->Input->setErrors(array(array($response->output)));
+            } else {
+                $this->log($row->meta->host_name . '| unsuspend_domain', serialize($response), 'output', true);
+            }
+        }
+       
+
+     
         return null;
     }
 

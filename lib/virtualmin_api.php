@@ -1334,7 +1334,7 @@ class VirtualMinApi
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
 
-        //curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
 
         if (isset($params['user']) && isset($params['password'])) {
             curl_setopt($ch, CURLOPT_USERPWD, $params['user'] . ":" . $params['password']);
