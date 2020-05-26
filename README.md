@@ -6,7 +6,7 @@ I myself have now got into webhosting and updating this plugin for my own needs 
 This also will include Cloudflare support option to update DNS
 
    
-  If you have any suggestion's feel free to create an issue 
+  If you have any suggestion's feel free to create an issue, aim is to allow client to login to blesta to manage there hosting.
   
   [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11)
   
