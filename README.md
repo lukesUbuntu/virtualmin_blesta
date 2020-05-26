@@ -10,7 +10,7 @@ This also will include Cloudflare support option to update DNS
   
   [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11)
   
-
+  Module works with blesta 4.0+ (php 5.6 + 7.0+) project is still in beta
 
 ## 
 
