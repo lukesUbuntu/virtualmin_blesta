@@ -1,5 +1,4 @@
 <?php
-set_time_limit(0);
 /**
  * Created by PhpStorm.
  * User: Luke Hardiman
@@ -1834,7 +1833,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password", '');
+        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password", 'mail_disable_forward');
         $dataRequest = array(
             'package' => $package,
             'service' => $service,
@@ -2195,6 +2194,7 @@ class VirtualminBlesta extends module
     }
 
     public function mail_disable_forward($postRequest, $dataRequest = array()){
+        // TODO allow to disable individual disable of mail forwarders this removes all forwarders on an account
         $email_id = $postRequest['email_id'];
         $email_address = $postRequest["email_address"];
 
@@ -2208,7 +2208,53 @@ class VirtualminBlesta extends module
         //get the mail accounts for domain
         $account = array('domain' => $service_fields->virtualmin_domain);
         $mail_accounts = $this->api()->list_users($account);
-        // virtualmin modify-user --domain domain.name
+        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($mail_accounts);
+
+        // virtualmin modify-user --domain domain.name --del-forward address
+        // get the users forwarding address and remove them
+        $foundAccount = null;
+        foreach ($mail_accounts as $account) {
+
+            if ($account['email_address'] == $email_address){
+                $foundAccount = $account;
+                break;
+            }
+        }
+       if ($foundAccount == null){
+        $this->log(
+            $service_fields->virtualmin_domain . "| mail_disable_forward account failed mailAccount[$email_id] email address $email_address is not found on domain" .
+            serialize(array($service_fields->virtualmin_username, $package->meta->package)
+            ), "output", true
+        );
+            $this->getVirtualMinHelper()->sendAjax("Something went wrong", false);
+            return;
+       }
+        $forwardAddress = $foundAccount['forward_mail_to'];
+       
+        if (is_array($forwardAddress)){
+            foreach ($forwardAddress as $email) {
+                $prams = [
+                    'user' => $foundAccount['unix_username'],
+                    'domain' => $service_fields->virtualmin_domain,
+                    'del-forward' => $email
+                ];
+               
+                $reponse = $this->api()->modify_user($prams);
+                print_r($reponse);
+            }
+           
+        }else{
+            $prams = [
+                'user' => $foundAccount['unix_username'],
+                'domain' => $service_fields->virtualmin_domain,
+                'del-forward' => $forwardAddress
+            ];
+            $reponse = $this->api()->modify_user($prams);
+        }
+
+        $this->getVirtualMinHelper()->sendAjax("Removed forward addresses");
+        // modify_user
+        //$this->api()->modify_user
 
     }
     /**
