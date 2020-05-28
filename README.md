@@ -8,9 +8,9 @@ This also will include Cloudflare support option to update DNS
    
   If you have any suggestion's feel free to create an issue, aim is to allow client to login to blesta to manage there hosting.
   
-  [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) 
+  [Todo Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) or [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/projects/2)
   
-  Module currently works with blesta 4.0+ (php 5.6 & 7.0+) project is still in beta i wouldn't install till [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) has been completed. But if you want to have a play and provide issues feel free to install.
+  Module currently works with blesta 4.0+ (php 5.6 & 7.0+) project is still in beta i wouldn't install till  [Todo Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) or [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/projects/2) has been completed. But if you want to have a play and provide issues or feedback feel free to install.
 
 ## 
 
