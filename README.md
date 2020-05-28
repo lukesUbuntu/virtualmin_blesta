@@ -1,4 +1,4 @@
-# 23/05/2020 Blesta v4.9+ Update
+# 23/05/2020 Virtualmin Module for Blesta v4.9+ 
 Updating this module for Blesta v4.9+ orginally did this plugin for someone else 4 years ago but they stopped webhosting... so i stopped development...  
   
 I myself have now got into webhosting and updating this plugin for my own needs as i want all my hosting automated, from billing to the client controlling everything within blesta.
@@ -10,7 +10,7 @@ This also will include Cloudflare support option to update DNS
   
   [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) 
   
-  Module works with blesta 4.0+ (php 5.6 + 7.0+) project is still in beta i wouldn't install till  [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) has been completed.
+  Module currently works with blesta 4.0+ (php 5.6 & 7.0+) project is still in beta i wouldn't install till [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) has been completed. But if you want to have a play and provide issues feel free to install.
 
 ## 
 
