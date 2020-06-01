@@ -25,6 +25,8 @@ else
 
 
 function sendRequest($postVars,successCallback,loadingElement){
+    
+   
     //pass the token
     $postVars['_csrf_token'] = $CsrfToken;  //add token
 
@@ -40,6 +42,7 @@ function sendRequest($postVars,successCallback,loadingElement){
         success: successCallback,
         //console.log(response);
         error : function(httpObj, textStatus) {
+         
             //401 (Unauthorized) need to refresh page session died
             if (httpObj.status == 401){
                 attachError("Session timed out refreshing possibley logged out reloading page...");
@@ -48,14 +51,25 @@ function sendRequest($postVars,successCallback,loadingElement){
                 },4000);
                 return;
             }
-            //if not dump the works
-            console.log("ajaxError httpObj->",httpObj);
-            console.log("ajaxError textStatus->",textStatus);
-            console.log("ajaxError $postVars ->",$postVars);
+
+            try{
+                successCallback(httpObj.responseText);
+            }catch(e){
+                //if not dump the works
+                // responseText
+                console.log("ajaxError httpObj->",httpObj);
+                console.log("ajaxError textStatus->",textStatus);
+                console.log("ajaxError $postVars ->",$postVars);
+            }
+           
+
 
         },
         beforeSend: function() {
-            loadingDiv.append($(this).blestaLoadingDialog());
+            if (typeof $(this).blestaLoadingDialog == 'function'){
+                loadingDiv.append($(this).blestaLoadingDialog());
+            }
+           
         },
         complete: function() {
             $(".loading_container",loadingDiv).remove();

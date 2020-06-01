@@ -731,7 +731,13 @@ class VirtualminBlesta extends module
     public function manageAddRow(array &$vars)
     {
 
-        
+       
+        // ajax to manageAddRow
+        $allowedRequests = array("check_server");
+        $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+
+       
+    
         // Load the view into this object, so helpers can be automatically added to the view
         $this->view = new View('add_row', 'default');
         $this->view->base_uri = $this->base_uri;
@@ -760,6 +766,12 @@ class VirtualminBlesta extends module
      */
     public function manageEditRow($module_row, array &$vars)
     {
+
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+        
+         
         $this->view = new View("edit_row", "default");
         $this->view->base_uri = $this->base_uri;
         $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
@@ -792,6 +804,10 @@ class VirtualminBlesta extends module
     public function addModuleRow(array &$vars)
     {
         
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+         
         $vars['host_name'] = strtolower($vars['host_name']);
 
         //our meta fields
@@ -892,28 +908,46 @@ class VirtualminBlesta extends module
      * Validates connection by calling list_plans smallest transaction possible
      *
      */
-    public function validateConnection($host, $account)
+    public function validateConnection($account)
     {
         // print_r($password . $hostname . $port . $user . $realm);
-
+       
         Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
+
+    
+       
         try {
-            $test = new VirtualMinApi(
-                $host,            //hostname
-                $account['user_name'],            //username
-                $account['password'],            //password
-                $account['port_number'],            //port number
-                ($account['use_ssl'] == "true")    //use secure
-            );
+          
+        $test = new VirtualMinApi(
+            $account['host_name'],      
+            $account['username'],            //username
+            $account['password'],            //password
+            $account['port_number'],            //port number
+            ($account['use_ssl'] == "true")    //use secure
+        );
+       
+            $params['program'] = 'list-plans';
+            $params['json'] = 1;
+            $params[] = 'multiline';
 
+            $response = json_decode($test->callServer($params));
+            if ($response && $response->status == 'success') {
+               
+               return $this->getVirtualMinHelper()->sendAjax("Connected Successfully");
+            }else{
+               
+                //$this->log($account['host_name'], serialize($response), "connection error", $response);
+                $this->getVirtualMinHelper()->sendAjax($response, false);
 
-            $response = $test->list_plans();
-            if ($response && $response->status == 'success') return true;
+            }
 
-            $this->log($account['host_name'], serialize($response), "connection error", $response);
 
         } catch (Exception $e) {
-            $errorMessage = $e->getMessage();
+            // $errorMessage = $e->getMessage();
+
+            $this->getVirtualMinHelper()->sendAjax($e->getMessage(), false);
+
+   
             /*
             $this->Input->setErrors(
                 array('errors' => $errorMessage)
@@ -937,6 +971,11 @@ class VirtualminBlesta extends module
      */
     public function editModuleRow($module_row, array &$vars)
     {
+
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+         
         //define our meta fields
         $meta_fields = array(
             "server_name",
@@ -2061,7 +2100,17 @@ class VirtualminBlesta extends module
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
     }
+    public function check_server($postRequest, $dataRequest = array()){
+      
+        $response = $this->validateConnection([
+            'username' => $postRequest['username'],
+            'password' => $postRequest['password'],
+            'port_number' => $postRequest['port_number'],
+            'host_name' => $postRequest['host_name'],
+            'use_ssl' => $postRequest['use_ssl']
+        ]);
 
+    }
     /**
      * Builds and returns the rules for changing password
      *

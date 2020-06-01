@@ -4,7 +4,7 @@
 		$this->Widget->setLinkButtons(array());
 		$this->Widget->create($this->_("virtualmin.edit_row.box_title", true));
 		?>
-		<div class="inner">
+		<div id="edit_server" class="inner">
 			<?php
 			$this->Form->create();
 			$this->Form->fieldHidden("account_count", $this->Html->ifSet($vars->account_count, 0));
@@ -45,14 +45,14 @@
 						<?php
 						$this->Form->fieldCheckbox("use_ssl", "true", $this->Html->ifSet($vars->use_ssl, "true") == "true", array('id'=>"use_ssl"));
 						$this->Form->label($this->_("virtualmin.row_meta.use_ssl", true), "use_ssl", array('class'=>"inline"));
-						$this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
-						//@todo add virtualmin connection test
+						// $this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
+						
 						?>
 					</li>
 					<li>
 
-						<button id="testConnection" class="btn btn-warning btn-xs disabled"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
-						Connection testing not finished
+						<button id="testConnection" class="btn btn-warning btn-xs "><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+						<span id="testConnectionResults"></span>
 					</li>
 					<li>
 						<?php
@@ -104,9 +104,37 @@
 		$this->Widget->end();
 		?>
 
-
+<script type="text/javascript">
+	var $CurrentPage = 'edit_server'
+	var $action_url = $("#edit_server form").attr('action')
+	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+</script>
 <script type="text/javascript">
 $(document).ready(function() {
+
+	$("#testConnection").click(function(e){
+		e.preventDefault();
+
+				var $postVars = {
+						username: $('input[name="user_name"]').val(),
+						password: $('input[name="password"]').val(),
+						port_number: $('input[name="port_number"]').val(),
+						host_name: $('input[name="host_name"]').val(),
+						use_ssl: $("#use_ssl").prop('checked'),
+						action:	"check_server"
+					};
+				
+					$("#testConnectionResults").text("Connecting..")
+					sendRequest($postVars,function(response){
+							
+							if (response.success == false){
+								console.log("TCL: response". response)
+								$("#testConnectionResults").text(response.data).css('color','red')
+							}else{
+								$("#testConnectionResults").text(response.data).css('color','green')
+							}
+					});
+	});
 	// Add a row
 	$('.ns_row_add').click(function() {
 		var fields = $('tr.ns_row:first').clone(true);
@@ -142,3 +170,4 @@ function updateNsRows() {
 	});
 }
 </script>
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>

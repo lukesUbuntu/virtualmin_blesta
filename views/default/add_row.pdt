@@ -3,7 +3,7 @@
 		$this->Widget->setLinkButtons(array());
 		$this->Widget->create($this->_("virtualmin.add_row.box_title", true));
 		?>
-		<div class="inner">
+		<div id="add_server" class="inner">
 			<?php
 			$this->Form->create();
 			$this->Form->fieldHidden("account_count", $this->Html->ifSet($vars->account_count, 0));
@@ -45,15 +45,15 @@
 						<?php
 						$this->Form->fieldCheckbox("use_ssl", "true", $this->Html->ifSet($vars->use_ssl, "true") == "true", array('id'=>"use_ssl"));
 						$this->Form->label($this->_("virtualmin.row_meta.use_ssl", true), "use_ssl", array('class'=>"inline"));
-						$this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
-						//@todo add virtualmin connection test
+						// $this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
+					
 						?>
 					</li>
 
 					<li>
 
-						<button id="testConnection" class="btn btn-warning btn-xs disabled"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
-						Connection testing not finished
+						<button id="testConnection" class="btn btn-warning btn-xs "><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+						<span id="testConnectionResults"></span>
 					</li>
 
 					<li>
@@ -113,28 +113,34 @@
 		?>
 
 <script type="text/javascript">
+	var $CurrentPage = 'add_server'
+	var $action_url = $("#add_server form").attr('action')
+	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+</script>
+<script>
 $(document).ready(function() {
 
 	$("#testConnection").click(function(e){
 		e.preventDefault();
-		// TODO finish connection testing current issues with cors via client testing will move this call to backend call from surver
-		var url = (($("#use_ssl").prop('checked')) ? "https" : "http") + '://' +$("#host_name").val() +':'+ $("#port_number").val()
 
-		console.log("url",url)
-		$.ajax({
-			url : url + '/virtual-server/remote.cgi?list-plans',
-			data: {
-				username: $("#user_name").val(),
-				password: $("#password").val()
-       		 },
-			type: "POST",
-			dataType : "json",
-		})
-		.done(function(a,b){
-			console.log("a",a)
-			console.log("b",b)
-		})
-		// alert("currently not implmented")
+				var $postVars = {
+						username: $("#user_name").val(),
+						password: $("#password").val(),
+						port_number: $("#port_number").val(),
+						host_name: $("#host_name").val(),
+						use_ssl: $("#use_ssl").prop('checked'),
+						action:	"check_server"
+					};
+					$("#testConnectionResults").text("Connecting..")
+					sendRequest($postVars,function(response){
+							
+							if (response.success == false){
+								console.log("TCL: response". response)
+								$("#testConnectionResults").text(response.data).css('color','red')
+							}else{
+								$("#testConnectionResults").text(response.data).css('color','green')
+							}
+					});
 	});
 
 	// Add a row
@@ -173,3 +179,5 @@ function updateNsRows() {
 	});
 }
 </script>
+
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>

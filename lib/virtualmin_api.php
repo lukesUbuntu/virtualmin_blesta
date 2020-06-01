@@ -772,10 +772,10 @@ class VirtualMinApi
 
         //clear the list-plans as we only want to store after we have setup selected plan
         $this->clearSession("default", "list-plans");
-
+       
         //lets store the plans into there own array
         $response = $this->callServer($params);
-
+       
         if ($this->isJson($response) == false) return $response;
 
         $response = json_decode($response);
@@ -1381,7 +1381,7 @@ class VirtualMinApi
         return $querySring;
     }
 
-    private function callServer(array $params = array())
+    public function callServer(array $params = array())
     {
 
 
@@ -1411,7 +1411,9 @@ class VirtualMinApi
             $url = $this->protocol . $this->host . ":" . $this->port . "/virtual-server/remote.cgi?" . $querySring;
             //echo $url;exit;
             //return $this->get($url, true, $params);
+           
             $response = $this->get($url, true, $params);
+            
             //want to store the plans
             //don't sotre
             if (!$no_session)
@@ -1440,8 +1442,12 @@ class VirtualMinApi
         }
 
         $data = curl_exec($ch);
+    
+       
+
         if ($data === false) {
-            throw new \Exception('Virtualmin API Curl error: ' . curl_error($ch));
+            $data = curl_error($ch);
+            throw new \Exception(curl_error($ch));
         }
 
         return $data;
