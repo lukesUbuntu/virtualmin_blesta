@@ -731,7 +731,9 @@ class VirtualminBlesta extends module
     public function manageAddRow(array &$vars)
     {
 
-        
+        // print_r($_SESSION);
+        // print_r($vars);
+        // exit;
         // Load the view into this object, so helpers can be automatically added to the view
         $this->view = new View('add_row', 'default');
         $this->view->base_uri = $this->base_uri;
@@ -760,6 +762,7 @@ class VirtualminBlesta extends module
      */
     public function manageEditRow($module_row, array &$vars)
     {
+
         $this->view = new View("edit_row", "default");
         $this->view->base_uri = $this->base_uri;
         $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);

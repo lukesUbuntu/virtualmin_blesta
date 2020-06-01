@@ -55,7 +55,10 @@ function sendRequest($postVars,successCallback,loadingElement){
 
         },
         beforeSend: function() {
-            loadingDiv.append($(this).blestaLoadingDialog());
+            if (typeof $(this).blestaLoadingDialog == 'function'){
+                loadingDiv.append($(this).blestaLoadingDialog());
+            }
+           
         },
         complete: function() {
             $(".loading_container",loadingDiv).remove();

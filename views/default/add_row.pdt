@@ -3,7 +3,7 @@
 		$this->Widget->setLinkButtons(array());
 		$this->Widget->create($this->_("virtualmin.add_row.box_title", true));
 		?>
-		<div class="inner">
+		<div id="add_server" class="inner">
 			<?php
 			$this->Form->create();
 			$this->Form->fieldHidden("account_count", $this->Html->ifSet($vars->account_count, 0));
@@ -52,7 +52,7 @@
 
 					<li>
 
-						<button id="testConnection" class="btn btn-warning btn-xs disabled"><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
+						<button id="testConnection" class="btn btn-warning btn-xs "><?php $this->_("virtualmin.add_row.test_connection_btn");?></button>
 						Connection testing not finished
 					</li>
 
@@ -113,6 +113,11 @@
 		?>
 
 <script type="text/javascript">
+	var $CurrentPage = 'add_server'
+	var $action_url = $("#add_server form").attr('action')
+	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
+</script>
+<script>
 $(document).ready(function() {
 
 	$("#testConnection").click(function(e){
@@ -120,20 +125,31 @@ $(document).ready(function() {
 		// TODO finish connection testing current issues with cors via client testing will move this call to backend call from surver
 		var url = (($("#use_ssl").prop('checked')) ? "https" : "http") + '://' +$("#host_name").val() +':'+ $("#port_number").val()
 
-		console.log("url",url)
-		$.ajax({
-			url : url + '/virtual-server/remote.cgi?list-plans',
-			data: {
-				username: $("#user_name").val(),
-				password: $("#password").val()
-       		 },
-			type: "POST",
-			dataType : "json",
-		})
-		.done(function(a,b){
-			console.log("a",a)
-			console.log("b",b)
-		})
+			console.log("url",url)
+				var $postVars = {
+						username: $("#user_name").val(),
+						password: $("#password").val(),
+						'action'   		:	"check_server"
+					};
+				
+					sendRequest($postVars,function(response){
+                    console.log("TCL: response". response)
+
+					});
+
+		// $.ajax({
+		// 	url : url + '/virtual-server/remote.cgi?list-plans',
+		// 	data: {
+		// 		username: $("#user_name").val(),
+		// 		password: $("#password").val()
+       	// 	 },
+		// 	type: "POST",
+		// 	dataType : "json",
+		// })
+		// .done(function(a,b){
+		// 	console.log("a",a)
+		// 	console.log("b",b)
+		// })
 		// alert("currently not implmented")
 	});
 
@@ -173,3 +189,5 @@ function updateNsRows() {
 	});
 }
 </script>
+
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>
