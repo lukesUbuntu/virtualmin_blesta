@@ -1,4 +1,4 @@
-# 01/06/2020 Virtualmin Module for Blesta v4.9+ (module works for blesta 3.5+)
+# 01/06/2020 Virtualmin Module for Blesta v4.0+ (currently working off blesta 4.9)
 Orginally did this plugin 4 years ago but they stopped webhosting... so i stopped development...  
   
 I myself have now got into webhosting with Virtualmin and updating this plugin for my own needs as i want all my clients hosting automated, from billing to the client controlling everything within blesta.
@@ -9,6 +9,7 @@ I myself have now got into webhosting with Virtualmin and updating this plugin f
   
   Module currently works with blesta 3.5+ (php 5.6 & 7.0+) project is still in beta i wouldn't install till  [Todo Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) or [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/projects/2) has been completed. But if you want to have a play and provide issues or feedback feel free to install & help make this module.
 
+Support Blesta 3.5+
 ## 
 
 **Virtualmin Blesta Module version 0.1.3**
