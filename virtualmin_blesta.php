@@ -799,6 +799,10 @@ class VirtualminBlesta extends module
     public function addModuleRow(array &$vars)
     {
         
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+         
         $vars['host_name'] = strtolower($vars['host_name']);
 
         //our meta fields
@@ -944,6 +948,11 @@ class VirtualminBlesta extends module
      */
     public function editModuleRow($module_row, array &$vars)
     {
+
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+         
         //define our meta fields
         $meta_fields = array(
             "server_name",
