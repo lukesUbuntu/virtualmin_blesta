@@ -903,28 +903,46 @@ class VirtualminBlesta extends module
      * Validates connection by calling list_plans smallest transaction possible
      *
      */
-    public function validateConnection($host, $account)
+    public function validateConnection($account)
     {
         // print_r($password . $hostname . $port . $user . $realm);
-
+       
         Loader::load(dirname(__FILE__) . DS . "lib" . DS . "virtualmin_api.php");
+
+    
+       
         try {
-            $test = new VirtualMinApi(
-                $host,            //hostname
-                $account['user_name'],            //username
-                $account['password'],            //password
-                $account['port_number'],            //port number
-                ($account['use_ssl'] == "true")    //use secure
-            );
+          
+        $test = new VirtualMinApi(
+            $account['host_name'],      
+            $account['username'],            //username
+            $account['password'],            //password
+            $account['port_number'],            //port number
+            ($account['use_ssl'] == "true")    //use secure
+        );
+       
+            $params['program'] = 'list-plans';
+            $params['json'] = 1;
+            $params[] = 'multiline';
 
+            $response = json_decode($test->callServer($params));
+            if ($response && $response->status == 'success') {
+               
+               return $this->getVirtualMinHelper()->sendAjax("Connected Successfully");
+            }else{
+               
+                //$this->log($account['host_name'], serialize($response), "connection error", $response);
+                $this->getVirtualMinHelper()->sendAjax($response, false);
 
-            $response = $test->list_plans();
-            if ($response && $response->status == 'success') return true;
+            }
 
-            $this->log($account['host_name'], serialize($response), "connection error", $response);
 
         } catch (Exception $e) {
-            $errorMessage = $e->getMessage();
+            // $errorMessage = $e->getMessage();
+
+            $this->getVirtualMinHelper()->sendAjax($e->getMessage(), false);
+
+   
             /*
             $this->Input->setErrors(
                 array('errors' => $errorMessage)
@@ -2078,8 +2096,15 @@ class VirtualminBlesta extends module
 
     }
     public function check_server($postRequest, $dataRequest = array()){
-        echo "loaded check_server";
-        print_r($postRequest);exit;
+      
+        $response = $this->validateConnection([
+            'username' => $postRequest['username'],
+            'password' => $postRequest['password'],
+            'port_number' => $postRequest['port_number'],
+            'host_name' => $postRequest['host_name'],
+            'use_ssl' => $postRequest['use_ssl']
+        ]);
+
     }
     /**
      * Builds and returns the rules for changing password
