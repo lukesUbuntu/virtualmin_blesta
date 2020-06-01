@@ -1,5 +1,5 @@
 # 01/06/2020 Virtualmin Module for Blesta v4.0+ (currently working off blesta 4.9)
-Orginally did this plugin 4 years ago but they stopped webhosting... so i stopped development...  
+Orginally did this plugin 4 years ago but client stopped webhosting... so i stopped development...  
   
 I myself have now got into webhosting with Virtualmin and updating this plugin for my own needs as i want all my clients hosting automated, from billing to the client controlling everything within blesta.
 
