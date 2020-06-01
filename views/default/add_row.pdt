@@ -45,8 +45,8 @@
 						<?php
 						$this->Form->fieldCheckbox("use_ssl", "true", $this->Html->ifSet($vars->use_ssl, "true") == "true", array('id'=>"use_ssl"));
 						$this->Form->label($this->_("virtualmin.row_meta.use_ssl", true), "use_ssl", array('class'=>"inline"));
-						$this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
-						//@todo add virtualmin connection test
+						// $this->Form->label($this->_("virtualmin.row_meta.use_ssl_warning", true));
+					
 						?>
 					</li>
 
@@ -122,10 +122,7 @@ $(document).ready(function() {
 
 	$("#testConnection").click(function(e){
 		e.preventDefault();
-		// TODO finish connection testing current issues with cors via client testing will move this call to backend call from surver
-			// var url = (($("#use_ssl").prop('checked')) ? "https" : "http") + '://' +$("#host_name").val() +':'+ $("#port_number").val()
 
-			// console.log("url",url)
 				var $postVars = {
 						username: $("#user_name").val(),
 						password: $("#password").val(),
@@ -144,9 +141,6 @@ $(document).ready(function() {
 								$("#testConnectionResults").text(response.data).css('color','green')
 							}
 					});
-					
-					
-
 	});
 
 	// Add a row

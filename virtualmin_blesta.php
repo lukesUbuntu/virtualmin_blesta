@@ -767,6 +767,11 @@ class VirtualminBlesta extends module
     public function manageEditRow($module_row, array &$vars)
     {
 
+         // ajax to manageAddRow
+         $allowedRequests = array("check_server");
+         $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+        
+         
         $this->view = new View("edit_row", "default");
         $this->view->base_uri = $this->base_uri;
         $this->view->setDefaultView("components" . DS . "modules" . DS . "virtualmin_blesta" . DS);
