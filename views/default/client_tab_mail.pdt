@@ -85,7 +85,7 @@
 						$this->Html->ifSet($vars->username),
 						array('id' => "email_forward_to",
 							'class' => "form-control hide",
-							'placeholder' => "myEmail@example.com",
+							'placeholder' => "forwardaddress@example.com",
 							true)
 					);
 					?>
@@ -151,9 +151,11 @@
 						
 						if ($this->Html->ifSet($email_data['forward_mail_to']) != ""){
 							$email_address = '';
+				
 							if (is_array($email_data['forward_mail_to'])){
 								
 								foreach ($email_data['forward_mail_to'] as $email) {
+			
 									$email_address = $email_address . "<li>$email</li>";
 								}
 					
@@ -177,21 +179,21 @@
 								</button>
 								<ul data-email_id="<?php echo $email_id; ?>" class="dropdown-menu" role="menu"
 									aria-labelledby="dropdownMenu1">
-									<li class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
+									<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
 											Account</a></li>
-									<li data-toggle="modal" data-target="#changePassword" role="presentation"><a role="menuitem" tabindex="-1" href="#">Change Password</a></li>
+									<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" data-toggle="modal" data-target="#changePassword" role="presentation"><a role="menuitem" tabindex="-1" href="#">Change Password</a></li>
 
 									<?php
 									if ($this->Html->ifSet($email_data['forward_mail_to']) != "") {
 										?>
-										<li id="disable_forward" role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
+										<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" id="disable_forward" role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
 												Forwarding</a></li>
 										<?php
 									} else {
 
 										?>
-										<li class="disabled" role="presentation"><a role="menuitem" tabindex="-1"
-																					href="#">Enable Forwarding</a>
+										<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>', <?php echo $email_id; ?>)" data-toggle="modal" data-target="#addMailForward" role="presentation"><a role="menuitem" tabindex="-1"
+																					href="#">Add Email Forward</a>
 										</li<?php
 									}
 									?>
@@ -211,7 +213,8 @@
 		<?php
 	}
 	?>
-<!-- modals !-->
+
+<!-- change password modal !-->
 <div class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -249,6 +252,48 @@
 		</div>
 	</div>
 </div>
+<!-- Manage mail forward !-->
+<div class="modal fade" id="addMailForward" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+				<h4 class="modal-title" id="confirmation">Manage Email Forwards</h4>
+			</div>
+
+			<div class="modal-body">
+				<div class="form-group">
+					<?php
+					$this->Form->label("Forward To :", "add_email_forward");
+					?>
+					<?php
+					$this->Form->fieldText(
+						"add_email_forward",
+						null,
+						array(
+							'id' => "add_email_forward",
+							'style' => "display: inline;width:40%",
+							'class' => "form-control",
+							'placeholder' => "forwardaddress@example.com", true)
+					);
+					?>
+					<!-- <button id="addEmailForward" type="button" class="btn btn-success" data-dismiss="modal">Add</button> -->
+				</div>
+
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<a id="addEmailForward" href="#" class="save_email_forward btn btn-success success">Save</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
 	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -278,14 +323,21 @@
 	var $action_url = '<?php echo $action_url; ?>';
 	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
 	var $CurrentPage = $("#client_services_manage");
-
+    var currentEmail = null;
 
 	//main elements on current page
 	var MailAccountsDiv = $("#mail_accounts");
 	var $Domain = '<?php $this->Html->_($service_fields->virtualmin_domain);?>';
 
 
-
+	function updateCurrentEmailAddress(email_address,id){
+       
+		currentEmail = {
+			email_address : email_address,
+			id : id
+		}
+		
+	}
 
 		$(document).ready(function() {
 
@@ -363,7 +415,31 @@
 					return e.preventDefault();
 				})
 			});
+			// save_email_forward
+			$("#addEmailForward", $CurrentPage).click(function(e){
+				var add_email_forward = $("#add_email_forward").val();
+				if (/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(add_email_forward) == false){
+					alert("Invalid email forwarding address")
+					return;
+				}
 
+				var $postVars = {
+						'email_id'		: 	currentEmail.id,
+						'email_address'	:	currentEmail.email_address,
+						'forward_email' : 	add_email_forward,
+						'action'   :	"mail_add_forward"
+				};
+				console.log("postVars",$postVars)
+				sendRequest($postVars,function(response){
+						console.log("delete email response",response)
+						$('#addMailForward',$CurrentPage).modal('hide');
+                        
+
+					});
+					//$('#confirm-delete').hide.bs.modal
+					
+
+			});
 			$("#disable_forward" , $CurrentPage).click(function(e){
 				var email_id = $(this).parent().data("email_id");
 				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
@@ -387,7 +463,6 @@
                 e.preventDefault();
                 //get our filled out form data
                 var formData = $("#createEmailAccount",$CurrentPage).serializeFormToObject();
-
 
 				sendRequest(formData,function(response){
 

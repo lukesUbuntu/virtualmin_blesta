@@ -45,6 +45,104 @@ class VirtualMinApi
         return false;
     }
 
+    function validate_email($email) {
+        return (preg_match("/(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/", $email) || !preg_match("/^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/", $email)) ? false : true;
+    }
+    public function add_email_forward(array $params = array()){
+        $required = array(
+            'domain',
+            'user',
+            'email'
+        );
+        if (!$this->checkIfAllParamsGood($params, $required)) {
+            return false;
+        }
+        
+        $mail_accounts = $this->list_users(['domain' => $params['domain']]);
+        $foundAccount = null;
+        $emailOrNameCheck = $this->validate_email($params['user']);
+
+        foreach ($mail_accounts->data as $account) {
+            
+            // check against email or name account
+            if ($emailOrNameCheck){
+                if ($account->values->email_address[0] == $params['user']){
+                    $foundAccount = $account->values;
+                    break;
+                }
+            }else{
+                if ($account->name == $params['user']){
+                    $foundAccount = $account->values;
+                    break;
+                }
+            }
+           
+        }
+        if ($foundAccount == null) 
+            return "Failed to find account";
+
+    
+        $prams = [
+            'user' => $foundAccount->unix_username[0],
+            'domain' => $params['domain'],
+            'add-forward' => $params['email']
+        ];
+       
+        $response = $this->modify_user($prams);
+        return $response;
+    }
+    /**
+     * required params['domain','user']
+     * optional ['email'] if not supplied will remove all email forwarders
+     */
+    public function remove_email_forward(array $params = array()){
+        $required = array(
+            'domain',
+            'user'
+        );
+        if (!$this->checkIfAllParamsGood($params, $required)) {
+            return false;
+        }
+        
+        $mail_accounts = $this->list_users(['domain' => $params['domain']]);
+        $foundAccount = null;
+        
+        foreach ($mail_accounts->data as $account) {
+            // print_r($account->values->email_address);exit;
+            if ($account->values->email_address[0] == $params['user']){
+                $foundAccount = $account->values;
+                break;
+            }
+        }
+
+        if ($foundAccount == null) 
+            return "Failed to find account";
+
+        $forwardAddress = $foundAccount->forward_mail_to;
+        $response = [];
+        foreach ($forwardAddress as $email) {
+           
+            $prams = [
+                'user' => $foundAccount->unix_username[0],
+                'domain' => $params['domain'],
+                'del-forward' => $email
+            ];
+            if (isset($params['email'])){
+                if ($params['email'] == $email){
+                    $this->modify_user($prams);
+                }
+            }else{
+                $response[] = $this->modify_user($prams);
+            }
+             
+        }
+        // print_r($forwardAddress);exit;
+        // $params['program'] = 'modify-user';
+        // $params['json'] = 1;
+        // $params[] = 'multiline';
+        // get a list of forwarders on current account
+        return $response;
+    }
     public function get_domain_info(array $params = array())
     {
         $required = array(

@@ -98,21 +98,30 @@ class virtualmin_lib_helper {
         if (isset($arrayData->data) && isset($arrayData->data[0]->values)){
                 foreach ($arrayData->data as $index => $results) {
 
-                foreach($results->values as $result => $values ){
-                   
-                    if (count($values) > 1)      //if there is possible multiple values we will then store them as
-                        $cleanArray[$index][$result] = $values;
+                foreach($results->values as $key => $values ){
+                    //
+                    // print_r($results->values->unix_username[0]);exit;
+                    if (count($values) > 1){
+                        //remove unwanted forward address
+                        if ($key == 'forward_mail_to'){
+                            $adminRedirect = str_replace('@','-','\\'.$results->values->unix_username[0]);
+                            $forward_mail_to = [];
+                            foreach($values as $email){
+                           
+                                if ($email == $adminRedirect) continue;
+                               
+                                $forward_mail_to[] = $email;
+                            }
+                            $cleanArray[$index][$key] = $forward_mail_to;
+                        }else{
+                            $cleanArray[$index][$key] = $values;
+                        }
+                       
 
-                        /*
-                        foreach($values as $value){
-                            print_r($value);
-                            print_r($values);
-                            $cleanArray[$index][$values][] = $value;
-
-                        }*/
-
+                    }      //if there is possible multiple values we will then store them as
+                       
                     else
-                        $cleanArray[$index][$result] = $values[0];
+                        $cleanArray[$index][$key] = $values[0];
                 }
 
 

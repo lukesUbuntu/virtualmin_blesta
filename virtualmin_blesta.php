@@ -1833,7 +1833,7 @@ class VirtualminBlesta extends module
             return $service_active;
 
         //allowed request to clientTabMail
-        $allowedRequests = array("add_mail_account", "mail_delete_user", "mail_change_password", 'mail_disable_forward');
+        $allowedRequests = array("mail_add_forward","add_mail_account", "mail_delete_user", "mail_change_password", 'mail_disable_forward');
         $dataRequest = array(
             'package' => $package,
             'service' => $service,
@@ -1850,6 +1850,7 @@ class VirtualminBlesta extends module
         $account = array('domain' => $service_fields->virtualmin_domain);
 
         //grab the mailAccounts for domain
+       
         $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
        
         //lets build vars before render
@@ -2083,6 +2084,37 @@ class VirtualminBlesta extends module
             )
         );
     }
+    public function mail_add_forward($postRequest, $dataRequest = array()){
+        $vars = array(
+            "virtualmin_action" => $postRequest["action"],
+            "virtualmin_email_address" => $postRequest["email_address"],
+            "virtualmin_forward_email" => $postRequest["forward_email"],
+        );
+
+        $service = $dataRequest['service'];
+
+        Loader::loadModels($this, array("Services"));
+        $this->Services->edit($service->id, $vars);
+        //lets make sure there is no issues between query and service
+        if ($errors = $this->Services->errors()) {
+            //$this->Input->setErrors($this->Services->errors());
+            $this->getVirtualMinHelper()->sendAjax($errors);
+        }
+
+        //lets create the mail account on server
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        $addForwardPrams = [
+            'domain' => $service_fields->virtualmin_domain,
+            'user' => $vars["virtualmin_email_address"],
+            'email' => $vars["virtualmin_forward_email"],
+        ];
+       
+        $response = $this->api()->add_email_forward($addForwardPrams);
+        
+        $this->getVirtualMinHelper()->sendAjax($response->output);
+    }
 
     /**
      * Manages adding a new mail account via Ajax for our Client Mail Tab
@@ -2103,13 +2135,14 @@ class VirtualminBlesta extends module
             "virtualmin_enable_mail_forward" => $postRequest["enable_mail_forward"],
             "virtualmin_email_forward_to" => $postRequest["email_forward_to"]
         );
-
+       
         //lets validate our rules
         $this->Input->setRules($this->addMailAccountRules($vars));
         $this->Input->validates($vars);
 
+      
 
-        //validate rules before heading to editService
+        //validate rules before heading to adding email account
         if ($errors = $this->Input->errors()) {
             $response["errors"] = $errors;
             $response["message"] = "failed on validation";
@@ -2136,16 +2169,37 @@ class VirtualminBlesta extends module
             'user' => $vars["virtualmin_add_mail_username"],
             'pass' => $vars["virtualmin_add_mail_password"]
         );
+
         /*
          * [status] => success
             [output] => User test.testing1.com created successfully
             [command] => create-user
          */
+       
         $response = $this->parseResponse($this->api()->create_user($account));
-
+      
         if ($errors = $this->Input->errors()) {
             $this->getVirtualMinHelper()->sendAjax($errors, false);
+            return;
         }
+
+        if ($vars['virtualmin_enable_mail_forward'] == 'enabled'){
+            $addForwardPrams = [
+                'domain' => $service_fields->virtualmin_domain,
+                'user' => $vars["virtualmin_add_mail_username"],
+                'email' => $vars["virtualmin_email_forward_to"],
+            ];
+           
+            $response = $this->api()->add_email_forward($addForwardPrams);
+         
+        }
+        //virtualmin_enable_mail_forward
+        //if virtualmin_enable_mail_forward
+       
+        // $reponse = $this->api()->modify_user($prams);
+
+
+        
         //clear the list-users
         //$api->clearSession("list-users");
         $this->getVirtualMinHelper()->sendAjax($response->output);
@@ -2206,51 +2260,12 @@ class VirtualminBlesta extends module
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
         //get the mail accounts for domain
-        $account = array('domain' => $service_fields->virtualmin_domain);
-        $mail_accounts = $this->api()->list_users($account);
-        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($mail_accounts);
+        $details = [
+            'domain' => $service_fields->virtualmin_domain,
+            'user' => $email_address
+        ];
+        $mail_accounts = $this->api()->remove_email_forward($details);
 
-        // virtualmin modify-user --domain domain.name --del-forward address
-        // get the users forwarding address and remove them
-        $foundAccount = null;
-        foreach ($mail_accounts as $account) {
-
-            if ($account['email_address'] == $email_address){
-                $foundAccount = $account;
-                break;
-            }
-        }
-       if ($foundAccount == null){
-        $this->log(
-            $service_fields->virtualmin_domain . "| mail_disable_forward account failed mailAccount[$email_id] email address $email_address is not found on domain" .
-            serialize(array($service_fields->virtualmin_username, $package->meta->package)
-            ), "output", true
-        );
-            $this->getVirtualMinHelper()->sendAjax("Something went wrong", false);
-            return;
-       }
-        $forwardAddress = $foundAccount['forward_mail_to'];
-       
-        if (is_array($forwardAddress)){
-            foreach ($forwardAddress as $email) {
-                $prams = [
-                    'user' => $foundAccount['unix_username'],
-                    'domain' => $service_fields->virtualmin_domain,
-                    'del-forward' => $email
-                ];
-               
-                $reponse = $this->api()->modify_user($prams);
-                print_r($reponse);
-            }
-           
-        }else{
-            $prams = [
-                'user' => $foundAccount['unix_username'],
-                'domain' => $service_fields->virtualmin_domain,
-                'del-forward' => $forwardAddress
-            ];
-            $reponse = $this->api()->modify_user($prams);
-        }
 
         $this->getVirtualMinHelper()->sendAjax("Removed forward addresses");
         // modify_user
