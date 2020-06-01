@@ -1,4 +1,4 @@
-  Please [Todo Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) or [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/projects/2) before installing.
+  Please check [Todo Status](https://github.com/lukesUbuntu/virtualmin_blesta/issues/11) or [Current Project Status](https://github.com/lukesUbuntu/virtualmin_blesta/projects/2) before installing.
   
 # 01/06/2020 Virtualmin Module for Blesta v4.0+ (currently working off blesta 4.9)
 Orginally did this plugin 4 years ago but client stopped webhosting... so i stopped development...  
