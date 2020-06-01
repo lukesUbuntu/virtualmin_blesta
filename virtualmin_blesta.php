@@ -731,9 +731,13 @@ class VirtualminBlesta extends module
     public function manageAddRow(array &$vars)
     {
 
-        // print_r($_SESSION);
-        // print_r($vars);
-        // exit;
+       
+        // ajax to manageAddRow
+        $allowedRequests = array("check_server");
+        $this->getVirtualMinHelper()->processAjax($this, $_GET, $_GET, $allowedRequests, $vars);
+
+       
+    
         // Load the view into this object, so helpers can be automatically added to the view
         $this->view = new View('add_row', 'default');
         $this->view->base_uri = $this->base_uri;
@@ -2064,7 +2068,10 @@ class VirtualminBlesta extends module
         $this->getVirtualMinHelper()->sendAjax($response->output);
 
     }
-
+    public function check_server($postRequest, $dataRequest = array()){
+        echo "loaded check_server";
+        print_r($postRequest);exit;
+    }
     /**
      * Builds and returns the rules for changing password
      *
