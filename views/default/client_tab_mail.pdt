@@ -4,28 +4,28 @@
 !-->
 <h4><?php $this->_("virtualmin.client.tabs.mail.menu");?></h4>
 
-	<div id="add_account_button" >
-		<button class="btn btn-default pull-right add_mail btn-success" style="width:150px;">
-			<i class="fa fa-edit"></i><span>Add Mail Account</span>
-		</button>
-	</div>
+<div id="add_account_button">
+    <button class="btn btn-default pull-right add_mail btn-success" style="width:150px;">
+        <i class="fa fa-edit"></i><span>Add Mail Account</span>
+    </button>
+</div>
 
-	<form id="createEmailAccount" class="hide"  >
-		<h4>Create Email</h4>
-		<div class="row panel-fix">
-			<div class="col-md-12">
-				<?php
+<form id="createEmailAccount" class="hide">
+    <h4>Create Email</h4>
+    <div class="row panel-fix">
+        <div class="col-md-12">
+            <?php
 				$this->Form->fieldHidden(
 					"action",
 						array('id' => "add_mail_account")
 				);
 				?>
-				<div class="form-group">
-					<?php
+            <div class="form-group">
+                <?php
 					$this->Form->label("Account Username", "login_username");
 					?>
-                        <div style="">
-                        <?php
+                <div style="">
+                    <?php
 
                         $this->Form->fieldText(
                             "add_mail_username",
@@ -37,12 +37,12 @@
                                 'placeholder' => "Email Username", true)
                         );
                         ?>
-                            <span class="at_domain">@<?php $this->Html->_($service_fields->virtualmin_domain);?></span>
+                    <span class="at_domain">@<?php $this->Html->_($service_fields->virtualmin_domain);?></span>
 
-                        </div>
-				</div>
-				<div class="form-group">
-					<?php
+                </div>
+            </div>
+            <div class="form-group">
+                <?php
 					$this->Form->label("Password", "");
 					$this->Form->fieldText(
 						"add_mail_password",
@@ -53,9 +53,9 @@
 							true)
 					);
 					?>
-				</div>
-				<div class="form-group">
-					<?php
+            </div>
+            <div class="form-group">
+                <?php
 					$this->Form->label("Quota", "add_mail_quota");
 					$this->Form->fieldText(
 						"add_mail_quota",
@@ -66,9 +66,9 @@
 							true)
 					);
 					?>
-				</div>
-				<div class="form-group">
-					<?php
+            </div>
+            <div class="form-group">
+                <?php
 
 					$this->Form->fieldCheckbox(
 						"enable_mail_forward",
@@ -89,65 +89,71 @@
 							true)
 					);
 					?>
-				</div>
-				<!-- removing
+            </div>
+            <!-- removing
 				<div id="ajax_loader" class="form-group"></div>
 				!-->
-				<button id="create_account" type="submit" class="btn btn-success pull-right">
-					<i class="fa fa-sign-in"></i> Create Account
-				</button>
-				<?php
+            <button id="create_account" type="submit" class="btn btn-success pull-right">
+                <i class="fa fa-sign-in"></i> Create Account
+            </button>
+            <?php
 				//$this->Form->end();
 				?>
-			</div>
-		</div>
-	</form>
-	<?php
+        </div>
+    </div>
+</form>
+<?php
 	//$this->Form->end();	
 	//print_r($mail_accounts);exit;
 
 	if ($this->Html->ifSet($mail_accounts) && count($mail_accounts) > 0) {
 		?>
-		<div class="table-responsive" style="margin-top: 60px;">
-			<table id="mail_accounts" class="table table-curved table-striped">
+<div class="table-responsive" style="margin-top: 60px;">
+    <table id="mail_accounts" class="table table-curved table-striped">
 
-				<tr>
+        <tr>
 
-					<td>Email Account</td>
+            <td>Email Account</td>
 
-					<td>Quota</td>
-					<td></td>
-				</tr>
+            <td>Quota</td>
+            <td></td>
+        </tr>
 
-				<?php
+        <?php
+			
+				function generateId($email) {
+					return explode("@", $email)[0];
+				}
 				foreach ($mail_accounts as $email_id => $email_data) {
+					$email_accounts[] = $email_data['email_address'];
 
 					$unlimited = empty($email_data['home_quota']);
 					//print_r($email_data->forward_mail_to);
 					$percent_used = ($unlimited ? 0 : round(($this->Html->ifSet($email_data['home_byte_quota_used'], 0) / $this->Html->ifSet($email_data['home_byte_quota'])) * 100, 0));
 					?>
-					<tr id="email_<?php echo $email_id; ?>">
+					<!-- id="email_<?php echo $email_id; ?>" !-->
+        <tr id="<?php echo generateId($email_data['email_address']); ?>" >
 
 
-						<td class="email_address"><?php $this->Html->_($email_data['email_address']); ?></td>
-						<td>
-						 <span>
-								<?php $this->Html->_($email_data['home_quota_used']); ?>
-							 / <?php $this->Html->_($email_data['home_quota']); ?>
-							</span>
+            <td class="email_address"><?php $this->Html->_($email_data['email_address']); ?></td>
+            <td>
+                <span>
+                    <?php $this->Html->_($email_data['home_quota_used']); ?>
+                    / <?php $this->Html->_($email_data['home_quota']); ?>
+                </span>
 
-							<div class="progress">
-								<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
-									 aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0"
-									 aria-valuemax="100" style="width: <?php $this->Html->_($percent_used); ?>%">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+                        aria-valuenow="<?php $this->Html->_($percent_used); ?>" aria-valuemin="0" aria-valuemax="100"
+                        style="width: <?php $this->Html->_($percent_used); ?>%">
 
-								</div>
-							</div>
+                    </div>
+                </div>
 
-						</td>
+            </td>
 
 
-						<?php
+            <?php
 						
 						if ($this->Html->ifSet($email_data['forward_mail_to']) != ""){
 							$email_address = '';
@@ -169,68 +175,81 @@
 							echo "<td></td>"; ?>
 
 
-						<!--actions !-->
-						<td class="">
-							<div class="dropdown pull-right">
-								<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-										data-toggle="dropdown" aria-expanded="true">
-									Actions
-									<span class="caret"></span>
-								</button>
-								<ul data-email_id="<?php echo $email_id; ?>" class="dropdown-menu" role="menu"
-									aria-labelledby="dropdownMenu1">
-									<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
-											Account</a></li>
-									<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" data-toggle="modal" data-target="#changePassword" role="presentation"><a role="menuitem" tabindex="-1" href="#">Change Password</a></li>
+            <!--actions !-->
+            <td id="action_menu" class="">
+			
+			
+                <div class="dropdown pull-right">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                        data-toggle="dropdown" aria-expanded="true">
+                        Actions
+                        <span class="caret"></span>
+                    </button>
+                    <ul data-email_id="<?php echo $email_id; ?>" class="dropdown-menu" role="menu"
+                        aria-labelledby="dropdownMenu1">
+                        <li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)"
+                            class="disabled" role="presentation"><a role="menuitem" tabindex="-1" href="#">Edit
+                                Account</a></li>
+                        <li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)"
+                            data-toggle="modal" data-target="#changePassword" role="presentation"><a role="menuitem"
+                                tabindex="-1" href="#">Change Password</a></li>
 
-									<?php
+                        <?php
 									if ($this->Html->ifSet($email_data['forward_mail_to']) != "") {
 										?>
-										<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)" id="disable_forward" role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
-												Forwarding</a></li>
-										<?php
+                        <li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>' , <?php echo $email_id; ?>)"
+                            id="disable_forward" role="presentation"><a role="menuitem" tabindex="-1" href="#">Disable
+                                Forwarding</a></li>
+                        <?php
 									} else {
 
 										?>
-										<li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>', <?php echo $email_id; ?>)" data-toggle="modal" data-target="#addMailForward" role="presentation"><a role="menuitem" tabindex="-1"
-																					href="#">Add Email Forward</a>
-										</li<?php
+                        <li onclick="updateCurrentEmailAddress('<?php echo $email_data['email_address'] ?>', <?php echo $email_id; ?>)"
+                            data-toggle="modal" data-target="#addMailForward" role="presentation"><a role="menuitem"
+                                tabindex="-1" href="#">Add Email Forward</a>
+                            </li<?php
 									}
-									?>
-									<li role="presentation" class="divider"></li>
-									<li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem" tabindex="-1" href="#">Delete Account</a></li>
-								</ul>
-							</div>
-						</td>
-					</tr>
-					<?php
+									?> <li role="presentation" class="divider">
+                        </li>
+                        <li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem"
+                                tabindex="-1" href="#">Delete Account</a></li>
+                    </ul>
+                </div>
+				
+            </td>
+            <!--actions end !-->
+
+
+        </tr>
+        <?php
 				}
 				?>
 
-				</tbody>
-			</table>
-		</div>
-		<?php
+        </tbody>
+    </table>
+</div>
+<?php
 	}
 	?>
 
 <!-- change password modal !-->
-<div class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
+<div class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="confirmation"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-				<h4 class="modal-title" id="confirmation">New Password</h4>
-			</div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title" id="confirmation">New Password</h4>
+            </div>
 
-			<div class="modal-body">
-				<div class="form-group">
-					<p>User : <strong><span id="email_address"></span></strong></p>
-					<?php
+            <div class="modal-body">
+                <div class="form-group">
+                    <p>User : <strong><span id="email_address"></span></strong></p>
+                    <?php
 					$this->Form->label("Change Password", "change_password");
 					?>
-					<?php
+                    <?php
 					$this->Form->fieldText(
 						"change_password",
 						null,
@@ -241,33 +260,34 @@
 							'placeholder' => "New Password", true)
 					);
 					?>
-				</div>
+                </div>
 
-			</div>
+            </div>
 
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-				<a id="updatePassword" href="#" class="change_password btn btn-warning warning">Update</a>
-			</div>
-		</div>
-	</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a id="updatePassword" href="#" class="change_password btn btn-warning warning">Update</a>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- Manage mail forward !-->
-<div class="modal fade" id="addMailForward" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
+<div class="modal fade" id="addMailForward" tabindex="-1" role="dialog" aria-labelledby="confirmation"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-				<h4 class="modal-title" id="confirmation">Manage Email Forwards</h4>
-			</div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title" id="confirmation">Manage Email Forwards</h4>
+            </div>
 
-			<div class="modal-body">
-				<div class="form-group">
-					<?php
+            <div class="modal-body">
+                <div class="form-group">
+                    <?php
 					$this->Form->label("Forward To :", "add_email_forward");
 					?>
-					<?php
+                    <?php
 					$this->Form->fieldText(
 						"add_email_forward",
 						null,
@@ -278,254 +298,288 @@
 							'placeholder' => "forwardaddress@example.com", true)
 					);
 					?>
-					<!-- <button id="addEmailForward" type="button" class="btn btn-success" data-dismiss="modal">Add</button> -->
-				</div>
+                    <!-- <button id="addEmailForward" type="button" class="btn btn-success" data-dismiss="modal">Add</button> -->
+                </div>
 
-			</div>
+            </div>
 
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-				<a id="addEmailForward" href="#" class="save_email_forward btn btn-success success">Save</a>
-			</div>
-		</div>
-	</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a id="addEmailForward" href="#" class="save_email_forward btn btn-success success">Save</a>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- action menu template !-->
+<div id="template_action_menu">
+    <div class="dropdown pull-right">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+            aria-expanded="true">
+            Actions
+            <span class="caret"></span>
+        </button>
+        <ul data-email_id="<?php echo $email_id; ?>" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            <li onclick="updateCurrentEmailAddress('%email%' , 0)" class="disabled" role="presentation"><a
+                    role="menuitem" tabindex="-1" href="#">Edit
+                    Account</a></li>
+            <li onclick="updateCurrentEmailAddress('%email%' ,0)" data-toggle="modal" data-target="#changePassword"
+                role="presentation"><a role="menuitem" tabindex="-1" href="#">Change Password</a></li>
+
+            <li onclick="updateCurrentEmailAddress('%email%' ,0)" id="disable_forward" role="presentation"><a
+                    role="menuitem" tabindex="-1" href="#">Disable
+                    Forwarding</a></li>
 
 
+            <li onclick="updateCurrentEmailAddress('%email%', 0)" data-toggle="modal" data-target="#addMailForward"
+                role="presentation"><a role="menuitem" tabindex="-1" href="#">Add Email Forward</a>
+            </li>
 
-	<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="confirmation" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
+            <li role="presentation" class="divider"></li>
+            <li data-toggle="modal" data-target="#ConfirmEmailDelete" role="presentation"><a role="menuitem"
+                    tabindex="-1" href="#">Delete Account</a></li>
+        </ul>
+    </div>
+</div>
+<!-- action menu end template !-->
 
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-					<h4 class="modal-title" id="confirmation">Confirm Delete</h4>
-				</div>
 
-				<div class="modal-body">
-					<p>You are about to delete <strong><span id="email_address"></span></strong></p>
-					<p>All mailbox data will be deleted, Do you want to proceed?</p>
-					<p class="debug-url"></p>
-				</div>
+<div class="modal fade" id="ConfirmEmailDelete" tabindex="-1" role="dialog" aria-labelledby="confirmation"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<a id="confirmed" href="#" class="btn btn-danger danger">Delete</a>
-				</div>
-			</div>
-		</div>
-	</div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title" id="confirmation">Confirm Delete</h4>
+            </div>
+
+            <div class="modal-body">
+                <p>You are about to delete <strong><span id="email_address"></span></strong></p>
+                <p>All mailbox data will be deleted, Do you want to proceed?</p>
+                <p class="debug-url"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a id="confirmed" href="#" class="btn btn-danger danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
+//declared for our external js pagehelper.js
+var $action_url = '<?php echo $action_url; ?>';
+var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
+var $CurrentPage = $("#client_services_manage");
+var currentEmail = null;
 
-	//declared for our external js pagehelper.js
-	var $action_url = '<?php echo $action_url; ?>';
-	var $CsrfToken 	= '<?php echo $this->Form->getCsrfToken();?>';
-	var $CurrentPage = $("#client_services_manage");
-    var currentEmail = null;
+//main elements on current page
+var MailAccountsDiv = $("#mail_accounts");
+var $Domain = '<?php $this->Html->_($service_fields->virtualmin_domain);?>';
+var $mail_accounts = '<?php echo json_encode($email_accounts); ?>';
 
-	//main elements on current page
-	var MailAccountsDiv = $("#mail_accounts");
-	var $Domain = '<?php $this->Html->_($service_fields->virtualmin_domain);?>';
-
-
-	function updateCurrentEmailAddress(email_address,id){
-       
-		currentEmail = {
-			email_address : email_address,
-			id : id
-		}
-		
-	}
-
-		$(document).ready(function() {
-
-            if (typeof sendRequest != "function") throw new Error("pagehelper.js has not loaded");
-
-			/**
-			 * Change password
-			 */
-			$('#changePassword',$CurrentPage).on('show.bs.modal', function(e) {
-
-				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
-				var email_id = $(e.relatedTarget).parent().data("email_id");
-
-				//not correct way should be binding data to the element but its just for basic display for now
-				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
-
-				console.log("email_address",email_address);
-				$("#email_address", this).text(email_address);
-
-				$(this).find('.change_password').click(function(e){
-					//doesn't matter if code gets injected as all code gets passed via blesta users domain
-					new_password = $('#changePassword #change_password',$CurrentPage).val();
-
-					var $postVars = {
-						'email_address'	:	email_address,
-						'new_password'	:	new_password,
-						'action'   		:	"mail_change_password"
-					};
-					errorLocation = $("#changePassword .modal-body");
-					sendRequest($postVars,function(response){
-						if (response.success == false)
-							return processErrors(response,errorLocation);
-
-						console.log("database changepassword response",response)
-						$('#changePassword #change_password',$CurrentPage).val('')
-
-						attachSuccess(response.data);
-						return $('#changePassword').modal('toggle');
-
-					},errorLocation);
-					//$('#confirm-delete').hide.bs.modal
-					return e.preventDefault();
-				})
-			});
-
-			/**
-			 * Confirm Deletion
-			 */
-			$('#ConfirmEmailDelete',$CurrentPage).on('show.bs.modal', function(e) {
-
-				//$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
-				var email_id = $(e.relatedTarget).parent().data("email_id");
-
-                //not correct way should be binding data to the element but its just for basic display for now
-				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
-
-				console.log("email_address",email_address);
-				$("#email_address", this).text(email_address);
-
-				$(this).find('.danger').click(function(e){
-
-					var $postVars = {
-						'email_id'		: 	email_id,
-						'email_address'	:	email_address,
-						'action'   :	"mail_delete_user"
-					};
-
-					sendRequest($postVars,function(response){
-						console.log("delete email response",response)
-						$('#confirm-delete',$CurrentPage).modal('hide');
-                        $('#email_' + email_id,MailAccountsDiv).remove();
-
-					});
-					//$('#confirm-delete').hide.bs.modal
-					return e.preventDefault();
-				})
-			});
-			// save_email_forward
-			$("#addEmailForward", $CurrentPage).click(function(e){
-				var add_email_forward = $("#add_email_forward").val();
-				if (/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(add_email_forward) == false){
-					alert("Invalid email forwarding address")
-					return;
-				}
-
-				var $postVars = {
-						'email_id'		: 	currentEmail.id,
-						'email_address'	:	currentEmail.email_address,
-						'forward_email' : 	add_email_forward,
-						'action'   :	"mail_add_forward"
-				};
-				console.log("postVars",$postVars)
-				sendRequest($postVars,function(response){
-						console.log("delete email response",response)
-						$('#addMailForward',$CurrentPage).modal('hide');
-                        
-
-					});
-					//$('#confirm-delete').hide.bs.modal
-					
-
-			});
-			$("#disable_forward" , $CurrentPage).click(function(e){
-				var email_id = $(this).parent().data("email_id");
-				var email_address = $("#email_"+email_id + ' > .email_address',MailAccountsDiv).text();
-				var $postVars = {
-						'email_id'		: 	email_id,
-						'email_address'	:	email_address,
-						'action'   :	"mail_disable_forward"
-				};
-				sendRequest($postVars,function(response){
-						console.log("disabling forwarder",response)
-					
-
-				});
-				
-			})
-			/*
-			 * Create Email Account
-			 */
-			$("#create_account",$CurrentPage).click(function(e){
-
-                e.preventDefault();
-                //get our filled out form data
-                var formData = $("#createEmailAccount",$CurrentPage).serializeFormToObject();
-
-				sendRequest(formData,function(response){
-
-					if (response && response.success == false){
-						processErrors(response)
-					}
-					else{
-                        addEmailToList(formData);
-                        attachSuccess(response.data);
-						toggleAddMail();
-					}
-
-
-				});
-			});
-
-			//toggle add mail div to show form
-			$(".add_mail",$CurrentPage).click(toggleAddMail);
-
-			//enable_mail_forward display textbox
-			$('#enable_mail_forward',$CurrentPage).change(function() {
-				if($(this).is(":checked")){
-					$(this).val("enabled");
-					$("#email_forward_to").removeClass("hide")
-				}
-				else{
-					$(this).val("");
-					$("#email_forward_to").addClass("hide");
-				}
-			});
-
-
- });
-
-        /**
-         * Adds an email to our email list table
-         */
-        function addEmailToList(emailForm){
-            //@todo add full row options
-            $('tr:last',MailAccountsDiv).after('<tr><td>'  +   emailForm.add_mail_username +   '@' +   $Domain + '</td> edit options have not been loaded<td></td><td></td></tr>')
-
-        }
-        /*
-         * Toggles between adding a mail address form
-         */
-        function toggleAddMail(){
-            $("#createEmailAccount",$CurrentPage).toggleClass("hide");
-            $("#mail_accounts",$CurrentPage).toggleClass("hide");
-
-            //modify form
-            if ($(".add_mail",$CurrentPage).hasClass("btn-warning")){
-                $(".add_mail",$CurrentPage).toggleClass("btn-warning","btn-success");
-                $("span",".add_mail",$CurrentPage).text("Add Mail Account");
-
-            }
-            else{
-                $(".add_mail",$CurrentPage).toggleClass("btn-warning");
-                $("span",".add_mail",$CurrentPage).text("Cancel");
-            }
-        }
-
-
-	</script>
+function generateActionMenu(email){
 	
+        console.log("TCL: generateActionMenu -> $email_address", $mail_accounts)
+		$actionMenu = $("#action_menu");
+}
+
+function updateCurrentEmailAddress(email_address, id) {
+
+    currentEmail = {
+        email_address: email_address,
+        id: id
+    }
+
+}
+
+$(document).ready(function() {
+
+	generateActionMenu('wassup@myexample.com');
+    if (typeof sendRequest != "function") throw new Error("pagehelper.js has not loaded");
+
+    /**
+     * Change password
+     */
+    $('#changePassword', $CurrentPage).on('show.bs.modal', function(e) {
+
+        //$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
+        var email_id = $(e.relatedTarget).parent().data("email_id");
+
+        //not correct way should be binding data to the element but its just for basic display for now
+        var email_address = $("#email_" + email_id + ' > .email_address', MailAccountsDiv).text();
+
+        console.log("email_address", email_address);
+        $("#email_address", this).text(email_address);
+
+        $(this).find('.change_password').click(function(e) {
+            //doesn't matter if code gets injected as all code gets passed via blesta users domain
+            new_password = $('#changePassword #change_password', $CurrentPage).val();
+
+            var $postVars = {
+                'email_address': email_address,
+                'new_password': new_password,
+                'action': "mail_change_password"
+            };
+            errorLocation = $("#changePassword .modal-body");
+            sendRequest($postVars, function(response) {
+                if (response.success == false)
+                    return processErrors(response, errorLocation);
+
+                console.log("database changepassword response", response)
+                $('#changePassword #change_password', $CurrentPage).val('')
+
+                attachSuccess(response.data);
+                return $('#changePassword').modal('toggle');
+
+            }, errorLocation);
+            //$('#confirm-delete').hide.bs.modal
+            return e.preventDefault();
+        })
+    });
+
+    /**
+     * Confirm Deletion
+     */
+    $('#ConfirmEmailDelete', $CurrentPage).on('show.bs.modal', function(e) {
+
+        //$(this).find('.danger').attr('href', $(e.relatedTarget).data('href'))
+        var email_id = $(e.relatedTarget).parent().data("email_id");
+
+        //not correct way should be binding data to the element but its just for basic display for now
+        var email_address = $("#email_" + email_id + ' > .email_address', MailAccountsDiv).text();
+
+        console.log("email_address", email_address);
+        $("#email_address", this).text(email_address);
+
+        $(this).find('.danger').click(function(e) {
+
+            var $postVars = {
+                'email_id': email_id,
+                'email_address': email_address,
+                'action': "mail_delete_user"
+            };
+
+            sendRequest($postVars, function(response) {
+                console.log("delete email response", response)
+                $('#confirm-delete', $CurrentPage).modal('hide');
+                $('#email_' + email_id, MailAccountsDiv).remove();
+
+            });
+            //$('#confirm-delete').hide.bs.modal
+            return e.preventDefault();
+        })
+    });
+    // save_email_forward
+    $("#addEmailForward", $CurrentPage).click(function(e) {
+        var add_email_forward = $("#add_email_forward").val();
+        if (/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+                add_email_forward) == false) {
+            alert("Invalid email forwarding address")
+            return;
+        }
+
+        var $postVars = {
+            'email_id': currentEmail.id,
+            'email_address': currentEmail.email_address,
+            'forward_email': add_email_forward,
+            'action': "mail_add_forward"
+        };
+        console.log("postVars", $postVars)
+        sendRequest($postVars, function(response) {
+            console.log("delete email response", response)
+            $('#addMailForward', $CurrentPage).modal('hide');
+
+
+        });
+        //$('#confirm-delete').hide.bs.modal
+
+
+    });
+    $("#disable_forward", $CurrentPage).click(function(e) {
+        var email_id = $(this).parent().data("email_id");
+        var email_address = $("#email_" + email_id + ' > .email_address', MailAccountsDiv).text();
+        var $postVars = {
+            'email_id': email_id,
+            'email_address': email_address,
+            'action': "mail_disable_forward"
+        };
+        sendRequest($postVars, function(response) {
+            console.log("disabling forwarder", response)
+
+
+        });
+
+    })
+    /*
+     * Create Email Account
+     */
+    $("#create_account", $CurrentPage).click(function(e) {
+
+        e.preventDefault();
+        //get our filled out form data
+        var formData = $("#createEmailAccount", $CurrentPage).serializeFormToObject();
+
+        sendRequest(formData, function(response) {
+
+            if (response && response.success == false) {
+                processErrors(response)
+            } else {
+                addEmailToList(formData);
+                attachSuccess(response.data);
+                toggleAddMail();
+            }
+
+
+        });
+    });
+
+    //toggle add mail div to show form
+    $(".add_mail", $CurrentPage).click(toggleAddMail);
+
+    //enable_mail_forward display textbox
+    $('#enable_mail_forward', $CurrentPage).change(function() {
+        if ($(this).is(":checked")) {
+            $(this).val("enabled");
+            $("#email_forward_to").removeClass("hide")
+        } else {
+            $(this).val("");
+            $("#email_forward_to").addClass("hide");
+        }
+    });
+
+
+});
+
+/**
+ * Adds an email to our email list table
+ */
+function addEmailToList(emailForm) {
+    //@todo add full row options
+    $('tr:last', MailAccountsDiv).after('<tr><td>' + emailForm.add_mail_username + '@' + $Domain +
+        '</td> edit options have not been loaded<td></td><td></td></tr>')
+
+}
+/*
+ * Toggles between adding a mail address form
+ */
+function toggleAddMail() {
+    $("#createEmailAccount", $CurrentPage).toggleClass("hide");
+    $("#mail_accounts", $CurrentPage).toggleClass("hide");
+
+    //modify form
+    if ($(".add_mail", $CurrentPage).hasClass("btn-warning")) {
+        $(".add_mail", $CurrentPage).toggleClass("btn-warning", "btn-success");
+        $("span", ".add_mail", $CurrentPage).text("Add Mail Account");
+
+    } else {
+        $(".add_mail", $CurrentPage).toggleClass("btn-warning");
+        $("span", ".add_mail", $CurrentPage).text("Cancel");
+    }
+}
+</script>
+
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js');?>'></script>
