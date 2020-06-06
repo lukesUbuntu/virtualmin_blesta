@@ -1564,6 +1564,7 @@ class VirtualminBlesta extends module
     public function getClientTabs($package)
     {
 
+        // list_features
         $tabs = array(
             'clientTabStatus' => array('name' => Language::_("virtualmin.client.tabs.status.menu", true), 'icon' => "fa fa-columns"),
             'clientTabMail' => array('name' => Language::_("virtualmin.client.tabs.mail.menu", true), 'icon' => "fa fa-envelope-o"),
@@ -1682,17 +1683,28 @@ class VirtualminBlesta extends module
         $account = array('domain' => $service_fields->virtualmin_domain);
         $response = $this->parseResponse($this->api()->list_scripts($account));
 
+        $account = array('domain' => $service_fields->virtualmin_domain);
        
-        //check errors before any other server requests
-        if ($this->Input->errors())
-            return;
+         //check errors before any other server requests
+         if ($this->Input->errors())
+         return;
 
+        $databases_response = $this->getVirtualMinHelper()->cleanArray($this->api()->list_databases($account), true);
+        $databases = [];
+        if ($databases_response && count($databases_response) > 0){
+            foreach($databases_response as $database => $value){
+                $databases[] = $database;
+            }
+        }
+
+        if (count($databases) <= 0)
+        return "Sorry need database enabled on your account";
          
         //current scripts
         $installed_scripts = [];
        
         $installed = $this->getVirtualMinHelper()->cleanArray($response);
-        
+    
        
         //store the script type
         if (!empty($installed) && count($installed) > 1)
@@ -1715,6 +1727,7 @@ class VirtualminBlesta extends module
        
         //lets build vars before render
         $buildVars = array(
+            "databases" => $databases,
             "script_list" => $script_list,
             "installed_scripts" => array_flip($installed_scripts),
             "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabScripts/",
@@ -1837,6 +1850,9 @@ class VirtualminBlesta extends module
         $account = array('domain' => $service_fields->virtualmin_domain);
         $databases = $this->api()->list_databases($account);
 
+     
+        if (count($databases->data) <= 0)
+        return "Sorry need database enabled on your account";
 
         //lets build vars before render
         $buildVars = array(

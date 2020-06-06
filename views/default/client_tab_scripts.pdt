@@ -17,7 +17,10 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                 <td></td>
             </tr>
             <?php
+            $scriptInstall = [];
             foreach ($script_list as $script) {
+               
+                $scriptInstall[$script['name']] = $script;
                 ?>
                 <tr>
                     <td class="script_name">
@@ -33,7 +36,7 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                             <?php
                             if (isset($installed_scripts[strtolower($script['name'])])) {
                                 ?>
-                                <button class="btn btn-warning install disabled" type="button"
+                                <button class="btn btn-warning install" type="button"
                                         aria-expanded="true">
                                     Remove
                                 </button>
@@ -41,7 +44,7 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                                 <?php
                             } else {
                                 ?>
-                                <button class="btn btn-success install disabled" type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" data-toggle="modal" data-target="#installScriptOptions" role="presentation" class="btn btn-success install " type="button"
                                         aria-expanded="true">
                                     Install
                                 </button>
@@ -62,28 +65,44 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
     <?php
 }
 ?>
+<!-- script installer option start !-->
+<div class="modal fade" id="installScriptOptions" tabindex="-1" role="dialog" aria-labelledby="confirmation"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-<script type="text/javascript">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title">Install <span class="script_name"> Options</span></h4>
+                <span class="modal-description script_description"></span>
+            </div>
 
-    //declared for our external js pagehelper.js
-    var $action_url = '<?php echo $action_url; ?>';
-    var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
-    //var $CurrentPage = $("#");
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="add_email_forward">Version</label>
+                    <select class="form-control" id="script_versions"></select>
+                </div>
 
-    $(document).ready(function () {
-        $(".install").click(function () {
-            alert("sorry not availble yet ")
-        })
+            </div>
 
-    })
-</script>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a id="addEmailForward" href="#" class="save_email_forward btn btn-success success">Save</a>
+            </div>
+        </div>
+    </div>
+</div>
+>
 <script type="text/javascript">
 //declared for our external js pagehelper.js
 var $action_url = '<?php echo $action_url; ?>';
 var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
 var $CurrentPage = $("#scriptInstall");
 var currentEmail = null;
+var $scriptInstall = JSON.parse('<?php echo json_encode($scriptInstall) ; ?>')
+var $databases =  JSON.parse('<?php echo json_encode($databases) ; ?>')
 </script>
 
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js'); ?>'></script>
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/client_tab_scripts.js'); ?>'></script>

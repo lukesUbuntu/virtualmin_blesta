@@ -93,7 +93,7 @@ class virtualmin_lib_helper {
      * @param $arrayData    mixed array|multi array
      * @return object| bool   Returns a virtualmin clean object with values
      */
-    public function cleanArray($arrayData){
+    public function cleanArray($arrayData, $useResultName = false){
         $cleanArray = [];
         if (isset($arrayData->data) && isset($arrayData->data[0]->values)){
                 foreach ($arrayData->data as $index => $results) {
@@ -114,14 +114,29 @@ class virtualmin_lib_helper {
                             }
                             $cleanArray[$index][$key] = $forward_mail_to;
                         }else{
-                            $cleanArray[$index][$key] = $values;
+                           
+                            if (isset($results->name) && !empty($results->name) &&  $useResultName == true){
+                                $cleanArray[$results->name][$key] = $values;
+                            }else{
+                                $cleanArray[$index][$key] = $values;
+                            }
+
                         }
                        
 
                     }      //if there is possible multiple values we will then store them as
                        
-                    else
-                        $cleanArray[$index][$key] = $values[0];
+                    else{
+                        
+                      
+                        if (isset($results->name) && !empty($results->name) &&  $useResultName == true){
+                            $cleanArray[$results->name][$key] = $values[0];
+                        }else{
+                            $cleanArray[$index][$key] = $values[0];
+                        }
+                     
+                    }
+                       
                 }
 
 
