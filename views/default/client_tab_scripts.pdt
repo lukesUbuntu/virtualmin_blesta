@@ -23,7 +23,7 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                 $scriptInstall[$script['name']] = $script;
                 ?>
                 <tr>
-                    <td class="script_name">
+                    <td class="scripts_name">
                         <?php $this->Html->_($script['name']); ?>
                     </td>
                     <td>
@@ -36,7 +36,7 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                             <?php
                             if (isset($installed_scripts[strtolower($script['name'])])) {
                                 ?>
-                                <button class="btn btn-warning install" type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" class="btn btn-warning removeScript" type="button"
                                         aria-expanded="true">
                                     Remove
                                 </button>
@@ -79,20 +79,33 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
 
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="add_email_forward">Version</label>
-                    <select class="form-control" id="script_versions"></select>
+                    <label for="script_versions">Version</label>
+                    <select class="form-control" id="script_version"></select>
                 </div>
-
             </div>
-
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="database">Database</label>
+                    <select class="form-control" id="database"></select>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="install_path">Install Folder (this is your public folder leave blank to install as main site)</label>
+                    <input class="form-control install_path" id="install_path" type="text" />
+                    
+                    <div style="margin-top:5px;">http://<?php echo $service_fields->virtualmin_domain; ?>/<span class="install_path"></span></div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <a id="addEmailForward" href="#" class="save_email_forward btn btn-success success">Save</a>
+                <a id="installScript" href="#" class="save_email_forward btn btn-success success">Install</a>
             </div>
         </div>
     </div>
 </div>
->
+
 <script type="text/javascript">
 //declared for our external js pagehelper.js
 var $action_url = '<?php echo $action_url; ?>';
@@ -100,7 +113,7 @@ var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
 var $CurrentPage = $("#scriptInstall");
 var currentEmail = null;
 var $scriptInstall = JSON.parse('<?php echo json_encode($scriptInstall) ; ?>')
-var $databases =  JSON.parse('<?php echo json_encode($databases) ; ?>')
+var available_databases =  JSON.parse('<?php echo json_encode($databases) ; ?>')
 </script>
 
 <!--Include our javascript file !-->

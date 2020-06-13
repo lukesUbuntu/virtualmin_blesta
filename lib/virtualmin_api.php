@@ -1442,8 +1442,8 @@ class VirtualMinApi
         }
 
         $data = curl_exec($ch);
-    
-       
+        // https://stackoverflow.com/questions/51760328/catch-curl-error-is-not-working-properly-does-not-give-error-if-data-is-not-rec
+        // print_r($data);exit;
 
         if ($data === false) {
             $data = curl_error($ch);

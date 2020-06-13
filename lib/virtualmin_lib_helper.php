@@ -5,7 +5,6 @@
  * Date: 6/07/2015
  * Time: 12:25 AM
  
-  @description virtualmin library helper class helps main virtualmin plugin class.
  */
 
 class virtualmin_lib_helper {

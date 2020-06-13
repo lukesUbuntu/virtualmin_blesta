@@ -1672,6 +1672,16 @@ class VirtualminBlesta extends module
         if (($service_active = $this->serviceCheck($service)) !== true)
             return $service_active;
 
+
+        $allowedRequests = array("script_install","remove_script");
+        $dataRequest = array(
+            'package' => $package,
+            'service' => $service,
+        );
+
+        $this->getVirtualMinHelper()->processAjax($this, $getRequest, $postRequest, $allowedRequests, $dataRequest);
+
+
         //return as not available in this release
         //return "Not available in this release";
       
@@ -1706,12 +1716,13 @@ class VirtualminBlesta extends module
         $installed = $this->getVirtualMinHelper()->cleanArray($response);
     
        
+        //   print_r($installed);exit;
         //store the script type
-        if (!empty($installed) && count($installed) > 1)
+        if (!empty($installed) && count($installed) > 0)
         foreach ($installed as $script)
-            $installed_scripts[] = $script['type'];
+            $installed_scripts[$script['type']] = $script;
 
-        
+        //print_r($installed_scripts);exit;
         //lets get list_available_scripts the server has allowed us to install
         $response = $this->parseResponse($this->api()->list_available_scripts());
 
@@ -1724,12 +1735,17 @@ class VirtualminBlesta extends module
         //clean up our script
         $script_list = $this->getVirtualMinHelper()->cleanArray($response);
 
-       
+        // $account = array('domain' => $service_fields->virtualmin_domain);
+
+        // $serverDetails = $this->getVirtualMinHelper()->cleanArray($this->api()->get_domain_info($account));
+        //print_r($serverDetails[0]['html_directory']);exit;
         //lets build vars before render
+       
         $buildVars = array(
+            //"web_path" => $serverDetails[0]['html_directory'],
             "databases" => $databases,
             "script_list" => $script_list,
-            "installed_scripts" => array_flip($installed_scripts),
+            "installed_scripts" => $installed_scripts,
             "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabScripts/",
             "service_fields" => $service_fields,
             "service_id" => $service->id,
@@ -2065,7 +2081,57 @@ class VirtualminBlesta extends module
 
         return $this->Input->matches($host_name, "/^([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9])(\.([a-z0-9]|[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]))*$/");
     }
+    public function remove_script($postRequest, $dataRequest = array()){
+        $service = $dataRequest['service'];
+        $package = $dataRequest['package'];
+        
+        $service_fields = $this->serviceFieldsToObject($service->fields);
 
+        $type = strtolower($postRequest['script_name']);
+
+        $prams = [
+            "domain" => $service_fields->virtualmin_domain,
+            "type" => $type
+         ];
+
+
+         $remove_response = $this->api()->delete_script($prams); //receiving 500 error but installs script
+
+
+         $this->getVirtualMinHelper()->sendAjax($remove_response);
+
+
+    }
+    public function script_install($postRequest, $dataRequest = array()){
+        // virtualmin install-script --domain sys-log.me --type roundcube --version 1.4.5 --path /home/sys-log/public_html/roundcube
+         //parse service & package
+         $service = $dataRequest['service'];
+         $package = $dataRequest['package'];
+         
+         $service_fields = $this->serviceFieldsToObject($service->fields);
+
+         // todo recreate curl request could be a bug with virtualmin that needs to be reported, currently after a script install virtualmin returns a 500 status will check with other virtualmin install
+         $type = strtolower($postRequest['script_name']);
+         $prams = [
+            "domain" => $service_fields->virtualmin_domain,
+            "type" => $type,
+            "version" => $postRequest['script_version'],
+            "path" =>    $install_path,
+            "db" =>  'mysql '.$postRequest['database'],
+            "newdb" => ''
+         ];
+         try {
+            $test = $this->api()->install_script($prams); //receiving 500 error but installs script
+            print_r($test);exit;
+         }
+         catch (Exception $e) {
+            print_r($e);
+            $this->getVirtualMinHelper()->sendAjax($e);
+        }
+       
+        //  $response = $this->parseResponse($this->api()->install_script($prams));
+        
+    }   
     /**
      * Changes a password for mail account via Ajax for our Client Mail Tab
      *
@@ -2120,7 +2186,7 @@ class VirtualminBlesta extends module
       
         $response = $this->validateConnection([
             'username' => $postRequest['username'],
-            'password' => $postRequest['password'],
+            'password' => $postRxxequest['password'],
             'port_number' => $postRequest['port_number'],
             'host_name' => $postRequest['host_name'],
             'use_ssl' => $postRequest['use_ssl']
