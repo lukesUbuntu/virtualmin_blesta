@@ -10,8 +10,6 @@ $(".install").click(function(e){
 
     $(".script_name").text(script_name);
     $(".script_description").text(script['description']);
-    console.log("TCL: script", script)
-    console.log("TCL: available_versions", available_versions)
     for (var version_index in available_versions) {
         var version = available_versions[version_index];
         var option = new Option(version, version);
@@ -31,7 +29,6 @@ $(".install").click(function(e){
     $(".install_path").text(cleanScriptName(script_name))
 
     // $(".script_name").text(script_name)
-    // console.log("TCL: script_name", script_name)
 })
 
 
@@ -41,19 +38,20 @@ $("#install_path").keyup(function(){
 
 $(".removeScript").click(function(){
     script_name = $(this).data('script_name');
+
     var formData = {
     
         action : 'remove_script',
         script_name :  script_name
     }
-    console.log("TCL: formData", formData)
     sendRequest(formData, function(response) {
-        console.log("TCL: response", response)
-    
+        
+        $(this).removeClass('installed').addClass('not_installed')
     
      });
 })
 $("#installScript").click(function(){
+    var $this = $(this);
     var formData = {
         action : 'script_install',
         script_name :  script_name
@@ -62,12 +60,17 @@ $("#installScript").click(function(){
     $(".form-control").each(function(a,b){
         formData[$(b).attr('id')] = $(b).val();
     })
-    console.log("TCL: formData", formData)
 
 
 
     sendRequest(formData, function(response) {
-    console.log("TCL: response", response)
+        //mysql database (.*) already exists
+        console.log("TCL: response", response.success)
+        if (response.success == false){
+            $("#install_error").text(response.data);
+        }else{
+            $this.removeClass('not_installed').addClass('installed')
+        }
 
 
     });

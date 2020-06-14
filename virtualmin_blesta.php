@@ -2110,6 +2110,12 @@ class VirtualminBlesta extends module
          
          $service_fields = $this->serviceFieldsToObject($service->fields);
 
+         $install_path = $postRequest['install_path'];
+         if (strlen($install_path) > 0){
+            if (substr($postRequest['install_path'],0,1) != '/'){
+                $install_path = "/$install_path";
+            }
+         }
          // todo recreate curl request could be a bug with virtualmin that needs to be reported, currently after a script install virtualmin returns a 500 status will check with other virtualmin install
          $type = strtolower($postRequest['script_name']);
          $prams = [
@@ -2121,8 +2127,16 @@ class VirtualminBlesta extends module
             "newdb" => ''
          ];
          try {
-            $test = $this->api()->install_script($prams); //receiving 500 error but installs script
-            print_r($test);exit;
+            $install_response = $this->api()->install_script($prams); //receiving 500 error but installs script
+            //print_r($install_response);exit;
+            if (isset($install_response->status) && isset($install_response->error)){
+                $this->getVirtualMinHelper()->sendAjax($install_response->error, false);
+                return;
+            }
+
+            $this->getVirtualMinHelper()->sendAjax($install_response->output);
+
+            
          }
          catch (Exception $e) {
             print_r($e);

@@ -1,9 +1,21 @@
-<!--
-@todo finish install options
-@todo missing scripts already installed options
-!-->
+<style>
+#install_error{
+    color:red;
+}
+.not_installed.removeScript{
+    display:none;
+}
+.installed.removeScript{
+    display:block;
+}
+.not_installed.install {
+    display:block;
+}
+.installed.install {
+    display:none;
+}
+</style>
 <h4>Available Scripts</h4>
-
 <?php
 
 if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
@@ -34,23 +46,26 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
 
                         <div class="pull-right">
                             <?php
+                            $class = "not_installed ";
                             if (isset($installed_scripts[strtolower($script['name'])])) {
+                                $class = "installed ";
+                            }
                                 ?>
-                                <button data-script_name="<?php echo $script['name']; ?>" class="btn btn-warning removeScript" type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" class="<?php echo $class?> btn btn-warning removeScript" type="button"
                                         aria-expanded="true">
                                     Remove
                                 </button>
 
                                 <?php
-                            } else {
+                         
                                 ?>
-                                <button data-script_name="<?php echo $script['name']; ?>" data-toggle="modal" data-target="#installScriptOptions" role="presentation" class="btn btn-success install " type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" data-toggle="modal" data-target="#installScriptOptions" role="presentation" class="<?php echo $class?> btn btn-success install " type="button"
                                         aria-expanded="true">
                                     Install
                                 </button>
 
                                 <?php
-                            }
+                            
                             ?>
 
                         </div>
@@ -98,7 +113,9 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                     <div style="margin-top:5px;">http://<?php echo $service_fields->virtualmin_domain; ?>/<span class="install_path"></span></div>
                 </div>
             </div>
+            <div class="modal-body"> <span id="install_error"></span></div>
             <div class="modal-footer">
+               
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <a id="installScript" href="#" class="save_email_forward btn btn-success success">Install</a>
             </div>
