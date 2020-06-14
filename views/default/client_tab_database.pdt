@@ -3,9 +3,7 @@
 
 	<div>
 		<div class="btn-group pull-right">
-			<!-- @todo add change password
-			<button class="sorry btn btn-info">Change Password</button>
-			!-->
+
 			<button id="add_database" class="btn btn-success" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#createDatabaseForm" role="presentation">
 				<?php $this->_("virtualmin.client.tabs.database.add_database");?>
 			</button>

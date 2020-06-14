@@ -1035,8 +1035,7 @@ class VirtualminBlesta extends module
      * @param $vars stdClass A stdClass object representing a set of post fields
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
-    //@todo add generate password option
-    //@todo add option if server already exists on system
+
     /**
      * Returns an array of available service delegation order methods. The module
      * will determine how each method is defined. For example, the method "first"
@@ -1141,7 +1140,6 @@ class VirtualminBlesta extends module
         //     )
         // );
        
-        //@todo if we don't have any packages then we need to display error
         $package->attach(
             $fields->fieldSelect(
                 "meta[package]",
@@ -1205,8 +1203,7 @@ class VirtualminBlesta extends module
 			<div id='virtualminPackageSettings'></div>
 		");
        
-        //@todo wrap the attache into a function we can ref
-        //$name, $for=null, array $attributes=null, $preserve_tags=false
+
         $panel_options = $fields->label(
             "Enable Options.",
             "options",
@@ -1429,7 +1426,6 @@ class VirtualminBlesta extends module
      *        Example: array('methodName' => "Title", 'methodName2' => "Title2")
      *        array('methodName' => array('name' => "Title", 'icon' => "icon"))
      */
-    //@todo check what tabs the users is allowed to use , possible a pacakge option that first inherits from the virtualmin package then can be selected by the admin
 
     public function getAdminAddFields($package, $vars = null)
     {
@@ -1831,8 +1827,6 @@ class VirtualminBlesta extends module
      * @param string $command The API command to call, either getPackagesUser, or getPackagesReseller
      * @return array An array of packages in key/value pairs
      */
-    //@todo cleanup packahge plans
-    //@todo store what the package allows user to do so we can turn off some functions on billing system from showing
 
     /**
      *  client Tab Database handles all the database listings and manages databases for client
@@ -2440,27 +2434,21 @@ class VirtualminBlesta extends module
 
         //get the mail accounts for domain
         $account = array('domain' => $service_fields->virtualmin_domain);
-        $mail_accounts = $this->api()->list_users($account);
+        $mail_accounts = $this->getVirtualMinHelper()->cleanArray($this->api()->list_users($account));
 
-        //grab the users account we are referencing
-        //check that the index passed is not more than our array
-        if ($email_id > count($mail_accounts)) {
-            $this->log(
-                $service_fields->virtualmin_domain . "| delete_user account failed mailAccount[$email_id] is out of bounds" .
-                serialize(array($service_fields->virtualmin_username, $package->meta->package)
-                ), "output", true
-            );
-            //send error as email_id doesn't match account for that domain
-            $this->getVirtualMinHelper()->sendAjax("Incorrect email details", false);
+        $user_account = null;
+        foreach($mail_accounts as $_account){
+
+            if ($_account['email_address'] == $email_address){
+                $user_account = $_account;
+                break;
+            }
         }
-
-        //grab the user account
-        $user_account = $mail_accounts->data[$email_id]->values;
-
+       
         //make sure that the email matches the users_accounts email that we are wanting to delete
-        if ($user_account->email_address[0] != $email_address) {
+        if ($user_account == null) {
             $this->log(
-                $service_fields->virtualmin_domain . "| delete_user account failed [$email_address] does not match" .
+                $service_fields->virtualmin_domain . "| delete_user failed to find account for [$email_address] does not exist" .
                 serialize(array($service_fields->virtualmin_username, $package->meta->package)
                 ), "output", true
             );
@@ -2469,7 +2457,7 @@ class VirtualminBlesta extends module
 
         //	->unix_username[0];
         //prepare to delete the user from account
-        $account['user'] = $user_account->unix_username[0];
+        $account['user'] = $user_account['unix_username'];
 
         //call api
         $response = $this->parseResponse($this->api()->delete_user($account));

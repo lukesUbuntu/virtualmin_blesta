@@ -23,7 +23,6 @@
 						<?php
 						$this->Form->label($this->_("virtualmin.row_meta.host_name", true), "host_name");
 						$this->Form->fieldText("host_name", $this->Html->ifSet($vars->host_name),array('id'=>"host_name"));
-						//@todo fix this up so port is properly inline with hostname
 						echo $this->_("virtualmin.row_meta.port_number", true);
 						$this->Form->fieldText("port_number", $this->Html->ifSet($vars->port_number),array('id'=>"port_number"));
 
@@ -82,7 +81,6 @@
 					</thead>
 					<tbody>
 						<?php
-						//@todo make namservers optional
 						$num_servers = count($this->Html->ifSet($vars->name_servers,[]));
 						for ($i=0; $i<max(2,$num_servers); $i++) {
 						?>

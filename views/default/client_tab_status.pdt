@@ -81,7 +81,7 @@
         </div>
 
         <?php
-        //@todo check for multiple assigning of ips
+
         $server_ip = $serverDetails->ip_address;
         if (preg_match('#(?:[0-9]{1,3}\.){3}[0-9]{1,3}#', $serverDetails->ip_address, $serverIp)) {
             $server_ip = $serverIp[0];
