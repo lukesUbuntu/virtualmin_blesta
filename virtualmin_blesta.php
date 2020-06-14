@@ -2200,7 +2200,7 @@ class VirtualminBlesta extends module
       
         $response = $this->validateConnection([
             'username' => $postRequest['username'],
-            'password' => $postRxxequest['password'],
+            'password' => $postRequest['password'],
             'port_number' => $postRequest['port_number'],
             'host_name' => $postRequest['host_name'],
             'use_ssl' => $postRequest['use_ssl']
