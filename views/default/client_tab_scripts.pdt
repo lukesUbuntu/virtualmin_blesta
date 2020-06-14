@@ -1,14 +1,26 @@
-<!--
-@todo finish install options
-@todo missing scripts already installed options
-!-->
+<style>
+#install_error{
+    color:red;
+}
+.not_installed.removeScript{
+    display:none;
+}
+.installed.removeScript{
+    display:block;
+}
+.not_installed.install {
+    display:block;
+}
+.installed.install {
+    display:none;
+}
+</style>
 <h4>Available Scripts</h4>
-
 <?php
 
 if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
     ?>
-    <div class="table-responsive" style="margin-top: 60px;">
+    <div id="scriptInstall" class="table-responsive" style="margin-top: 60px;">
         <table id="scripts" class="table table-curved table-striped">
 
             <tr>
@@ -17,10 +29,13 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
                 <td></td>
             </tr>
             <?php
+            $scriptInstall = [];
             foreach ($script_list as $script) {
+               
+                $scriptInstall[$script['name']] = $script;
                 ?>
                 <tr>
-                    <td class="script_name">
+                    <td class="scripts_name">
                         <?php $this->Html->_($script['name']); ?>
                     </td>
                     <td>
@@ -31,23 +46,26 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
 
                         <div class="pull-right">
                             <?php
+                            $class = "not_installed ";
                             if (isset($installed_scripts[strtolower($script['name'])])) {
+                                $class = "installed ";
+                            }
                                 ?>
-                                <button class="btn btn-warning install disabled" type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" class="<?php echo $class?> btn btn-warning removeScript" type="button"
                                         aria-expanded="true">
                                     Remove
                                 </button>
 
                                 <?php
-                            } else {
+                         
                                 ?>
-                                <button class="btn btn-success install disabled" type="button"
+                                <button data-script_name="<?php echo $script['name']; ?>" data-toggle="modal" data-target="#installScriptOptions" role="presentation" class="<?php echo $class?> btn btn-success install " type="button"
                                         aria-expanded="true">
                                     Install
                                 </button>
 
                                 <?php
-                            }
+                            
                             ?>
 
                         </div>
@@ -62,20 +80,59 @@ if ($this->Html->ifSet($script_list) && (count($script_list)) > 0) {
     <?php
 }
 ?>
+<!-- script installer option start !-->
+<div class="modal fade" id="installScriptOptions" tabindex="-1" role="dialog" aria-labelledby="confirmation"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title">Install <span class="script_name"> Options</span></h4>
+                <span class="modal-description script_description"></span>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="script_versions">Version</label>
+                    <select class="form-control" id="script_version"></select>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="database">Database</label>
+                    <select class="form-control" id="database"></select>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="install_path">Install Folder (this is your public folder leave blank to install as main site)</label>
+                    <input class="form-control install_path" id="install_path" type="text" />
+                    
+                    <div style="margin-top:5px;">http://<?php echo $service_fields->virtualmin_domain; ?>/<span class="install_path"></span></div>
+                </div>
+            </div>
+            <div class="modal-body"> <span id="install_error"></span></div>
+            <div class="modal-footer">
+               
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a id="installScript" href="#" class="save_email_forward btn btn-success success">Install</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
-
-    //declared for our external js pagehelper.js
-    var $action_url = '<?php echo $action_url; ?>';
-    var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
-    //var $CurrentPage = $("#");
-
-    $(document).ready(function () {
-        $(".install").click(function () {
-            alert("sorry not availble yet ")
-        })
-
-    })
+//declared for our external js pagehelper.js
+var $action_url = '<?php echo $action_url; ?>';
+var $CsrfToken = '<?php echo $this->Form->getCsrfToken();?>';
+var $CurrentPage = $("#scriptInstall");
+var currentEmail = null;
+var $scriptInstall = JSON.parse('<?php echo json_encode($scriptInstall) ; ?>')
+var available_databases =  JSON.parse('<?php echo json_encode($databases) ; ?>')
 </script>
+
 <!--Include our javascript file !-->
 <script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/pagehelper.js'); ?>'></script>
+<script type='text/javascript' src='<?php echo $this->Html->safe($this->view_dir . 'js/client_tab_scripts.js'); ?>'></script>
