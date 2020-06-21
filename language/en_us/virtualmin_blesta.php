@@ -141,6 +141,8 @@ $lang['virtualmin.client.tabs.backup.menu'] = "Backups";
 //client tabs - Client Tab Scripts (client_tab_scripts.pdt)
 $lang['virtualmin.client.tabs.scripts.menu'] = "Install Scripts";
 
+$lang['virtualmin.client.tabs.dns.menu'] = "DNS Editor";
+
 //client tabs - Client Tab Scripts (client_tab_scripts.pdt)
 $lang['virtualmin.client.tabs.filemin.menu'] = "Filemin Manager";
 

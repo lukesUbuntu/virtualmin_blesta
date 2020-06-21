@@ -1567,13 +1567,18 @@ class VirtualminBlesta extends module
             'clientTabDatabase' => array('name' => Language::_("virtualmin.client.tabs.database.menu", true), 'icon' => "fa fa-bars"),
             //'clientTabFileMin' => array('name' => Language::_("virtualmin.client.tabs.filemin.menu", true), 'icon' => "fa  fa-file"), //still working on this may have to write custom perl module to enable
             'clientTabScripts' => array('name' => Language::_("virtualmin.client.tabs.scripts.menu", true), 'icon' => "fa  fa-chevron-right"),
+            'clientTabDns' => array('name' => Language::_("virtualmin.client.tabs.dns.menu", true), 'icon' => "fa fa-pencil"),
+
             'clientTabBackups' => array('name' => Language::_("virtualmin.client.tabs.backup.menu", true), 'icon' => "fa fa-download"),
+            
         );
 
         if (!isset($package->meta->enable_database)) unset($tabs['clientTabDatabase']);
         if (!isset($package->meta->enable_mail)) unset($tabs['clientTabMail']);
         if (!isset($package->meta->enable_scripts)) unset($tabs['clientTabScripts']);
         if (!isset($package->meta->enable_backups)) unset($tabs['clientTabBackups']);
+        if (!isset($package->meta->enable_dns)) unset($tabs['clientTabDNS']);
+        
         return $tabs;
     }
 
@@ -1752,7 +1757,39 @@ class VirtualminBlesta extends module
         return $this->renderTemplate("client_tab_scripts", $buildVars);
 
     }
+    public function clientTabDns($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
 
+             //check service is active
+             if (($service_active = $this->serviceCheck($service)) !== true)
+             return $service_active;
+ 
+ 
+         $allowedRequests = array("add_dns_record","remove_dns_record","modify_dns_record");
+         $dataRequest = array(
+             'package' => $package,
+             'service' => $service,
+         );
+ 
+         $this->getVirtualMinHelper()->processAjax($this, $getRequest, $postRequest, $allowedRequests, $dataRequest);
+         $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        $account = array('domain' => $service_fields->virtualmin_domain);
+        $dns_records = $this->getVirtualMinHelper()->cleanArray($this->api()->get_dns($account));
+        
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        $buildVars = array(
+            "dns_records" => $dns_records,
+            "action_url" => $this->base_uri . "services/manage/" . $service->id . "/clientTabDns/",
+            "service_fields" => $service_fields,
+            "service_id" => $service->id,
+            "vars", (isset($vars) ? $vars : new stdClass())
+        );
+
+        //build page
+        return $this->renderTemplate("client_tab_dns", $buildVars);
+    }
     /**
      * Initializes the virtualMinLib and returns an instance of that object
      * see lib/virtualmin_lib_helper.php
